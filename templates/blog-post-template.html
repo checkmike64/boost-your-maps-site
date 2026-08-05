@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<!-- ============================================================
+  BLOG POST TEMPLATE — Boost Your Maps
+  How to use: copy to /blog/<slug>.html, replace {{TOKENS}},
+  add to sitemap.xml with the publish date.
+
+  WRITING RULES (from the SEO system):
+  • One post = one search intent, answered COMPLETELY.
+  • Answer-first: the direct answer within the first ~150 words,
+    then the depth. Question-style H2s.
+  • Named stats with sources; re-date or cut stats older than ~18 months.
+  • Wiki-voice for factual sections; Mike's voice for opinion sections.
+  • Real author (Mike) with byline — E-E-A-T requires a human.
+============================================================ -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{Primary keyword phrase, ~50-60 chars}} | Boost Your Maps</title>
+<meta name="description" content="{{150-160 chars selling the answer}}">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+<link rel="canonical" href="https://www.boostyourmaps.com/blog/{{SLUG}}">
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gabarito:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/styles.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[
+ {"@type":"BlogPosting","headline":"{{Post title}}","description":"{{meta description}}",
+  "datePublished":"{{YYYY-MM-DD}}","dateModified":"{{YYYY-MM-DD}}",
+  "author":{"@type":"Person","name":"Michael Moll","url":"https://www.boostyourmaps.com/about-us"},
+  "publisher":{"@id":"https://www.boostyourmaps.com/#organization"},
+  "mainEntityOfPage":"https://www.boostyourmaps.com/blog/{{SLUG}}"},
+ {"@type":"BreadcrumbList","itemListElement":[
+  {"@type":"ListItem","position":1,"name":"Home","item":"https://www.boostyourmaps.com/"},
+  {"@type":"ListItem","position":2,"name":"Blog","item":"https://www.boostyourmaps.com/blog"},
+  {"@type":"ListItem","position":3,"name":"{{Post title}}","item":"https://www.boostyourmaps.com/blog/{{SLUG}}"}]}
+]}
+</script>
+</head>
+<body>
+<!-- Copy the <svg> mascot symbol + <nav> from any built page -->
+<main>
+<article>
+<section class="page-hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span> {{Category, e.g. Local SEO}}</span>
+    <h1 style="margin-top:18px;max-width:840px;">{{Post title — states the answer or promise}}</h1>
+    <p class="micro" style="margin-top:14px;">By Michael Moll · {{Month D, YYYY}} · {{X}} min read</p>
+  </div>
+</section>
+<section class="section tight">
+  <div class="wrap legal">
+    <p class="lead">{{THE ANSWER, directly, in the first paragraph. The rest of the post earns it.}}</p>
+    <h2>{{Question-style H2}}</h2>
+    <p>{{...}}</p>
+    <h2>{{Question-style H2}}</h2>
+    <p>{{...}}</p>
+    <h2>The bottom line</h2>
+    <p>{{Summary + honest recommendation.}}</p>
+  </div>
+</section>
+</article>
+<!-- Copy the .cta-panel section from about-us.html, then the footer -->
+</main>
+</body>
+</html>
