@@ -1,0 +1,11 @@
+{
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "redirects": [
+    {
+      "source": "/rank-report",
+      "destination": "/visibility-report",
+      "permanent": true
+    }
+  ]
+}
