@@ -1,0 +1,10 @@
+.git/
+.claude/
+.tools/
+.vercel/
+.env*
+BYM-HANDOFF.md
+CLAUDE.md
+DESIGN.md
+README.md
+templates/
