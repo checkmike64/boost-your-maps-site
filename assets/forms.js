@@ -58,7 +58,7 @@
         showStatus(
           status,
           "error",
-          'This form is ready, but its API connection has not been added yet. Please email <a href="mailto:mike@boostyourmaps.com">mike@boostyourmaps.com</a> for now.',
+          'This form is ready, but its API connection has not been added yet. Please email <a href="mailto:team@boostyourmaps.com">team@boostyourmaps.com</a> for now.',
           true
         );
         return;
@@ -93,8 +93,8 @@
         showStatus(status, "success", form.dataset.successMessage, false);
       } catch (error) {
         var message = error.name === "AbortError"
-          ? "That took too long. Please try again, or email mike@boostyourmaps.com."
-          : "We could not send that just now. Please try again, or email mike@boostyourmaps.com.";
+          ? "That took too long. Please try again, or email team@boostyourmaps.com."
+          : "We could not send that just now. Please try again, or email team@boostyourmaps.com.";
         showStatus(status, "error", message, false);
       } finally {
         window.clearTimeout(timeout);
