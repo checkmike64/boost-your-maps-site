@@ -49,5 +49,5 @@ Plain-spoken, honest, lightly playful. Fifth-grade reading level. NO em dashes. 
 - Add the production API URL to each native form's `data-endpoint` and test persistence.
 - Approved owner quotes can be added later; the current proof cards contain measured result summaries only.
 - Mike plans his own full content rewrite pass.
-- Speech bubble text ("Hey, found you!") will be replaced by Mike.
+- Hero speech bubble reads "I'm looking for you." and supports the low-visibility message.
 - Domain not yet switched from the old GHL site — launch checklist lives in README.md.

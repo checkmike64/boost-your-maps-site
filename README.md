@@ -17,7 +17,7 @@ service-agreement.html     Client service agreement (existing content)
 404.html                   Custom not-found page
 assets/styles.css          The entire design system (see DESIGN.md for the rules)
 assets/forms.js            Native validation + API-ready JSON submission handling
-assets/favicon.svg, og.png, icon-512.png, responsive mascot and report-sample WebP/AVIF files
+assets/favicon-character PNGs, Apple touch icon, og.png, icon-512.png, responsive mascot and report-sample WebP/AVIF files
 robots.txt                 Allows all search + AI crawlers, declares sitemap
 llms.txt                   AI-engine site overview (llmstxt.org format)
 pricing.txt                Machine-readable pricing for answer engines and agents
