@@ -2,18 +2,20 @@
 
 > Done-for-you Google Maps marketing for local businesses. We manage Google Business Profiles end to end — optimization, citations, posts, photos, and honest plain-English reporting — so established local businesses get more profile views, website visits, and phone calls. One business per industry per area. $450/month ongoing management (full rebuild included) or a $1,750 one-time rebuild. Operated by Impact Leads LLC.
 
-Key facts: no ranking guarantees (Google decides rankings); results typically begin in 60–90 days; month-to-month with no contract; clients keep their profile and everything built if they cancel; free "visibility report" shows a business where it ranks, who holds the local top three, and whether their area is open.
+Key facts: no ranking guarantees (Google decides rankings); results typically begin in 60–90 days; month-to-month with 7 days' written cancellation notice; clients keep their profile and everything built if they cancel; free "visibility report" shows a business where it ranks, who holds the local top three, and whether their area is open.
 
 ## Pages
 
-- [Home](/): what we do, how it works, pricing, and FAQ
-- [Services](/services): profile optimization, review management, local citations, performance tracking
-- [About us](/about-us): why we only do local search, and how we operate
-- [Free visibility report](/visibility-report): request the free 24-hour map ranking report
+- [Home](https://www.boostyourmaps.com/): what we do, how it works, and frequently asked questions
+- [Services](https://www.boostyourmaps.com/services): profile optimization, review management, local citations, and performance tracking
+- [Pricing](https://www.boostyourmaps.com/pricing): current plans, deliverables, eligibility, and engagement terms
+- [Machine-readable pricing](https://www.boostyourmaps.com/pricing.txt): plain-text pricing and plan details
+- [About us](https://www.boostyourmaps.com/about-us): why we focus on local search and how we operate
+- [Free visibility report](https://www.boostyourmaps.com/visibility-report): request the free 24-hour map ranking report
 
 ## Optional
 
-- [Privacy policy](/privacy)
-- [Terms & conditions](/terms)
-- [Service agreement](/service-agreement)
-- [Contact](/inquiry-form)
+- [Privacy policy](https://www.boostyourmaps.com/privacy)
+- [Terms & conditions](https://www.boostyourmaps.com/terms)
+- [Service agreement](https://www.boostyourmaps.com/service-agreement)
+- [Contact](https://www.boostyourmaps.com/inquiry-form)

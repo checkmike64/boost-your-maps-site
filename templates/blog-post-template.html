@@ -25,9 +25,11 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gabarito:wght@500;600;700;800&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/styles.css">
+<link rel="stylesheet" href="/assets/styles.css?v=20260820-1">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@graph":[
+ {"@type":"Organization","@id":"https://www.boostyourmaps.com/#organization","name":"Boost Your Maps","legalName":"Impact Leads LLC","url":"https://www.boostyourmaps.com/","logo":"https://www.boostyourmaps.com/assets/icon-512.png","email":"team@boostyourmaps.com","founder":{"@type":"Person","name":"Michael Moll","url":"https://www.boostyourmaps.com/about-us"}},
+ {"@type":"WebSite","@id":"https://www.boostyourmaps.com/#website","url":"https://www.boostyourmaps.com/","name":"Boost Your Maps","publisher":{"@id":"https://www.boostyourmaps.com/#organization"}},
  {"@type":"BlogPosting","headline":"{{Post title}}","description":"{{meta description}}",
   "datePublished":"{{YYYY-MM-DD}}","dateModified":"{{YYYY-MM-DD}}",
   "author":{"@type":"Person","name":"Michael Moll","url":"https://www.boostyourmaps.com/about-us"},
@@ -41,8 +43,9 @@
 </script>
 </head>
 <body>
-<!-- Copy the <svg> mascot symbol + <nav> from any built page -->
-<main>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<!-- Copy the <svg> mascot symbol + primary nav from any built page, then add a visible breadcrumb matching the BreadcrumbList schema. -->
+<main id="main-content" tabindex="-1">
 <article>
 <section class="page-hero">
   <div class="wrap">

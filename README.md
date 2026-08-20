@@ -8,6 +8,7 @@ Static multi-page site for **boostyourmaps.com**, designed to replace the curren
 index.html                 Homepage (incl. interactive 3-Pack demo + on-page report teaser forms)
 about-us.html              About
 services.html              Services
+pricing.html               Canonical pricing and deliverables page
 visibility-report.html     THE conversion page — free report request form
 inquiry-form.html          Contact / inquiry form
 privacy.html               Privacy Policy
@@ -16,11 +17,14 @@ service-agreement.html     Client service agreement (existing content)
 404.html                   Custom not-found page
 assets/styles.css          The entire design system (see DESIGN.md for the rules)
 assets/forms.js            Native validation + API-ready JSON submission handling
-assets/favicon.svg, og.png, icon-512.png
+assets/favicon.svg, og.png, icon-512.png, responsive mascot WebP/AVIF files
 robots.txt                 Allows all search + AI crawlers, declares sitemap
 llms.txt                   AI-engine site overview (llmstxt.org format)
-sitemap.xml                All 8 canonical pages
-vercel.json                cleanUrls + 301 /rank-report → /visibility-report
+pricing.txt                Machine-readable pricing for answer engines and agents
+sitemap.xml                All 9 canonical pages
+vercel.json                Clean URLs, redirects, caching, CSP + security headers
+scripts/validate_site.py    Dependency-free SEO/accessibility/link/schema checks
+.github/workflows/         Runs validation on pull requests and main
 templates/                 Copy-paste templates for new SERVICE PAGES and BLOG POSTS
 DESIGN.md                  The design system contract — follow it for anything new
 ```
@@ -42,13 +46,11 @@ script on that page. No backend needed for those.
 
 ## Deploy (Vercel)
 
-```
-git init && git add -A && git commit -m "Boost Your Maps site v1"
-git remote add origin https://github.com/checkmike64/boost-your-maps-site.git
-git branch -M main && git push -u origin main
-```
-Then in Vercel: Add New → Project → import the repo → Framework preset: **Other** →
-no build command, output dir = root. Every push to `main` auto-deploys.
+The canonical repository is `https://github.com/checkmike64/boost-your-maps-site`.
+Clone that repository before publishing; do not force-push an independently initialized
+local history. In Vercel, import the repository with Framework preset **Other**, no build
+command, and the repository root as the output directory. Configure `main` as the production
+branch so pull requests receive previews and merges deploy automatically.
 
 A preview deployment of this exact package already exists (see the project in the
 Vercel dashboard) for click-through testing before the domain switch.
@@ -59,7 +61,8 @@ Vercel dashboard) for click-through testing before the domain switch.
 2. In Vercel → Project → Domains: add `boostyourmaps.com` + `www.boostyourmaps.com`
    (www is the canonical — all canonicals/sitemap use www; Vercel will 308 apex → www).
 3. Update DNS at the registrar per Vercel's instructions (A/ALIAS + CNAME).
-4. After cutover, verify: `/rank-report` 301s to `/visibility-report`; 404 page works;
+4. After cutover, verify: `/rank-report` redirects to `/visibility-report`, `/contact`
+   redirects to `/inquiry-form`, the 404 page works, and
    `https://www.boostyourmaps.com/sitemap.xml` and `/robots.txt` resolve.
 5. Google Search Console: add/verify the property, submit sitemap.xml.
 6. Update the website link on the Google Business Profile if it points at any old path.
@@ -74,12 +77,13 @@ Vercel dashboard) for click-through testing before the domain switch.
 - Every new page: unique title (~50-60 chars) + meta description (~150-160), one H1,
   self-canonical, add to `sitemap.xml` with lastmod. The JSON-LD blocks in the templates
   are pre-wired to the site's Organization entity.
+- Before publishing, run `python3 scripts/validate_site.py`.
 
 ## Notes
 
 - Legal pages were carried over from the live site (privacy, service agreement) plus a new
   Terms & Conditions. **Have a lawyer review all three** — they were prepared editorially,
   not as legal advice.
-- Proof cards on the homepage contain two placeholder owner quotes pending client permission.
+- Proof cards intentionally omit owner quotes until approved quotes are available.
 - Design rules live in DESIGN.md. The short version: one red, three text sizes, hairlines,
   no colored section bands, flat simple mascot only.

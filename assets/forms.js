@@ -41,10 +41,24 @@
     var submitButton = form.querySelector('button[type="submit"]');
     var originalButtonText = submitButton.textContent;
 
+    form.addEventListener("invalid", function (event) {
+      event.target.setAttribute("aria-invalid", "true");
+    }, true);
+
+    form.addEventListener("input", function (event) {
+      if (event.target.matches("input, select, textarea") && event.target.checkValidity()) {
+        event.target.removeAttribute("aria-invalid");
+      }
+    });
+
     form.addEventListener("submit", async function (event) {
       event.preventDefault();
 
-      if (!form.reportValidity()) return;
+      if (!form.reportValidity()) {
+        var firstInvalid = form.querySelector(":invalid");
+        if (firstInvalid) firstInvalid.focus();
+        return;
+      }
 
       var honeypot = form.elements.company_fax;
       if (honeypot && honeypot.value) {

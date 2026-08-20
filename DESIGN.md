@@ -6,8 +6,8 @@ colors:
   muted:    "#5D6B68"   # secondary text, captions, eyebrows
   hairline: "#E7EAE8"   # 1px rules — inside components + the two section breaks
   panel:    "#F5F7F5"   # ONE gray panel exists: the Visibility Report card
-  red:      "#F04E31"   # THE accent. Buttons, step numerals, route dots, mascot, stat. Nothing else is red.
-  redDeep:  "#D63C20"   # hover
+  red:      "#F04E31"   # THE visual accent. Step numerals, route dots, mascot, stat.
+  redDeep:  "#D63C20"   # accessible primary-action background against white text
   green:    "#12B76A"   # list checkmarks ONLY
   yellow:   "#FFC42E"   # the hand-drawn h1 underline ONLY
 typography:
@@ -31,7 +31,7 @@ Red appears roughly ONCE per viewport, always pointing at an action or the brand
 Gabarito 800 display over Hanken Grotesk body. Three body sizes only (1.05 / 1.2 lead / .9 caption) — the earlier seven-size drift was the main cause of "dense" feel. Eyebrows are short functional labels (≤3 words, uppercase .78rem, muted with red dot) and appear ONLY on: hero, why, how, what-we-handle, pricing. Voicey sections (straight talk, proof, report, FAQ) lead with the h2 alone. Load Google Fonts with one <link> per family + generic fallbacks.
 
 ## 4. Components
-- Primary button: red, white text, radius 12, tinted red glow shadow, hover lifts 2px, active scale .98. EVERY primary says the identical phrase: "Get my free visibility report →".
+- Primary button: deep red `#D63C20`, white text, radius 12, tinted red glow shadow, hover lifts 2px, active scale .98. This pair passes WCAG AA for normal text. EVERY navigation/CTA primary says the identical phrase: "Get my free visibility report →".
 - Secondary actions are text links (Gabarito 600, hairline underline, red on hover) — not boxed buttons.
 - Cards: white, 1px hairline, radius 14-16, no shadows. The Visibility Report panel: `panel` gray, radius 20, 1.5px red border (same "featured" language as the popular pricing tier).
 - The two-field mini form (trade + ZIP + primary button) appears in the HERO and in the Visibility Report section.

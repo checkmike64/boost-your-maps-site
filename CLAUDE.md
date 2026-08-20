@@ -1,6 +1,6 @@
 # Boost Your Maps — website repo
 
-Static multi-page marketing site for boostyourmaps.com (Google Maps marketing for local businesses). No build step: plain HTML + `assets/styles.css`. Deployed on Vercel from this repo — **every push to `main` goes live**, so verify before pushing.
+Static multi-page marketing site for boostyourmaps.com (Google Maps marketing for local businesses). No build step: plain HTML + `assets/styles.css`. Verify the GitHub/Vercel connection before assuming a push deploys.
 
 ## Who this is for
 Mike Moll (owner, non-developer). Talk plainly, no jargon. He directs; you build, commit, and push.
@@ -9,8 +9,9 @@ Mike Moll (owner, non-developer). Talk plainly, no jargon. He directs; you build
 1. Make the edit.
 2. Open the changed page in a browser (or screenshot it) and verify it renders correctly, desktop AND mobile width (~390px).
 3. If a page was added or removed: update `sitemap.xml` (with lastmod) and, if nav-worthy, the shared nav/footer on ALL pages.
-4. `git add -A && git commit` with a clear message, then `git push origin main`.
-5. Tell Mike what changed and give him the Vercel URL to check.
+4. Run `python3 scripts/validate_site.py`, then verify desktop and mobile rendering.
+5. Publish through a reviewed feature branch and pull request. Never force-push an unrelated local history.
+6. Tell Mike what changed and give him the Vercel preview URL to check.
 
 ## Design system — DESIGN.md is law
 Read `DESIGN.md` before touching any visual. The short version:
@@ -42,11 +43,11 @@ Plain-spoken, honest, lightly playful. Fifth-grade reading level. NO em dashes. 
 - The interactive 3-Pack map component on index (`#bym-map`) — best element on the site.
 - Pricing numbers ($450/mo, $1,750 once) and the 93% stat + SOCi source line.
 - Legal pages content (lawyer review pending).
-- The two proof-card quote placeholders (real owner quotes coming from Mike).
+- Approved customer quotes; do not invent or publish quotes without permission.
 
 ## Current state / open items
 - Add the production API URL to each native form's `data-endpoint` and test persistence.
-- Owner quotes for MOR Ink Tattoo + Solopreneur Coach cards: pending Mike.
+- Approved owner quotes can be added later; the current proof cards contain measured result summaries only.
 - Mike plans his own full content rewrite pass.
 - Speech bubble text ("Hey, found you!") will be replaced by Mike.
 - Domain not yet switched from the old GHL site — launch checklist lives in README.md.
