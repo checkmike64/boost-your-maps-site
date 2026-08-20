@@ -2,6 +2,8 @@
 .DS_Store
 # logs / env
 *.log
+__pycache__/
+*.py[cod]
 .env
 .env.*
 .tools/
