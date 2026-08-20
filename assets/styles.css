@@ -52,10 +52,16 @@ img,svg{display:block;}
 .tier ul{list-style:none;margin:18px 0 26px;}
 .tier li{display:flex;gap:10px;align-items:flex-start;padding:6px 0;font-size:.97rem;}
 .tier .c{flex:0 0 18px;margin-top:4px;} .tier .c svg{width:16px;height:16px;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;}
-.rank{position:relative;overflow:hidden;padding:56px 50px;}
+.rank{position:relative;overflow:hidden;padding:56px 50px;display:grid;grid-template-columns:minmax(0,.84fr) minmax(360px,1.16fr);gap:44px;align-items:center;}
 .rank .form{display:flex;gap:12px;flex-wrap:wrap;max-width:560px;}
 .rank input{flex:1;min-width:190px;font-size:1rem;padding:14px 16px;}
-.rank .mini-mascot{position:absolute;right:36px;top:50%;transform:translateY(-50%);width:130px;}
+.rank .report-meta{margin:12px 0 0;font-size:.9rem;opacity:.85;}
+.rank .report-ps{margin:20px 0 0;padding-top:20px;border-top:1px solid #D5DBD8;font-size:.93rem;}
+.report-preview{margin:0;min-width:0;}
+.report-preview a{display:block;padding:10px;background:#fff;border:1px solid var(--hairline);border-radius:14px;box-shadow:0 20px 38px -28px rgba(23,40,46,.55);transition:transform .25s cubic-bezier(.32,.72,0,1),box-shadow .25s cubic-bezier(.32,.72,0,1);}
+.report-preview a:hover{transform:translateY(-2px);box-shadow:0 24px 42px -26px rgba(23,40,46,.62);}
+.report-preview img{width:100%;height:auto;border-radius:8px;}
+.report-preview figcaption{margin-top:9px;color:var(--muted);font-size:.84rem;text-align:center;}
 .band{position:relative;overflow:hidden;padding:56px 50px;}
 .band .mini-mascot{position:absolute;right:40px;bottom:-4px;width:110px;}
 .faq{max-width:760px;margin:40px auto 0;}
@@ -65,8 +71,9 @@ footer .wrap{display:flex;flex-direction:column;align-items:center;gap:10px;text
 .hand svg{position:absolute;left:-2%;right:-2%;bottom:-.28em;width:104%;height:.34em;}
 @media(max-width:880px){
   .hero-grid,.why,.handle,.proof,.pricing{grid-template-columns:1fr;}
-  .band .mini-mascot,.rank .mini-mascot{display:none;}
+  .band .mini-mascot{display:none;}
   .band,.rank{padding:40px 28px;}
+  .rank{grid-template-columns:1fr;gap:32px;}
   .nav-links a.plain{display:none;}
   .nav-in{padding:14px 16px;gap:12px;}
   .nav-links{margin-left:auto;}
