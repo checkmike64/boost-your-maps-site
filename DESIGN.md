@@ -6,8 +6,8 @@ colors:
   muted:    "#5D6B68"   # secondary text, captions, eyebrows
   hairline: "#E7EAE8"   # 1px rules — inside components + the two section breaks
   panel:    "#F5F7F5"   # ONE gray panel exists: the Visibility Report card
-  red:      "#F04E31"   # THE visual accent. Step numerals, route dots, mascot, stat.
-  redDeep:  "#D63C20"   # accessible primary-action background against white text
+  red:      "#C5221F"   # THE visual accent and accessible primary-action background.
+  redDeep:  "#A50E0E"   # hover and pressed states
   green:    "#12B76A"   # list checkmarks ONLY
   yellow:   "#FFC42E"   # the hand-drawn h1 underline ONLY
 typography:
@@ -31,7 +31,7 @@ Red appears roughly ONCE per viewport, always pointing at an action or the brand
 Gabarito 800 display over Hanken Grotesk body. Three body sizes only (1.05 / 1.2 lead / .9 caption) — the earlier seven-size drift was the main cause of "dense" feel. Eyebrows are short functional labels (≤3 words, uppercase .78rem, muted with red dot) and appear ONLY on: hero, why, how, what-we-handle, pricing. Voicey sections (straight talk, proof, report, FAQ) lead with the h2 alone. Load Google Fonts with one <link> per family + generic fallbacks.
 
 ## 4. Components
-- Primary button: deep red `#D63C20`, white text, radius 12, tinted red glow shadow, hover lifts 2px, active scale .98. This pair passes WCAG AA for normal text. EVERY navigation/CTA primary says the identical phrase: "Get my free visibility report →".
+- Primary button: deep red `#C5221F`, white text, radius 12, tinted red glow shadow, hover lifts 2px, active scale .98. This pair passes WCAG AA for normal text. EVERY navigation/CTA primary says the identical phrase: "Get my free visibility report →".
 - Secondary actions are text links (Gabarito 600, hairline underline, red on hover) — not boxed buttons.
 - Cards: white, 1px hairline, radius 14-16, no shadows. The Visibility Report panel: `panel` gray, radius 20, 1.5px red border (same "featured" language as the popular pricing tier).
 - The two-field mini form (trade + ZIP + primary button) appears in the HERO and in the Visibility Report section.
@@ -51,4 +51,4 @@ DON'T: colored section backgrounds; hard offset shadows; 2.5px borders; pill chi
 Breakpoint 880px: grids stack, route connectors hide, mini-mascots hide, plain nav links hide, sections drop to 72/52px. Touch targets ≥44px.
 
 ## 9. Agent Prompt Guide
-"Build/restyle per Boost Your Maps DESIGN.md: white canvas, Gabarito 800 + Hanken Grotesk (three body sizes only), single red #F04E31 accent on actions/numerals/mascot with green checks and one yellow h1 underline, 1px hairlines inside components, dashed route connectors with red dots between sections, flat simple pin mascot (dot eyes + smile, never detailed), two-field report form in hero and in the red-bordered gray report panel, identical CTA phrase on every primary button, secondaries as text links. No colored bands, no offset shadows, no pills, no icon-box grids, no extra grays. Motion: 250ms cubic-bezier(.32,.72,0,1), mascot idle bob only."
+"Build/restyle per Boost Your Maps DESIGN.md: white canvas, Gabarito 800 + Hanken Grotesk (three body sizes only), single deep red #C5221F accent on actions/numerals/mascot with green checks and one yellow h1 underline, 1px hairlines inside components, dashed route connectors with red dots between sections, flat simple pin mascot (dot eyes + smile, never detailed), button-only visibility-report prompts in the hero and red-bordered gray report panel, identical CTA phrase on every primary button, secondaries as text links. No colored bands, no offset shadows, no pills, no icon-box grids, no extra grays. Motion: 250ms cubic-bezier(.32,.72,0,1), mascot idle bob only."

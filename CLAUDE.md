@@ -16,7 +16,7 @@ Mike Moll (owner, non-developer). Talk plainly, no jargon. He directs; you build
 ## Design system — DESIGN.md is law
 Read `DESIGN.md` before touching any visual. The short version:
 - White canvas ONLY. No colored section backgrounds, ever.
-- One accent: red #F04E31 (buttons, numerals, mascot, key stat). Green #12B76A for checkmarks only. Yellow #FFC42E only in the h1 hand-underline.
+- One accent: deep red #C5221F (buttons, numerals, mascot, key stat). Green #12B76A for checkmarks only. Yellow #FFC42E only in the h1 hand-underline.
 - Gabarito 800 display + Hanken Grotesk body. EXACTLY three body sizes: 1.05rem / 1.2rem lead / .9rem caption.
 - 1px hairlines (#E7EAE8) inside components; section-break borders only before pricing + FAQ. Dashed route connectors with red dots between story sections.
 - One gray panel (#F5F7F5) exists: the Visibility Report card (1.5px red border).
