@@ -18,7 +18,7 @@
     var data = new FormData(form);
 
     data.forEach(function (value, key) {
-      if (key === "company_fax") return;
+      if (key === "hp_field_2026") return;
 
       if (Object.prototype.hasOwnProperty.call(fields, key)) {
         if (!Array.isArray(fields[key])) fields[key] = [fields[key]];
@@ -61,7 +61,7 @@
         return;
       }
 
-      var honeypot = form.elements.company_fax;
+      var honeypot = form.elements.hp_field_2026;
       if (honeypot && honeypot.value) {
         form.reset();
         showStatus(status, "success", form.dataset.successMessage, false);
