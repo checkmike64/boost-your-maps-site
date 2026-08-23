@@ -38,7 +38,8 @@
 
   forms.forEach(function (form) {
     var status = form.querySelector(".form-status");
-    var submitButton = form.querySelector('button[type="submit"]');
+    var submitButton = form.querySelector('[type="submit"]');
+    if (!status || !submitButton) return;
     var originalButtonText = submitButton.textContent;
 
     form.addEventListener("invalid", function (event) {
