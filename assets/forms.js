@@ -1,6 +1,13 @@
 (function () {
   "use strict";
 
+  window.dataLayer = window.dataLayer || [];
+
+  function pushEvent(data) {
+    data.page_path = window.location.pathname;
+    window.dataLayer.push(data);
+  }
+
   var forms = document.querySelectorAll("form[data-native-form]");
 
   function showStatus(status, type, message, allowMarkup) {
@@ -58,6 +65,7 @@
       if (!form.reportValidity()) {
         var firstInvalid = form.querySelector(":invalid");
         if (firstInvalid) firstInvalid.focus();
+        pushEvent({ event: "form_validation_error", form_id: form.id });
         return;
       }
 
@@ -102,15 +110,25 @@
           signal: controller.signal
         });
 
-        if (!response.ok) throw new Error("Submission failed");
+        if (!response.ok) {
+          var serverError = new Error("Submission failed");
+          serverError.name = "ServerError";
+          throw serverError;
+        }
 
         form.reset();
         showStatus(status, "success", form.dataset.successMessage, false);
+        pushEvent({ event: "generate_lead", form_id: form.id });
       } catch (error) {
         var message = error.name === "AbortError"
           ? "That took too long. Please try again, or email team@boostyourmaps.com."
           : "We could not send that just now. Please try again, or email team@boostyourmaps.com.";
         showStatus(status, "error", message, false);
+        pushEvent({
+          event: "lead_form_error",
+          form_id: form.id,
+          error_type: error.name === "AbortError" ? "timeout" : error.name === "ServerError" ? "server" : "network"
+        });
       } finally {
         window.clearTimeout(timeout);
         form.removeAttribute("aria-busy");
