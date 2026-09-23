@@ -1,0 +1,31 @@
+{
+  "snapshot_id": null,
+  "query": "pest control Tampa FL",
+  "run_at": "2026-09-22",
+  "source": "Outscraper google_maps_search, limit 3, region us",
+  "location": {
+    "label": "no fixed coordinates (Outscraper default). The page says 'from downtown Tampa'; re-run from 27.9506,-82.4572 at the next refresh.",
+    "lat": null,
+    "lng": null
+  },
+  "results": [
+    {
+      "name": "Consolidated Pest Control",
+      "rating": 5,
+      "reviews": 383,
+      "address": "4307 W Pearl Ave Unit D, Tampa 33611"
+    },
+    {
+      "name": "Florida Pest Control",
+      "rating": 4.6,
+      "reviews": 429,
+      "address": "1907 US-301 Ste C160, Tampa 33619"
+    },
+    {
+      "name": "Truly Nolen Pest & Termite Control",
+      "rating": 4.7,
+      "reviews": 1214,
+      "address": "4842 N Florida Ave, Tampa 33603"
+    }
+  ]
+}
