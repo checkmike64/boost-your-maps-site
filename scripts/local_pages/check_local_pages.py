@@ -315,9 +315,9 @@ def check_structure(p: Page, r: Report):
             r.err(where, "empty or '#' link in main content")
         elif href.startswith("#") and href[1:] not in ids:
             r.err(where, f"in-page link {href} has no target")
-    for leftover in ("{{", "}}", "__MAIN__", 'class="ph"', "img-slot", "mock-note"):
-        if leftover in src:
-            r.err(where, f"template leftover {leftover!r} still on the page")
+    for leftover in re.findall(r"\{\{[A-Za-z_:]+\}\}|__[A-Z0-9_]+__", src) + [
+            x for x in ('class="ph"', "img-slot", "mock-note") if x in src]:
+        r.err(where, f"template leftover {leftover!r} still on the page")
 
     # images
     imgs = img_tags(p.main)
