@@ -1,0 +1,31 @@
+{
+  "snapshot_id": null,
+  "query": "pest control Orlando FL",
+  "run_at": "2026-09-22",
+  "source": "Outscraper google_maps_search, limit 3, region us, language en",
+  "location": {
+    "label": "downtown Orlando",
+    "lat": 28.5384,
+    "lng": -81.3789
+  },
+  "results": [
+    {
+      "name": "All American Pest Control",
+      "rating": 4.8,
+      "reviews": 376,
+      "address": "390 N Orange Ave #2300, Orlando, FL 32801"
+    },
+    {
+      "name": "Truly Nolen Pest & Termite Control",
+      "rating": 4.7,
+      "reviews": 1365,
+      "address": "2082 33rd St Floor 1, Orlando, FL 32839"
+    },
+    {
+      "name": "Solve Pest Pros",
+      "rating": 4.9,
+      "reviews": 1377,
+      "address": "100 W Lucerne Cir Unit- U, Orlando, FL 32801"
+    }
+  ]
+}
