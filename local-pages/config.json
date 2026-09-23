@@ -1,0 +1,74 @@
+{
+  "_about": "Rules for the industry x city local service pages under /google-maps-marketing/. Read by scripts/local_pages/check_local_pages.py (CI) and by the BYM Team connector. Only Mike edits this file; publisher pull requests may not touch it.",
+  "site_origin": "https://www.boostyourmaps.com",
+  "section": "google-maps-marketing",
+  "cta_text": "Get my free visibility report →",
+  "guard_exempt_users": ["checkmike64", "abdulmannan4"],
+
+  "approved_industries": {
+    "pest-control": {
+      "name": "pest control",
+      "label": "Pest control",
+      "brief_title": "BYM Industry Brief — Pest Control"
+    }
+  },
+
+  "publishing": {
+    "paused": false,
+    "pause_reason": "",
+    "first_batch_size": 10,
+    "first_batch_hold_days": 28,
+    "max_new_pages_per_30_days": 20
+  },
+
+  "thresholds": {
+    "shingle_size": 5,
+    "any_page": 0.15,
+    "same_industry_or_city": 0.12,
+    "sitewide_boilerplate": 0.08,
+    "boilerplate_min_pages": 5,
+    "banned_phrase_min_pages": 3,
+    "words_min": 1000,
+    "words_max": 1600,
+    "title_max": 60,
+    "meta_min": 150,
+    "meta_max": 160,
+    "module_sections_min": 4,
+    "module_sections_max": 6,
+    "faq_min": 3,
+    "faq_max": 5,
+    "fact_sheet_min_facts": 8,
+    "image_max_kb": 250
+  },
+
+  "allowed_repeat_phrases": [
+    "get my free visibility report"
+  ],
+
+  "banned_terms": [
+    "—", "–",
+    "\\breal\\b", "\\bactually\\b", "\\bnumbers\\b", "\\bgap\\b",
+    "\\bthe bar\\b", "\\ba long shot\\b", "\\bworth going after\\b", "\\bwhere you land\\b",
+    "\\bclimb", "\\bbest shot at the top three\\b", "\\bwhether your area is open\\b",
+    "\\bcensus\\b", "\\bdominate\\b", "\\bseamless", "\\bleverage\\b", "\\bnot just\\b",
+    "\\bisn't just\\b",
+    "\\belevate\\b", "\\bunleash\\b", "\\bdelve\\b", "\\bleaving money on the table\\b"
+  ],
+
+  "hero_angles": [
+    "seasonal-deadline",
+    "chains-nearby",
+    "burned-by-seo",
+    "growth-suburbs",
+    "reach-beyond-neighborhood",
+    "license-and-trust"
+  ],
+
+  "snapshot_observations": [
+    "chain-in-top-three",
+    "smallest-review-count",
+    "rating-spread",
+    "newer-company",
+    "name-carries-service-city"
+  ]
+}

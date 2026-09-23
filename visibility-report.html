@@ -87,10 +87,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </form>
     <script>
       (function(){var p=new URLSearchParams(location.search);
-        var s=p.get('service');var l=p.get('location');
+        var s=p.get('service');var l=p.get('location');var b=p.get('business_name');
         if(s)document.getElementById('service').value=s;
         if(l)document.getElementById('location').value=l;
-        if(s||l){
+        if(b)document.getElementById('business_name').value=b;
+        if(s||l||b){
           window.dataLayer=window.dataLayer||[];
           window.dataLayer.push({event:'prefill_applied',has_service:Boolean(s),has_location:Boolean(l),page_path:window.location.pathname});
         }})();

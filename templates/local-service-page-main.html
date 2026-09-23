@@ -1,0 +1,118 @@
+<!--
+  LOCAL SERVICE PAGE: MAIN CONTENT SKELETON
+  ==========================================
+  This is the markup a drafter fills in. It is everything that goes INSIDE <main>. The
+  BYM Team connector (or the local harness) wraps it in templates/local-service-page-shell.html,
+  builds the JSON-LD from the page spec and the visible FAQ, and fills these tokens:
+
+    {{H1}}             the fixed H1 with the yellow underline on the city (from the spec)
+    {{IMAGE:hero}}     the hero illustration (file, size and alt come from spec.images.hero)
+    {{IMAGE:second}}   optional second illustration (spec.images.second)
+    {{REPORT_PANEL}}   the whole R4 report panel: spec.report_panel.heading + intro, the two-field
+                       form wired to /visibility-report, and the sample report
+
+  Rules the CI checker enforces (scripts/local_pages/check_local_pages.py):
+    - every section starts with its code comment: R1, R2, M1-M12 (merged checklist: "M6 + M4 + M7"), R3, CLOSE
+    - R1 first, R2 second or third, 4-6 module sections including M12 FAQ, R3 before {{REPORT_PANEL}}, CLOSE last
+    - order the modules strongest fact first; never copy another page's module order in the same industry or city
+    - FAQ items use exactly <div class="qa"><h3>question</h3><p>answer</p></div> (3-5 of them)
+    - primary buttons say exactly "Get my free visibility report →" and link to #report
+    - no href="#"; link the hub (/google-maps-marketing/<industry>), /services or /pricing
+    - 1,000-1,600 words, no em or en dashes, none of the banned voice terms in local-pages/config.json
+  Every heading below is an EXAMPLE of the shape only. Write every heading and sentence fresh.
+  Delete this comment block and the example comments when you draft.
+-->
+
+<!-- R1 HERO. Angle: <hero angle from the bank> -->
+<section class="page-hero">
+  <div class="wrap lsp-hero">
+    <div>
+      <span class="eyebrow"><span class="dot"></span> <City> <industry></span>
+      {{H1}}
+      <p class="lead"><Speak to the owner. Open with the hero angle, then what they're buying and the $450 a month.></p>
+      <div class="btns"><a href="#report" class="btn btn-primary">Get my free visibility report →</a></div>
+      <p class="micro"><Terms line: no setup fee, 7 days' notice, the profile stays theirs. Written fresh.></p>
+      <p class="micro"><Fit rule: 20+ Google reviews and a year on Maps. Then the availability line.></p>
+    </div>
+    {{IMAGE:hero}}
+  </div>
+</section>
+
+<!-- R2 MARKET SNAPSHOT. <where the search ran from> -->
+<section class="section tight">
+  <div class="wrap">
+    <div class="prose">
+      <h2><A fresh heading about who showed up first></h2>
+      <p><The date (Month D, YYYY), the exact search in quotes, and where it ran from.></p>
+      <ol class="top3">
+        <li><Name exactly as on Google>, <rating> stars from <review count> reviews</li>
+        <li>…</li>
+        <li>…</li>
+      </ol>
+      <p><One plain observation the search supports. Then: other parts of town see a different three, and the free report runs the search from theirs.></p>
+    </div>
+  </div>
+</section>
+
+<!-- M3 SEASONS AND DEMAND (example module; choose 4-6 from the library, strongest fact first) -->
+<section class="section flow">
+  <div class="wrap">
+    <div class="prose">
+      <h2><A heading that names the local fact></h2>
+      <p><Answer first in one or two sentences, then detail. Tie every fact to the owner's profile, calls or timing.></p>
+      <p class="src">Sources: <name each source in plain words>.</p>
+    </div>
+    <!-- Optional crawlable season calendar: copy the .season block pattern (rows with .track and .bar) -->
+  </div>
+</section>
+
+<!-- M6 + M4 + M7 PROFILE CHECKLIST (merge only when each item carries a local or industry fact) -->
+<section class="section flow">
+  <div class="wrap">
+    <div class="prose">
+      <span class="eyebrow"><span class="dot"></span> What we handle</span>
+      <h2 style="margin-top:18px;"><A new heading every time></h2>
+    </div>
+    <ul class="checklist">
+      <li><span class="c"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg></span><p><b><Item.></b> <Why it matters for this trade in this state.></p></li>
+    </ul>
+    <p style="margin-top:22px;"><a class="tlink" href="/services">See everything in the monthly plan →</a></p>
+  </div>
+</section>
+
+<!-- R3 PRICE, TERMS, FIT, PROOF -->
+<section class="section section-break">
+  <div class="wrap">
+    <div class="prose">
+      <span class="eyebrow"><span class="dot"></span> Pricing</span>
+      <h2 style="margin-top:18px;"><A fresh pricing question or statement naming the city and trade></h2>
+      <p><$450 a month, no setup fee, 7 days' notice, $1,750 one-time rebuild, what they keep if they leave.></p>
+      <p><Burned-by-SEO answer: the monthly report lists every post, photo and listing. No-guarantee line. One company per area.></p>
+      <p><Proof line by the matching order: same industry + city, same industry, same city, else say plainly there's no client here yet and name the closest example.> <a class="plainlink" href="https://www.google.com/maps/search/<Client+Name+City>" target="_blank" rel="noopener">Look them up on Google Maps →</a></p>
+    </div>
+  </div>
+</section>
+
+{{REPORT_PANEL}}
+
+<!-- M12 FAQ -->
+<section class="section section-break">
+  <div class="wrap">
+    <div class="center narrow"><h2><A fresh FAQ heading></h2></div>
+    <div class="faq">
+      <div class="qa"><h3><A question that names a local fact or entity?></h3><p><A direct answer.></p></div>
+    </div>
+  </div>
+</section>
+
+<!-- CLOSE -->
+<section class="section flow final-cta">
+  <div class="wrap center narrow">
+    <h2><A heading tied to the anchor fact or season></h2>
+    <p class="lead" style="margin:14px auto 0;"><One sentence.></p>
+    <div class="btns" style="justify-content:center;"><a href="#report" class="btn btn-primary">Get my free visibility report →</a></div>
+    <p class="micro" style="margin-top:34px;">More for <industry> companies:</p>
+    <div class="related" style="justify-content:center;"><a class="plainlink" href="/google-maps-marketing/<industry>">Google Maps marketing for <industry> companies</a> <a class="plainlink" href="/services">How we run a Google profile</a></div>
+    <p class="byline">Written by Michael Moll, founder of Boost Your Maps. We ran the Maps search on <Month D, YYYY> and checked each local fact against its source.</p>
+  </div>
+</section>
