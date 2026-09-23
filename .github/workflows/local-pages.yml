@@ -1,0 +1,60 @@
+name: Local pages
+
+# Publish gate for /google-maps-marketing/<industry>/<city-st> pages.
+# Runs scripts/local_pages/check_local_pages.py and posts its report on the pull request.
+# Publisher pull requests (branches named local-page-*, or authors not listed in
+# local-pages/config.json "guard_exempt_users") may only touch local-page files.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  local-pages:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check local service pages
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE_REF: ${{ github.base_ref }}
+          HEAD_REF: ${{ github.head_ref }}
+          AUTHOR: ${{ github.event.pull_request.user.login }}
+        run: |
+          args=(--report local-pages-report.md)
+          if [ "$EVENT" = "pull_request" ]; then
+            args+=(--base "origin/$BASE_REF")
+            exempt=$(python3 -c "import json;print(' '.join(json.load(open('local-pages/config.json')).get('guard_exempt_users', [])))")
+            if [[ "$HEAD_REF" == local-page-* ]] || [[ " $exempt " != *" $AUTHOR "* ]]; then
+              args+=(--guard)
+            fi
+          fi
+          python3 scripts/local_pages/check_local_pages.py "${args[@]}"
+      - name: Post the report on the pull request
+        if: always() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          [ -f local-pages-report.md ] || exit 0
+          existing=$(gh api "repos/$REPO/issues/$PR/comments" --paginate --jq '.[] | select(.body | startswith("<!-- local-pages-report -->")) | .id' | tail -n 1)
+          if grep -q "No local service pages changed" local-pages-report.md && grep -q "Result: PASS" local-pages-report.md && [ -z "$existing" ]; then
+            exit 0
+          fi
+          { echo "<!-- local-pages-report -->"; cat local-pages-report.md; } > body.md
+          if [ -n "$existing" ]; then
+            gh api -X PATCH "repos/$REPO/issues/comments/$existing" -F body=@body.md > /dev/null
+          else
+            gh api -X POST "repos/$REPO/issues/$PR/comments" -F body=@body.md > /dev/null
+          fi

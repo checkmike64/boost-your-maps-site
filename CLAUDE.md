@@ -36,6 +36,9 @@ Plain-spoken, honest, lightly playful. Fifth-grade reading level. NO em dashes. 
 - New service/location pages: START from `templates/service-page-template.html` and obey its compliance comment block — no city-list stuffing, no doorway pages, every page needs real unique local content or it doesn't ship.
 - Blog posts: `templates/blog-post-template.html`, answer-first, question-style H2s, Michael Moll byline, into `/blog/`.
 
+## Local service pages (/google-maps-marketing/…)
+Industry × city pages are built with the `bym-local-service-pages` skill and published through the BYM Team connector, which opens a `local-page-*` pull request. Read `local-pages/README.md` before touching them. Never hand-write a city page from scratch: start from `templates/local-service-page-main.html` and assemble with the connector so the schema, report form and page-meta stay correct. `scripts/local_pages/check_local_pages.py` is the publish gate (similarity, registries, facts, cadence, pause switch); CI runs it on every PR. `local-pages/config.json` is Mike's to change.
+
 ## Forms
 `visibility-report.html` and `inquiry-form.html` are native forms handled by `assets/forms.js`. They POST JSON to the URL in each form's `data-endpoint` attribute and include validation, accessible status messages, and a honeypot. The API endpoints are intentionally blank until Mike connects his backend. Never show a success message for a real visitor unless the API returns a successful response. The mini-forms on index GET-submit to `/visibility-report?service=&location=` which prefills via the small script there — keep that behavior.
 
