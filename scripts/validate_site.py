@@ -14,7 +14,10 @@ from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
 CANONICAL_ORIGIN = "https://www.boostyourmaps.com"
-HTML_FILES = sorted(ROOT.glob("*.html"))
+# Root pages plus nested pages such as /google-maps-marketing/<industry>/<city-st>.
+# Source folders that never deploy (see .vercelignore) are skipped.
+SKIP_DIRS = {".git", ".github", ".claude", ".tools", ".vercel", "api", "scripts", "templates", "local-pages", "node_modules"}
+HTML_FILES = sorted(p for p in ROOT.rglob("*.html") if not SKIP_DIRS & set(p.relative_to(ROOT).parts[:-1]))
 errors: list[str] = []
 
 
@@ -92,43 +95,44 @@ def clean_target(href: str) -> str | None:
 
 indexable_canonicals: set[str] = set()
 for page in HTML_FILES:
+    name = str(page.relative_to(ROOT))
     parser = PageParser()
     source = page.read_text(encoding="utf-8")
     parser.feed(source)
 
     if parser.h1_count != 1:
-        fail(page.name, f"expected one H1, found {parser.h1_count}")
+        fail(name, f"expected one H1, found {parser.h1_count}")
     if parser.main_ids != ["main-content"]:
-        fail(page.name, "expected one <main id=\"main-content\">")
+        fail(name, "expected one <main id=\"main-content\">")
     if parser.skip_links != ["#main-content"]:
-        fail(page.name, "missing or invalid skip link")
+        fail(name, "missing or invalid skip link")
     for previous, current in zip(parser.heading_levels, parser.heading_levels[1:]):
         if current > previous + 1:
-            fail(page.name, f"heading level skips from H{previous} to H{current}")
+            fail(name, f"heading level skips from H{previous} to H{current}")
 
     noindex = "noindex" in parser.robots.lower()
     if not noindex:
         if not 20 <= len(parser.title) <= 65:
-            fail(page.name, f"title length is {len(parser.title)}")
+            fail(name, f"title length is {len(parser.title)}")
         if not 120 <= len(parser.description) <= 170:
-            fail(page.name, f"description length is {len(parser.description)}")
+            fail(name, f"description length is {len(parser.description)}")
         if not parser.canonical.startswith(CANONICAL_ORIGIN):
-            fail(page.name, "missing canonical on canonical origin")
+            fail(name, "missing canonical on canonical origin")
         indexable_canonicals.add(parser.canonical)
     elif parser.canonical:
-        fail(page.name, "noindex page should not declare a canonical")
+        fail(name, "noindex page should not declare a canonical")
 
     if not parser.json_ld:
-        fail(page.name, "missing JSON-LD")
+        fail(name, "missing JSON-LD")
     for block in parser.json_ld:
         try:
             data = json.loads(block)
         except json.JSONDecodeError as exc:
-            fail(page.name, f"invalid JSON-LD: {exc}")
+            fail(name, f"invalid JSON-LD: {exc}")
             continue
         graph = data.get("@graph", [data])
         if any(node.get("@type") == "BreadcrumbList" for node in graph) and not parser.has_breadcrumbs:
-            fail(page.name, "BreadcrumbList schema has no visible breadcrumb")
+            fail(name, "BreadcrumbList schema has no visible breadcrumb")
 
     for href in parser.links:
         target = clean_target(href)
@@ -141,11 +145,11 @@ for page in HTML_FILES:
         else:
             candidate = ROOT / f"{target.strip('/')}.html"
         if not candidate.exists():
-            fail(page.name, f"broken internal link {href}")
+            fail(name, f"broken internal link {href}")
 
     for forbidden in ("Owner quote goes here", "review keyword seeding", "geo-tagged image uploads"):
         if forbidden.lower() in source.lower():
-            fail(page.name, f"forbidden placeholder or policy-risk phrase: {forbidden}")
+            fail(name, f"forbidden placeholder or policy-risk phrase: {forbidden}")
 
 
 sitemap = ET.parse(ROOT / "sitemap.xml")

@@ -270,3 +270,48 @@ p{font-size:1.05rem;}
   .statline .lab{max-width:none;}
 }
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto;} *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;}}
+
+/* ===== Local service pages: /google-maps-marketing/<industry>/<city-st> ===== */
+.lsp-hero{display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:center;}
+.lsp-hero h1{margin-top:18px;}
+.lsp-hero .btns{margin-top:28px;}
+.lsp-hero .micro{margin-top:10px;}
+.lsp-hero .micro+.micro{margin-top:4px;}
+.hero-img,.lsp-figure{margin:0;}
+.hero-img img{width:100%;height:auto;border-radius:20px;}
+.lsp-figure img{width:100%;height:auto;border-radius:16px;}
+.prose{max-width:720px;}
+.prose h2{margin-bottom:18px;}
+.prose p+p{margin-top:14px;}
+.top3{margin:18px 0 20px 22px;}
+.top3 li{padding:4px 0;font-size:1.05rem;}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;}
+.season{margin-top:30px;max-width:720px;}
+.season .row{display:grid;grid-template-columns:130px 1fr;gap:14px;align-items:center;margin-top:12px;}
+.season .lab{font-size:.9rem;font-weight:600;}
+.season .track{position:relative;height:22px;border:1px solid var(--hairline);border-radius:6px;background:#fff;display:grid;grid-template-columns:repeat(12,1fr);}
+.season .track span+span{border-left:1px solid var(--hairline);}
+.season .bar{position:absolute;top:3px;bottom:3px;border-radius:4px;background:#C9D1CE;}
+.season .bar.go{background:var(--red);}
+.season .months{display:grid;grid-template-columns:repeat(12,1fr);font-size:.9rem;color:var(--muted);margin-left:144px;margin-top:6px;}
+.season .months span{text-align:center;}
+.checklist{list-style:none;max-width:760px;margin-top:26px;}
+.checklist li{display:flex;gap:14px;align-items:flex-start;padding:18px 0;border-top:1px solid var(--hairline);}
+.checklist li:last-child{border-bottom:1px solid var(--hairline);}
+.checklist .c{flex:0 0 22px;margin-top:3px;}
+.checklist .c svg{width:18px;height:18px;fill:none;stroke:var(--green);stroke-width:3;stroke-linecap:round;stroke-linejoin:round;}
+.checklist b{font-family:'Gabarito';font-weight:700;}
+.rank .form select{flex:1;min-width:190px;font-family:'Hanken Grotesk';font-size:1rem;padding:14px 16px;border-radius:10px;border:1px solid #D5DBD8;background:#fff;color:var(--ink);}
+.rank label.sr{position:absolute;left:-10000px;}
+.byline{margin-top:34px;color:var(--muted);font-size:.9rem;}
+.related{display:flex;gap:10px 22px;flex-wrap:wrap;margin-top:14px;}
+.city-list{list-style:none;display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:18px;}
+@media(max-width:880px){
+  .lsp-hero,.split{grid-template-columns:1fr;gap:28px;}
+  .season .row{grid-template-columns:1fr;gap:6px;}
+  .season .months{margin-left:0;}
+}
+@media(max-width:420px){
+  .season .months span:nth-child(even){visibility:hidden;}
+  .rank .form input,.rank .form select{min-width:100%;}
+}
