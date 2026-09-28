@@ -444,8 +444,7 @@ def check_governance(new_pages: list[Page], base_pages: list[Page], r: Report, t
     if new_pages and pub.get("paused"):
         for p in new_pages:
             r.err(p.path, f"publishing is paused: {pub.get('pause_reason') or 'see local-pages/config.json'}")
-    dated = sorted((dt.date.fromisoformat(p.published), p) for p in base_pages if re.fullmatch(r"\d{4}-\d{2}-\d{2}", p.published))
-    order = [d for d, _ in dated]
+    order = sorted(dt.date.fromisoformat(p.published) for p in base_pages if re.fullmatch(r"\d{4}-\d{2}-\d{2}", p.published))
     for p in sorted(new_pages, key=lambda x: x.published):
         try:
             order.append(dt.date.fromisoformat(p.published))
