@@ -12,6 +12,8 @@ Key facts: no ranking guarantees (Google decides rankings); results typically be
 - [Machine-readable pricing](https://www.boostyourmaps.com/pricing.txt): plain-text pricing and plan details
 - [About us](https://www.boostyourmaps.com/about-us): why we focus on local search and how we operate
 - [Free visibility report](https://www.boostyourmaps.com/visibility-report): request the free 24-hour map ranking report
+- [Google Maps marketing by industry](https://www.boostyourmaps.com/google-maps-marketing): the trades we work with and the cities we have studied
+- [Pest control SEO and Google Maps marketing](https://www.boostyourmaps.com/google-maps-marketing/pest-control): how Google picks the top three for pest control searches, what we change on a pest control profile, pricing and FAQ
 
 ## Optional
 
