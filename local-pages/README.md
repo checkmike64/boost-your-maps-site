@@ -12,7 +12,7 @@ below are the site-side half: where pages live and the automatic gate every page
 | `google-maps-marketing.html` | The `/google-maps-marketing` index (write before any city page) | yes |
 | `google-maps-marketing/<industry>.html` | Industry hub: city list plus the explanations that apply to every city. A starter hub is created automatically with an industry's first page | yes |
 | `google-maps-marketing/<industry>/<city>-<st>.html` | A city page (built by the BYM Team connector) | yes |
-| `assets/local/<industry>-<city>-<st>-hero.webp` | The cartoon hero, made in a separate tool and uploaded by hand | yes |
+| `assets/local/<industry>-<city>-<st>-hero.webp` | The cartoon hero, made in a separate tool and added on `/team-upload` | yes |
 | `local-pages/<industry>/<city>-<st>/fact-sheet.md` | Sourced facts, one tagged ANCHOR | no |
 | `local-pages/<industry>/<city>-<st>/snapshot.json` | The one Google Maps search (top three) | no |
 | `local-pages/<industry>/<city>-<st>/images.md` | Image briefs for the illustrator | no |
@@ -21,6 +21,7 @@ below are the site-side half: where pages live and the automatic gate every page
 | `templates/local-service-page-main.html` | The section skeleton drafters fill in | no |
 | `templates/local-service-hub-main.html` | The starter hub for a new industry | no |
 | `scripts/local_pages/check_local_pages.py` | The publish gate (CI runs it on every PR) | no |
+| `team-upload.html` | `/team-upload` (noindex): publishers add a page's images with their BYM Team link, no GitHub account | yes |
 
 ## How a page gets published
 
@@ -28,8 +29,9 @@ below are the site-side half: where pages live and the automatic gate every page
    fact sheet, plan, draft, humanizer loop, review, then `publish_page`.
 2. The connector opens a pull request on a `local-page-<industry>-<city>` branch with the page,
    its fact sheet, snapshot and image briefs, plus the sitemap, llms.txt and hub updates.
-3. The hero image is uploaded into that branch at `assets/local/<industry>-<city>-hero.webp`
-   (the PR description has the upload link).
+3. A publisher adds the hero image on `/team-upload?pr=<number>` (or the connector's
+   `upload_image`). The connector checks the file type, size and exact dimensions against the
+   page spec, then commits it to the branch at `assets/local/<industry>-<city>-hero.webp`.
 4. **Local pages** (this checker) and **Site checks** run. Vercel posts a preview link.
 5. When both checks pass, a publisher merges (connector `merge_page`, or the green button).
    Merging to `main` deploys to boostyourmaps.com.
