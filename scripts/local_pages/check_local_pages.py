@@ -207,8 +207,9 @@ def check_structure(p: Page, r: Report):
     src = p.src
     if p.meta.get("industry") != p.industry or p.meta.get("city") != p.city:
         r.err(where, "page-meta industry/city must match the file path")
-    if p.industry not in CONFIG["approved_industries"]:
-        r.err(where, f"industry '{p.industry}' is not approved in local-pages/config.json (Mike opens new industries)")
+    known = {**CONFIG.get("approved_industries", {}), **CONFIG.get("industries", {})}
+    if CONFIG.get("restrict_industries") and p.industry not in known:
+        r.err(where, f"industry '{p.industry}' is not on the industry list in local-pages/config.json (restrict_industries is on)")
     if p.angle not in CONFIG["hero_angles"]:
         r.err(where, f"page-meta hero_angle '{p.angle}' is not one of {CONFIG['hero_angles']}")
     if p.meta.get("snapshot_observation") not in CONFIG["snapshot_observations"]:
@@ -451,13 +452,13 @@ def check_governance(new_pages: list[Page], base_pages: list[Page], r: Report, t
         except ValueError:
             continue
         position = len(order)
-        n = pub["first_batch_size"]
-        if position > n:
+        n = pub.get("first_batch_size", 0)
+        if n and pub.get("first_batch_hold_days", 0) and position > n:
             batch_end = sorted(order)[n - 1]
             if (today - batch_end).days < pub["first_batch_hold_days"]:
                 r.err(p.path, f"the first {n} pages went live by {batch_end}; wait {pub['first_batch_hold_days']} days after that before page {position}")
         recent = [d for d in order if (today - d).days < 30]
-        if len(recent) > pub["max_new_pages_per_30_days"]:
+        if pub.get("max_new_pages_per_30_days", 0) and len(recent) > pub["max_new_pages_per_30_days"]:
             r.err(p.path, f"more than {pub['max_new_pages_per_30_days']} new city pages in 30 days")
         same = sorted((x for x in base_pages if x.industry == p.industry and x.published), key=lambda x: x.published)
         if same and same[-1].angle == p.angle:
@@ -465,9 +466,12 @@ def check_governance(new_pages: list[Page], base_pages: list[Page], r: Report, t
 
 
 def check_guard(changes: dict[str, str], base: str, r: Report):
-    """Publisher pull requests may only add or edit local-page files."""
+    """Publisher pull requests may only add or edit local-page files. A new industry's first page may
+    also add its starter hub (built from templates/local-service-hub-main.html) and list the industry
+    between the industry-pages markers on the /google-maps-marketing index."""
     city_pages = {m.groups() for f in changes if (m := CITY_RE.match(f))}
     allowed_pages = {f"{SECTION}/{i}/{c}.html" for i, c in city_pages}
+    industries = {i for i, _ in city_pages}
     for path, status in changes.items():
         if status == "D":
             r.err(path, "publisher pull requests may not delete files")
@@ -481,6 +485,17 @@ def check_guard(changes: dict[str, str], base: str, r: Report):
         if m and any(m.group(1).startswith(f"{i}-{c}-") for i, c in city_pages):
             continue
         hub = re.fullmatch(rf"{SECTION}/([a-z0-9-]+)\.html", path)
+        if hub and status == "A":
+            if hub.group(1) not in industries or "hub:auto-starter" not in (ROOT / path).read_text(encoding="utf-8"):
+                r.err(path, "a new hub must be the starter hub built for an industry with a city page in this pull request")
+            continue
+        if path == f"{SECTION}.html" and status == "M":
+            old = base_text(base, path) or ""
+            new = (ROOT / path).read_text(encoding="utf-8")
+            cut = lambda s: re.sub(r"<!--\s*industry-pages:start\s*-->.*?<!--\s*industry-pages:end\s*-->", "", s, flags=re.S)
+            if cut(old) != cut(new):
+                r.err(path, "page pull requests may only add an industry between the industry-pages markers on the index")
+            continue
         if hub and status == "M":
             old = base_text(base, path) or ""
             new = (ROOT / path).read_text(encoding="utf-8")
@@ -491,9 +506,10 @@ def check_guard(changes: dict[str, str], base: str, r: Report):
         if path == "sitemap.xml":
             old = set(re.findall(r"<loc>(.*?)</loc>", base_text(base, path) or ""))
             new = set(re.findall(r"<loc>(.*?)</loc>", (ROOT / path).read_text(encoding="utf-8")))
-            extra = {u for u in new - old if not re.fullmatch(rf"{re.escape(ORIGIN)}/{SECTION}/[a-z0-9-]+/[a-z0-9-]+", u)}
+            extra = {u for u in new - old if not re.fullmatch(rf"{re.escape(ORIGIN)}/{SECTION}/[a-z0-9-]+/[a-z0-9-]+", u)
+                     and u not in {f"{ORIGIN}/{SECTION}/{i}" for i in industries}}
             if old - new or extra:
-                r.err(path, "publishers may only add city page URLs (and update their lastmod) in sitemap.xml")
+                r.err(path, "page pull requests may only add city page and new hub URLs (and update lastmod) in sitemap.xml")
             continue
         if path == "llms.txt":
             old = set((base_text(base, path) or "").splitlines())

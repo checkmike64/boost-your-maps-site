@@ -1,11 +1,13 @@
 {
-  "_about": "Rules for the industry x city local service pages under /google-maps-marketing/. Read by scripts/local_pages/check_local_pages.py (CI) and by the BYM Team connector. Only Mike edits this file; publisher pull requests may not touch it.",
+  "_about": "Rules for the industry x city local service pages under /google-maps-marketing/. Read by scripts/local_pages/check_local_pages.py (CI) and by the BYM Team connector. Any industry and any city can be built (decided 2026-10-05). Only Mike edits this file; page pull requests may not touch it.",
   "site_origin": "https://www.boostyourmaps.com",
   "section": "google-maps-marketing",
   "cta_text": "Get my free visibility report →",
   "guard_exempt_users": ["checkmike64", "abdulmannan4"],
 
-  "approved_industries": {
+  "_industries_note": "Not an approval list. Names and brief titles for industries already built; a new industry's page supplies industry_name itself. Set restrict_industries to true only to limit pages to this list again.",
+  "restrict_industries": false,
+  "industries": {
     "pest-control": {
       "name": "pest control",
       "label": "Pest control",
@@ -16,9 +18,10 @@
   "publishing": {
     "paused": false,
     "pause_reason": "",
-    "first_batch_size": 10,
-    "first_batch_hold_days": 28,
-    "max_new_pages_per_30_days": 20
+    "_cadence_note": "0 turns a limit off. No volume limits as of 2026-10-05; the pause switch above is the brake.",
+    "first_batch_size": 0,
+    "first_batch_hold_days": 0,
+    "max_new_pages_per_30_days": 0
   },
 
   "thresholds": {

@@ -10,15 +10,16 @@ below are the site-side half: where pages live and the automatic gate every page
 | Path | What | Deployed? |
 |---|---|---|
 | `google-maps-marketing.html` | The `/google-maps-marketing` index (write before any city page) | yes |
-| `google-maps-marketing/<industry>.html` | Industry hub: universal explanations + hub FAQ + city list | yes |
+| `google-maps-marketing/<industry>.html` | Industry hub: city list plus the explanations that apply to every city. A starter hub is created automatically with an industry's first page | yes |
 | `google-maps-marketing/<industry>/<city>-<st>.html` | A city page (built by the BYM Team connector) | yes |
 | `assets/local/<industry>-<city>-<st>-hero.webp` | The cartoon hero, made in a separate tool and uploaded by hand | yes |
 | `local-pages/<industry>/<city>-<st>/fact-sheet.md` | Sourced facts, one tagged ANCHOR | no |
 | `local-pages/<industry>/<city>-<st>/snapshot.json` | The one Google Maps search (top three) | no |
 | `local-pages/<industry>/<city>-<st>/images.md` | Image briefs for the illustrator | no |
-| `local-pages/config.json` | Approved industries, pause switch, cadence, thresholds, banned terms. **Mike only.** | no |
+| `local-pages/config.json` | Known industry names, pause switch, thresholds, banned terms. **Mike only.** | no |
 | `templates/local-service-page-shell.html` | The page frame (head, nav, footer) | no |
 | `templates/local-service-page-main.html` | The section skeleton drafters fill in | no |
+| `templates/local-service-hub-main.html` | The starter hub for a new industry | no |
 | `scripts/local_pages/check_local_pages.py` | The publish gate (CI runs it on every PR) | no |
 
 ## How a page gets published
@@ -41,21 +42,22 @@ publishing" blocks the merge once branch protection requires the check.
 Pull requests from `local-page-*` branches, or from anyone not in `guard_exempt_users`, may only:
 add or edit city pages, their `local-pages/<industry>/<city>/` sidecars and
 `assets/local/<industry>-<city>-*` images, add city URLs to `sitemap.xml`, add lines to
-`llms.txt`, and change the city list between the markers on a hub. Everything else (pricing,
+`llms.txt`, and change the city list between the markers on a hub. A new industry's first page
+may also add that industry's starter hub and list it between the `industry-pages` markers on the
+index. Everything else (pricing,
 legal pages, the homepage, `config.json`, other pages) fails the guard.
 
-## Opening a new industry (Mike)
+## New industries and cities
 
-1. Build the industry brief in the brain ("BYM Industry Brief — <Industry>").
-2. Write the hub `google-maps-marketing/<industry>.html` with a city list block:
+Any industry and any city can be built, with nobody's sign-off (decided 2026-10-05). The page's
+spec carries `industry_name` (how the trade reads in "for roofing companies in Tampa"). When the
+first page in a new industry is published, the connector adds a starter hub from
+`templates/local-service-hub-main.html` and lists the industry on `/google-maps-marketing`, in the
+same pull request. Mike can later replace a starter hub with a full one (as with pest control,
+built by `scripts/local_pages/build_hub_pages.py`) and add an industry brief to the brain.
 
-   ```html
-   <ul class="city-list">
-     <!-- city-pages:start -->
-     <!-- city-pages:end -->
-   </ul>
-   ```
-3. Add the industry to `approved_industries` in `config.json`.
+There are no volume limits. The quality gates (Maps snapshot, sourced facts with an anchor,
+overlap limits, voice rules) still apply to every page.
 
 ## Pausing
 
