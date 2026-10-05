@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Upload page images | Boost Your Maps team</title>
+<meta name="description" content="Internal tool for the Boost Your Maps team: add the illustration to a local service page before it goes live.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-character-32.png">
+<link rel="icon" type="image/png" sizes="64x64" href="/assets/favicon-character-64.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gabarito:wght@500;600;700;800&amp;family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/styles.css?v=20260922-1">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebPage", "name": "Upload page images", "publisher": {"@id": "https://www.boostyourmaps.com/#organization"}}</script>
+<style>
+  .tool { max-width: 720px; margin: 0 auto; padding: 48px 20px 80px; }
+  .tool h1 { font-size: clamp(1.9rem, 4vw, 2.6rem); margin: 0 0 10px; }
+  .tool .lead { margin: 0 0 28px; }
+  .tool label { display: block; font-weight: 600; margin: 18px 0 6px; }
+  .tool input[type=text], .tool input[type=password], .tool input[type=number] { width: 100%; box-sizing: border-box; padding: 12px 14px; border: 1.5px solid #d6d9e0; border-radius: 10px; font: inherit; }
+  .tool .row { display: flex; gap: 10px; align-items: center; margin-top: 8px; font-size: .95rem; }
+  .tool .btn { margin-top: 18px; }
+  .tool .card { border: 1.5px solid #e3e6ec; border-radius: 14px; padding: 18px 18px 6px; margin-top: 18px; }
+  .tool .card h2 { font-size: 1.15rem; margin: 0 0 6px; }
+  .tool .meta { color: #5b6170; font-size: .95rem; margin: 0 0 10px; }
+  .tool .ok { color: #137a3f; font-weight: 600; }
+  .tool .bad { color: #b42318; font-weight: 600; }
+  .tool .msg { margin: 12px 0; }
+  .tool img.preview { max-width: 100%; border-radius: 10px; margin-top: 10px; display: block; }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<main id="main-content" tabindex="-1">
+  <div class="tool">
+    <h1>Upload page images</h1>
+    <p class="lead">Add the illustration to a city page before it goes live. Use the pull request number from <code>publish_page</code>. The image has to match the size in the page spec exactly.</p>
+
+    <label for="link">Your BYM Team link</label>
+    <input id="link" type="password" autocomplete="off" spellcheck="false" placeholder="https://…/bym-team/mcp/bym_…">
+    <div class="row"><input id="remember" type="checkbox"> <label for="remember" style="margin:0;font-weight:500;">Remember it on this computer</label></div>
+
+    <label for="pr">Pull request number</label>
+    <input id="pr" type="number" min="1" inputmode="numeric">
+
+    <button id="load" class="btn btn-primary" type="button">Show the images this page needs</button>
+    <p id="status" class="msg" role="status" aria-live="polite"></p>
+    <div id="slots"></div>
+  </div>
+</main>
+<script>
+(function () {
+  var API = "https://rwycwbyfigxgvykuutwr.supabase.co/functions/v1/bym-team/upload";
+  var KEY = "bym-team-link";
+  var $ = function (id) { return document.getElementById(id); };
+  var linkInput = $("link"), remember = $("remember"), prInput = $("pr"), status = $("status"), slots = $("slots");
+
+  try { var saved = localStorage.getItem(KEY); if (saved) { linkInput.value = saved; remember.checked = true; } } catch (e) {}
+  var qp = new URLSearchParams(location.search).get("pr");
+  if (qp) prInput.value = qp;
+
+  function token() { var m = linkInput.value.match(/bym_[0-9a-f]{48}/); return m ? m[0] : null; }
+  function say(el, text, cls) { el.textContent = text; el.className = "msg" + (cls ? " " + cls : ""); }
+  function el(tag, attrs, text) { var n = document.createElement(tag); for (var k in (attrs || {})) n.setAttribute(k, attrs[k]); if (text) n.textContent = text; return n; }
+
+  function saveLink() {
+    try { if (remember.checked) localStorage.setItem(KEY, linkInput.value.trim()); else localStorage.removeItem(KEY); } catch (e) {}
+  }
+  remember.addEventListener("change", saveLink);
+
+  async function call(method, body) {
+    var t = token();
+    if (!t) throw new Error("Paste your BYM Team link first (the one that ends in bym_…).");
+    var url = method === "GET" ? API + "?pr=" + encodeURIComponent(prInput.value) : API;
+    var res = await fetch(url, { method: method, headers: { Authorization: "Bearer " + t }, body: body });
+    var data = await res.json().catch(function () { return {}; });
+    if (!res.ok) {
+      var msg = typeof data.error === "string" ? data.error : res.status === 401 ? "That link isn't active. Ask Mike for your link." : "Request failed (" + res.status + ").";
+      throw new Error(msg);
+    }
+    return data;
+  }
+
+  async function load() {
+    saveLink();
+    slots.textContent = "";
+    if (!prInput.value) { say(status, "Enter the pull request number.", "bad"); return; }
+    say(status, "Checking…");
+    try {
+      var d = await call("GET");
+      say(status, d.title + " (pull request #" + d.number + ")" + (d.can_upload ? "" : ". Your link can't upload images; ask Mike for publisher access."), d.can_upload ? "" : "bad");
+      Object.keys(d.images).forEach(function (slot) { slots.appendChild(card(slot, d.images[slot], d)); });
+    } catch (e) { say(status, e.message, "bad"); }
+  }
+
+  function card(slot, im, d) {
+    var box = el("div", { class: "card" });
+    box.appendChild(el("h2", null, slot === "hero" ? "Hero illustration" : "Second illustration"));
+    box.appendChild(el("p", { class: "meta" }, im.file + " · exactly " + im.width + " × " + im.height + " · under " + d.max_kb + " KB"));
+    var state = el("p", { class: im.uploaded ? "ok" : "bad" }, im.uploaded ? "Uploaded. You can replace it below." : "Not uploaded yet.");
+    box.appendChild(state);
+    if (!d.can_upload) return box;
+    var input = el("input", { type: "file", accept: ".webp,.png,.jpg,.jpeg,.avif,image/*", "aria-label": "Choose the " + slot + " image" });
+    var btn = el("button", { class: "btn btn-primary", type: "button", disabled: "disabled" }, "Upload");
+    var note = el("p", { class: "msg", role: "status" });
+    var preview = el("img", { class: "preview", alt: "" });
+    var file = null;
+    input.addEventListener("change", async function () {
+      file = input.files[0] || null; btn.disabled = true; preview.removeAttribute("src");
+      if (!file) return;
+      var kb = Math.round(file.size / 1024), problems = [];
+      if (kb > d.max_kb) problems.push("it's " + kb + " KB (limit " + d.max_kb + " KB)");
+      try {
+        var bmp = await createImageBitmap(file);
+        if (bmp.width !== im.width || bmp.height !== im.height) problems.push("it's " + bmp.width + " × " + bmp.height + ", not " + im.width + " × " + im.height);
+      } catch (e) {}
+      preview.src = URL.createObjectURL(file);
+      if (problems.length) { say(note, "Fix the file first: " + problems.join("; ") + ".", "bad"); return; }
+      say(note, file.name + ", " + kb + " KB. Ready to upload.");
+      btn.disabled = false;
+    });
+    btn.addEventListener("click", async function () {
+      if (!file) return;
+      btn.disabled = true; say(note, "Uploading…");
+      var form = new FormData(); form.append("pr", String(d.number)); form.append("slot", slot); form.append("file", file);
+      try {
+        var out = await call("POST", form);
+        say(note, "Uploaded " + out.uploaded + " (" + out.size + "). The checks re-run now; ask your AI to run page_status in a few minutes.", "ok");
+        state.textContent = "Uploaded."; state.className = "ok";
+      } catch (e) { say(note, e.message, "bad"); btn.disabled = false; }
+    });
+    box.appendChild(input); box.appendChild(preview); box.appendChild(note); box.appendChild(btn);
+    return box;
+  }
+
+  $("load").addEventListener("click", load);
+  if (qp && token()) load();
+})();
+</script>
+</body>
+</html>
