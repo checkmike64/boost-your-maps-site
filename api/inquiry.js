@@ -1,3 +1,3 @@
-const { submitToGhl } = require("./_ghl");
+const { submitLead } = require("./_lead");
 
-module.exports = (req, res) => submitToGhl(req, res, { tag: "inquiry", source: "Website - Contact Form" });
+module.exports = (req, res) => submitLead(req, res, { tag: "inquiry", source: "Website - Contact Form", crmForm: "inquiry" });
