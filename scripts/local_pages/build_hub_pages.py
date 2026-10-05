@@ -6,8 +6,9 @@ head, nav, footer and JSON-LD always match the city pages. Run from the repo roo
 
   python3 scripts/local_pages/build_hub_pages.py
 
-It rewrites google-maps-marketing.html and google-maps-marketing/<industry>.html, keeping any city
-links already between the city-pages markers on a hub (the connector adds those).
+It rewrites google-maps-marketing.html and google-maps-marketing/pest-control.html, keeping whatever the
+connector listed between the industry-pages markers (index) and city-pages markers (hub). Starter hubs
+for other industries come from templates/local-service-hub-main.html via the connector.
 """
 from __future__ import annotations
 
@@ -83,7 +84,9 @@ INDEX_MAIN = f"""
       <h2>Industries we write about</h2>
     </div>
     <ul class="checklist">
+      <!-- industry-pages:start -->
       <li>{CHECK}<p><b><a class="plainlink" href="/google-maps-marketing/pest-control">Pest control</a></b> What we change on a pest control profile, when to start before your busy season, and the cities we've looked at.</p></li>
+      <!-- industry-pages:end -->
     </ul>
     <p style="margin-top:22px;">Don't see your trade? The free report works for any established local service company. <a class="tlink" href="/visibility-report">Get the report →</a></p>
   </div>
@@ -234,11 +237,13 @@ PEST_MAIN = f"""
 """
 
 
-def keep_city_links(new: str, old_path: Path) -> str:
+def keep_listed(new: str, old_path: Path, marker: str) -> str:
+    """Keep whatever the connector listed between the <marker>:start/end comments in the current file."""
     if not old_path.exists():
         return new
-    old = re.search(r"<!--\s*city-pages:start\s*-->.*?<!--\s*city-pages:end\s*-->", old_path.read_text(encoding="utf-8"), re.S)
-    return re.sub(r"<!--\s*city-pages:start\s*-->.*?<!--\s*city-pages:end\s*-->", lambda _: old.group(0), new, flags=re.S) if old else new
+    pattern = rf"<!--\s*{marker}:start\s*-->.*?<!--\s*{marker}:end\s*-->"
+    old = re.search(pattern, old_path.read_text(encoding="utf-8"), re.S)
+    return re.sub(pattern, lambda _: old.group(0), new, flags=re.S) if old else new
 
 
 def main():
@@ -248,7 +253,8 @@ def main():
                    "in your trade and the cities we have studied so far.",
                    [("Home", "/"), ("Google Maps marketing", f"/{index_path}")], INDEX_MAIN,
                    [webpage(index_path, "Google Maps marketing by industry", {"@type": "CollectionPage"})])
-    (ROOT / f"{index_path}.html").write_text(index, encoding="utf-8")
+    index_file = ROOT / f"{index_path}.html"
+    index_file.write_text(keep_listed(index, index_file, "industry-pages"), encoding="utf-8")
 
     hub_path = "google-maps-marketing/pest-control"
     service = {"@type": "Service", "@id": f"{ORIGIN}/{hub_path}#service",
@@ -268,7 +274,7 @@ def main():
                              service, faq_schema(PEST_FAQ)])
     out = ROOT / f"{hub_path}.html"
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(keep_city_links(hub, out), encoding="utf-8")
+    out.write_text(keep_listed(hub, out, "city-pages"), encoding="utf-8")
     print("wrote", f"{index_path}.html", f"{hub_path}.html")
 
 
