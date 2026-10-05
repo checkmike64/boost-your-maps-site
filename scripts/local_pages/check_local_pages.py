@@ -10,7 +10,9 @@ Runs in CI on every pull request and can be run locally:
 What it enforces (rules come from local-pages/config.json and the BYM local service page process):
   structure   page-meta, title/meta lengths, canonical, one H1, JSON-LD graph, FAQ schema == visible FAQ,
               module order, 4-6 module sections, word count, banned voice terms, CTA text, images
-  facts       fact sheet (>= 8 sourced facts, one ANCHOR) and Maps snapshot sidecars; snapshot names,
+  markup      the skeleton's section wrappers, R1/CLOSE/FAQ blocks, only classes the site stylesheet
+              defines, no placeholders
+  facts      fact sheet (>= 8 sourced facts, one ANCHOR) and Maps snapshot sidecars; snapshot names,
               review counts and date appear on the page
   variety     5-word shingle Jaccard vs every other city page (15% any, 12% same industry or city),
               sitewide boilerplate (8%), heading and FAQ registry, module fingerprint
@@ -347,6 +349,56 @@ def check_structure(p: Page, r: Report):
             r.err(where, f"image {src_attr[:60]} must be a site file under /assets/")
 
 
+def stylesheet_classes() -> set[str]:
+    """Class names the page shell's stylesheet defines. A city page may only use these."""
+    shell = (ROOT / "templates" / "local-service-page-shell.html").read_text(encoding="utf-8")
+    m = re.search(r'<link rel="stylesheet" href="/([^"?]+\.css)', shell)
+    css_path = ROOT / (m.group(1) if m else "assets/styles.css")
+    css = re.sub(r"/\*.*?\*/", "", css_path.read_text(encoding="utf-8"), flags=re.S)
+    return set(re.findall(r"\.(-?[A-Za-z_][\w-]*)", css))
+
+
+PLACEHOLDER = re.compile(r"\[(?:PENDING|TODO|TBD|INSERT|PLACEHOLDER)[^\]]*\]|\bPENDING_[A-Z_]+|lorem ipsum|MAIN CONTENT SKELETON"
+                         r"|<[A-Z][a-zA-Z]*\s[^>]*>")
+
+
+def classes_of(attrs: str) -> set[str]:
+    m = re.search(r'\bclass="([^"]*)"', attrs)
+    return set(m.group(1).split()) if m else set()
+
+
+def check_markup(p: Page, r: Report, css: set[str]):
+    """The skeleton's markup (mirrors markupProblems in the BYM Team connector)."""
+    where = p.path
+    found: list[str] = []
+    authored = authored_html(re.sub(r"<!-- R4 REPORT PANEL.*?<!-- /R4 -->", " ", p.main, flags=re.S))  # R4 is generated
+    body = re.sub(r"<!--.*?-->", " ", p.main, flags=re.S)
+    for m in re.finditer(r"<section\b([^>]*)>\s*(?:<([a-z0-9]+)\b([^>]*)>)?", body):
+        cls = classes_of(m.group(1))
+        label = f'<section class="{" ".join(sorted(cls))}">' if cls else "<section>"
+        if not cls & {"section", "page-hero"}:
+            found.append(f"{label} needs the skeleton's section classes (\"page-hero\" for R1, \"section …\" for the rest)")
+        if m.group(2) != "div" or "wrap" not in classes_of(m.group(3) or ""):
+            found.append(f"the first thing inside {label} must be <div class=\"wrap\">, as in the skeleton")
+    blocks = re.split(r"(?=<!--\s*(?:R\d|M\d+|CLOSE)\b)", p.main)
+    r1 = next((b for b in blocks if re.match(r"<!--\s*R1\b", b)), "")
+    if r1 and not ('class="page-hero"' in r1 and "lsp-hero" in r1):
+        found.append('R1 must be <section class="page-hero"><div class="wrap lsp-hero">, as in the skeleton')
+    close = next((b for b in blocks if re.match(r"<!--\s*CLOSE\b", b)), "")
+    if close and "final-cta" not in close:
+        found.append('CLOSE must be <section class="section flow final-cta">, as in the skeleton')
+    if 'class="qa"' in p.main and 'class="faq"' not in p.main:
+        found.append('FAQ items go inside <div class="faq">')
+    unknown = sorted({c for attrs in re.findall(r'\bclass="([^"]*)"', authored) for c in attrs.split()} - css)
+    if unknown:
+        found.append(f"classes {', '.join(repr(c) for c in unknown)} are not in the site stylesheet; use the skeleton's markup")
+    ph = PLACEHOLDER.search(authored)
+    if ph:
+        found.append(f"placeholder still on the page: {ph.group(0)[:80]}")
+    for msg in dict.fromkeys(found):
+        r.err(where, msg)
+
+
 def check_sidecars(p: Page, r: Report):
     folder = ROOT / "local-pages" / p.industry / p.city
     fs = folder / "fact-sheet.md"
@@ -558,9 +610,11 @@ def main() -> int:
     sitemap = {u.findtext("sm:loc", "", ns): u.findtext("sm:lastmod", "", ns) for u in ET.parse(sm_path).findall("sm:url", ns)}
     llms = (ROOT / "llms.txt").read_text(encoding="utf-8")
 
+    css = stylesheet_classes()
     r.lines += ["| Page | Compared with | Overlap | Limit | Result |", "|---|---|---|---|---|"]
     for p in targets:
         check_structure(p, r)
+        check_markup(p, r, css)
         check_sidecars(p, r)
         check_wiring(p, r, sitemap, llms)
         check_variety(p, [o for o in pages.values() if o.path != p.path], r)
