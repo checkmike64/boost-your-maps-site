@@ -69,12 +69,12 @@ assert.deepEqual(buildCrmPayload(VISIBILITY_REPORT, HEADERS), {
   userAgent: HEADERS["user-agent"],
 });
 
-// A number typed without a country code is not guessed at, and x-real-ip
-// stands in when x-forwarded-for is missing.
+// A 10-digit number gets +1, and x-real-ip stands in when x-forwarded-for is
+// missing.
 assert.deepEqual(buildCrmPayload(INQUIRY, { "x-real-ip": "2001:db8::1" }), {
   name: "Sam",
   email: "sam@example.com",
-  phone: null,
+  phone: "+18135550199",
   answers: {
     business_name: "Sam's Plumbing",
     service_interest: "Ongoing management",
@@ -88,13 +88,29 @@ assert.deepEqual(buildCrmPayload(INQUIRY, { "x-real-ip": "2001:db8::1" }), {
   userAgent: null,
 });
 
+// Phones as E.164. BYM serves the US and Canada, which share +1.
+const PHONES = {
+  "813-555-0142": "+18135550142",
+  "(813) 555-0142": "+18135550142",
+  "1-813-555-0142": "+18135550142",
+  "+1 813 555 0142": "+18135550142",
+  "+44 20 7946 0958": "+442079460958",
+  "555-0142": null,
+  "2-813-555-0142": null, // 11 digits, but not starting with 1
+  "0044 20 7946 0958": null, // only a typed + is read as international
+  "+1 555": null,
+  "": null,
+};
+for (const [typed, sent] of Object.entries(PHONES)) {
+  assert.equal(buildCrmPayload({ fields: { email: "a@example.com", phone: typed } }, {}).phone, sent, `phone ${JSON.stringify(typed)}`);
+}
+
 // Values cut to what the CRM accepts instead of getting the lead refused.
 const edge = buildCrmPayload(
   {
     page_url: `https://www.boostyourmaps.com/visibility-report?utm_source=${"x".repeat(300)}&pad=${"y".repeat(2100)}`,
     fields: {
       email: "  owner@example.com ",
-      phone: "0044 20 7946 0958",
       service: "s".repeat(600),
       message: `${"m".repeat(4999)}😀`,
       some_new_field: "not sent",
@@ -105,7 +121,6 @@ const edge = buildCrmPayload(
 );
 assert.equal(edge.name, "owner"); // no name given: the part of the email before @
 assert.equal(edge.email, "owner@example.com");
-assert.equal(edge.phone, "+442079460958"); // a leading 00 means +
 assert.deepEqual(Object.keys(edge.answers).sort(), ["message", "service"]);
 assert.equal(edge.answers.service.length, 500);
 assert.equal(edge.answers.message, "m".repeat(4999)); // the emoji is not cut in half

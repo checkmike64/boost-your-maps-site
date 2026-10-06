@@ -55,13 +55,16 @@ function cut(value, max) {
   return head.length < value.length && /[\uD800-\uDBFF]$/.test(head) ? head.slice(0, -1) : head;
 }
 
-// The CRM keeps phones in E.164 and never guesses a country code, so neither
-// does this: punctuation goes, a leading 00 becomes +, and a number still not
-// shaped +<8-15 digits> is sent as null. GHL gets the number as typed.
+// The CRM keeps phones in E.164. BYM serves the US and Canada, which share +1,
+// so once punctuation is gone a 10-digit number gets +1 and an 11-digit one
+// starting with 1 gets +. A number typed with + must be +<8-15 digits>.
+// Anything else is sent as null; GHL gets the number as typed.
 function e164(value) {
-  let phone = text(value).replace(/[\s().\- ]/g, "");
-  if (phone.startsWith("00")) phone = `+${phone.slice(2)}`;
-  return /^\+[0-9]{8,15}$/.test(phone) ? phone : null;
+  const phone = text(value).replace(/[\s().\- ]/g, "");
+  if (phone.startsWith("+")) return /^\+[0-9]{8,15}$/.test(phone) ? phone : null;
+  if (/^[0-9]{10}$/.test(phone)) return `+1${phone}`;
+  if (/^1[0-9]{10}$/.test(phone)) return `+${phone}`;
+  return null;
 }
 
 function pageUrlFrom(value) {
