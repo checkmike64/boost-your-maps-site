@@ -18,6 +18,7 @@ service-agreement.html     Client service agreement (existing content)
 assets/styles.css          The entire design system (see DESIGN.md for the rules)
 assets/forms.js            Native validation + API-ready JSON submission handling
 assets/favicon-character PNGs, Apple touch icon, og.png, icon-512.png, responsive mascot and report-sample WebP/AVIF files
+api/                       Form endpoints: each lead goes to GoHighLevel and the BYM CRM
 robots.txt                 Allows all search + AI crawlers, declares sitemap
 llms.txt                   AI-engine site overview (llmstxt.org format)
 pricing.txt                Machine-readable pricing for answer engines and agents
@@ -29,16 +30,29 @@ templates/                 Copy-paste templates for new SERVICE PAGES and BLOG P
 DESIGN.md                  The design system contract — follow it for anything new
 ```
 
-## THE TWO FORMS — API connection required before launch
+## THE TWO FORMS — where the leads go
 
 `visibility-report.html` and `inquiry-form.html` use native HTML forms with browser
-validation and shared submission handling in `assets/forms.js`. Each form sends JSON,
+validation and shared submission handling in `assets/forms.js`. Each form sends JSON
+(`form_type`, `submitted_at`, `page_url`, and a `fields` object) to its `data-endpoint`,
 shows accessible loading/success/error states, and includes a spam honeypot.
 
-To connect a backend, set each form's empty `data-endpoint` attribute to its API URL.
-The request body contains `form_type`, `submitted_at`, `page_url`, and a `fields` object.
-Until an endpoint is configured, the form honestly directs visitors to the business email
-instead of pretending an unpersisted submission succeeded.
+The endpoints, `/api/visibility-report` and `/api/inquiry`, send each lead to two places
+at the same time:
+
+- **GoHighLevel**, as a contact upsert tagged by form (`api/_ghl.js`; needs
+  `GHL_API_TOKEN` and `GHL_LOCATION_ID`).
+- **The BYM CRM**, through its public forms API (`api/_crm.js`), once `CRM_URL` is set in
+  Vercel (for example `https://crm.boostyourmaps.com`). Until then this step is skipped.
+  Leads go to the CRM forms `visibility-report` and `inquiry`; `CRM_FORM_VISIBILITY_REPORT`
+  and `CRM_FORM_INQUIRY` change those slugs. The other form fields arrive as answers under
+  their form names (`business_name`, `service`, `location`, `website`, `message`,
+  `service_interest`, `active_marketing`), and the CRM keeps only the ones its form defines.
+
+The visitor sees the success message when either one stores the lead, so nothing is lost
+while the CRM is new. Each side's failures are logged on their own (`GHL ...` or
+`BYM CRM ...`) in the Vercel function logs. `node scripts/check_crm_payload.js` checks what
+the CRM receives without touching the network; CI runs it.
 
 The two mini-forms on `index.html` are intentional teasers — they GET-submit to
 `/visibility-report?service=…&location=…`, which prefills the real form via the small
@@ -57,7 +71,7 @@ Vercel dashboard) for click-through testing before the domain switch.
 
 ## Domain switchover checklist
 
-1. Add the two API endpoints (above) and test that both submission types persist successfully.
+1. Test that both submission types persist successfully (see the two forms, above).
 2. In Vercel → Project → Domains: add `boostyourmaps.com` + `www.boostyourmaps.com`
    (www is the canonical — all canonicals/sitemap use www; Vercel will 308 apex → www).
 3. Update DNS at the registrar per Vercel's instructions (A/ALIAS + CNAME).
