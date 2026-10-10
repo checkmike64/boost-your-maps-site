@@ -335,8 +335,8 @@ p{font-size:1.05rem;}
 .su-actions .micro{margin-top:0;}
 .su-after{margin-top:18px;}
 .su-note{margin-top:14px;color:var(--muted);font-size:.9rem;}
-.su-linkbtn{background:none;border:0;border-bottom:1.5px solid #D5DBD8;padding:0 0 2px;font-family:'Gabarito',sans-serif;font-weight:600;font-size:1.05rem;color:var(--ink);cursor:pointer;min-height:44px;transition:color .2s,border-color .2s;}
-.su-linkbtn:hover{color:var(--redDeep);border-color:var(--redDeep);}
+.su-linkbtn{background:none;border:0;padding:0;text-align:left;font-family:'Gabarito',sans-serif;font-weight:600;font-size:1.05rem;line-height:1.4;color:var(--ink);cursor:pointer;min-height:44px;text-decoration:underline;text-decoration-color:#D5DBD8;text-decoration-thickness:1.5px;text-underline-offset:5px;transition:color .2s,text-decoration-color .2s;}
+.su-linkbtn:hover{color:var(--redDeep);text-decoration-color:var(--redDeep);}
 .su-linkbtn:disabled{cursor:wait;opacity:.6;}
 .su-steps{list-style:none;max-width:760px;margin-top:8px;}
 .su-steps .step{padding-bottom:30px;}
@@ -345,7 +345,8 @@ p{font-size:1.05rem;}
 .su-steps .step.is-active .pin span{color:var(--red);}
 .su-steps .step .pin svg{width:22px;height:22px;fill:none;stroke:var(--green);stroke-width:3;stroke-linecap:round;stroke-linejoin:round;}
 .su-step-title{font-size:1.22rem;margin-top:14px;}
-.su-steps .step:not(.is-active):not(.is-done) .su-step-title{color:var(--muted);}
+.su-steps .step:not(.is-active):not(.is-done):not(.is-open) .su-step-title{color:var(--muted);}
+.su-steps .step.is-open .pin span{color:var(--ink);}
 .su-steps .body > p{margin-top:8px;}
 .su-steps .body > p.su-done{color:var(--muted);}
 .su-steps .body > div > p:first-child{margin-top:8px;}
@@ -389,5 +390,10 @@ main.su [hidden]{display:none!important;}
   .su-table td.su-name::before{content:none;}
 }
 @media(max-width:420px){
-  .su-email{flex-direction:column;align-items:flex-start;}
+  .su-email{flex-direction:column;align-items:flex-start;padding:12px 14px;}
+  .su-email strong{font-size:.9rem;overflow-wrap:normal;}
+  .su-steps.route:before{left:21px;}
+  .su-steps .step{grid-template-columns:44px 1fr;gap:14px;}
+  .su-steps .step .pin{width:44px;height:44px;}
+  .su-steps .step .pin span{font-size:1.2rem;}
 }

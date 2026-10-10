@@ -296,6 +296,16 @@
     approval: ["approval", "Please pick how you want to approve the changes."]
   };
 
+  // FNV-1a, 32 bits, as 8 hex characters.
+  function shortHash(text) {
+    var hash = 0x811c9dc5;
+    for (var i = 0; i < text.length; i++) {
+      hash ^= text.charCodeAt(i);
+      hash = Math.imul(hash, 0x01000193) >>> 0;
+    }
+    return ("0000000" + hash.toString(16)).slice(-8);
+  }
+
   function tokenFromUrl() {
     var match = window.location.hash.match(/(?:^#|&)t=([^&]*)/);
     var raw = match ? match[1] : new URLSearchParams(window.location.search).get("t");
@@ -306,8 +316,30 @@
     var token = tokenFromUrl();
     var signup = null;
     var editing = false;
-    var skipped = false;
     var prefilled = false;
+
+    // Steps the buyer folded away on this device without telling the CRM
+    // ("I'll do this later", an agency's "Skip this step"), kept for this tab
+    // so a reload keeps them folded. The key is a short hash of the token, never
+    // the token. Without storage the page still works; the fold just doesn't
+    // survive a reload.
+    var localKey = "bym-welcome-" + shortHash(token);
+    var local = readLocal();
+
+    function readLocal() {
+      try {
+        var saved = JSON.parse(window.sessionStorage.getItem(localKey) || "{}");
+        return saved && typeof saved === "object" ? saved : {};
+      } catch (e) {
+        return {};
+      }
+    }
+
+    function writeLocal() {
+      try {
+        window.sessionStorage.setItem(localKey, JSON.stringify(local));
+      } catch (e) { /* storage blocked: fine */ }
+    }
     var pollDeadline = 0;
     var pollTimer = null;
 
@@ -401,20 +433,27 @@
     var accessStatus = $("[data-access-status]");
     var accessConfirm = $("[data-access-confirm]");
     var accessSkip = $("[data-access-skip]");
+    var accessLater = $("[data-access-later]");
 
-    async function sendAccess(isSkip) {
+    // After the access step folds, move focus to whatever is still to do.
+    function focusAfterAccess() {
+      focusStep(signup.intakeDone ? "call" : "intake");
+    }
+
+    // "I've added you": the only access action the CRM hears about (it turns
+    // it into a team task to accept the invite).
+    async function sendAccess() {
       hideStatus(accessStatus);
       accessConfirm.disabled = true;
-      accessSkip.disabled = true;
       var result = await call("POST", "/api/signup/access", { t: token });
       accessConfirm.disabled = false;
-      accessSkip.disabled = false;
       if (result.status === 200 && result.data.ok === true) {
         signup.accessConfirmed = true;
-        skipped = isSkip;
-        pushEvent({ event: "signup_step", signup_step: isSkip ? "access_skipped" : "access_added", signup_plan: signup.plan });
+        delete local.access;
+        writeLocal();
+        pushEvent({ event: "signup_step", signup_step: "access_added", signup_plan: signup.plan });
         render();
-        focusStep("intake");
+        focusAfterAccess();
       } else if (result.status === 404) {
         problemFor(result);
       } else {
@@ -423,8 +462,27 @@
       }
     }
 
-    accessConfirm.addEventListener("click", function () { sendAccess(false); });
-    accessSkip.addEventListener("click", function () { sendAccess(true); });
+    // "I'll do this later" and the agency's "Skip this step" only fold the
+    // step on this device. No CRM call: for a client we already manage, an
+    // "accept the invite" task would be wrong.
+    function foldAccess(kind) {
+      hideStatus(accessStatus);
+      local.access = kind;
+      writeLocal();
+      pushEvent({ event: "signup_step", signup_step: kind === "skipped" ? "access_skipped" : "access_later", signup_plan: signup.plan });
+      render();
+      focusAfterAccess();
+    }
+
+    accessConfirm.addEventListener("click", sendAccess);
+    accessLater.addEventListener("click", function () { foldAccess("later"); });
+    accessSkip.addEventListener("click", function () { foldAccess("skipped"); });
+    $("[data-access-reopen]").addEventListener("click", function () {
+      delete local.access;
+      writeLocal();
+      render();
+      focusStep("access");
+    });
 
     $("[data-copy]").addEventListener("click", async function (event) {
       var button = event.currentTarget;
@@ -668,9 +726,12 @@
 
     // ---- drawing the steps from the signup's state ----
 
+    // state: "next" (waiting on payment), "open", "active" (the first open
+    // step, red numeral), "later" (folded, not done) or "done" (green check).
     function setStep(name, state, number) {
       var li = root.querySelector('[data-step="' + name + '"]');
       li.classList.toggle("is-active", state === "active");
+      li.classList.toggle("is-open", state === "open" || state === "later");
       li.classList.toggle("is-done", state === "done");
       li.querySelector(".pin").innerHTML = state === "done" ? CHECK_SVG : "<span>" + number + "</span>";
     }
@@ -704,14 +765,23 @@
         $("[data-pay-wait]").hidden = true;
         $("[data-pay-slow]").hidden = true;
       }
-      setStep("pay", signup.paid ? "done" : "active", 1);
+      var states = { pay: signup.paid ? "done" : "active" };
 
-      // 2. Access
-      var accessOpen = signup.paid && !signup.accessConfirmed;
+      // 2. Access and 3. Questions open together once paid; neither waits for
+      // the other.
+      var accessEmail = signup.accessEmail || TEAM_EMAIL;
+      var fold = signup.accessConfirmed ? "confirmed"
+        : local.access === "skipped" && partner ? "skipped"
+        : local.access === "later" ? "later" : null;
+      var accessOpen = signup.paid && !fold;
       $("[data-access-next]").hidden = signup.paid;
       $("[data-access-open]").hidden = !accessOpen;
-      $("[data-access-done]").hidden = !(signup.paid && signup.accessConfirmed);
-      $("[data-access-done]").textContent = skipped ? "Done. You told us we already have access." : "Done. We'll accept the invite on our side.";
+      $("[data-access-closed]").hidden = !(signup.paid && fold);
+      $("[data-access-reopen]").hidden = fold !== "later" && fold !== "skipped";
+      $("[data-access-closed-text]").textContent =
+        fold === "skipped" ? "Done. You told us we already have access."
+        : fold === "later" ? "No problem. Add " + accessEmail + " as a Manager when you can. We need it before we can change the profile."
+        : "Done. We'll accept the invite on our side.";
       if (accessOpen) {
         $("[data-access-email]").textContent = signup.accessEmail || TEAM_EMAIL;
         $("[data-access-intro]").textContent = partner
@@ -719,10 +789,9 @@
           : "Add " + (signup.accessEmail || TEAM_EMAIL) + " as a Manager on your Google Business Profile. This lets us make the changes for you. You stay the owner.";
         accessSkip.hidden = !partner;
       }
-      setStep("access", !signup.paid ? "next" : signup.accessConfirmed ? "done" : "active", 2);
+      states.access = !signup.paid ? "next" : fold === "later" ? "later" : fold ? "done" : "open";
 
-      // 3. Questions
-      var intakeReady = signup.paid && signup.accessConfirmed;
+      var intakeReady = signup.paid;
       var intakeOpen = intakeReady && (!signup.intakeDone || editing);
       $("[data-intake-next]").hidden = intakeReady;
       $("[data-intake-open]").hidden = !intakeOpen;
@@ -732,13 +801,22 @@
         applyPartnerCopy();
         fillFromPrefill();
       }
-      setStep("intake", !intakeReady ? "next" : intakeOpen ? "active" : "done", 3);
+      states.intake = !intakeReady ? "next" : intakeOpen ? "open" : "done";
 
-      // 4. Launch call
+      // 4. Launch call, once the questions are answered.
       var callReady = intakeReady && signup.intakeDone && !editing;
       $("[data-call-next]").hidden = callReady;
       $("[data-call-open]").hidden = !callReady;
-      setStep("call", callReady ? renderCall() : "next", 4);
+      states.call = callReady ? (renderCall() === "active" ? "open" : "done") : "next";
+
+      // One red numeral: only the first open step is "active".
+      var order = ["pay", "access", "intake", "call"];
+      var first = order.filter(function (name) { return states[name] === "open" || states[name] === "active"; })[0];
+      order.forEach(function (name, i) {
+        var state = states[name];
+        if (state === "active" || state === "open") state = name === first ? "active" : "open";
+        setStep(name, state, i + 1);
+      });
     }
 
     if (!TOKEN.test(token)) {

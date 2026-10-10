@@ -21,9 +21,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gabarito:wght@500;600;700;800&amp;family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/styles.css?v=20261009-1">
+<link rel="stylesheet" href="/assets/styles.css?v=20261009-2">
 <script src="/assets/tracking.js?v=1" defer></script>
-<script src="/assets/signup.js?v=20261009-1" defer></script>
+<script src="/assets/signup.js?v=20261009-2" defer></script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "WebPage", "name": "Welcome", "publisher": {"@id": "https://www.boostyourmaps.com/#organization"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.boostyourmaps.com/"}, {"@type": "ListItem", "position": 2, "name": "Welcome"}]}]}</script>
 </head>
 <body>
@@ -45,7 +45,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <a class="plain" href="/about-us">About us</a>
       <a class="plain" href="/services">Services</a>
       <a class="plain" href="/pricing">Pricing</a>
-      <a href="/visibility-report" class="btn btn-primary" style="padding:9px 18px;font-size:.92rem;">Get my free visibility report</a>
     </div>
   </div>
 </nav>
@@ -104,11 +103,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             </ol>
             <div class="su-actions">
               <button type="button" class="btn btn-primary" data-access-confirm>I've added you →</button>
+              <button type="button" class="su-linkbtn" data-access-later>I'll do this later</button>
               <button type="button" class="su-linkbtn" data-access-skip hidden>Already gave us access to this client? Skip this step.</button>
             </div>
             <div class="form-status full" data-access-status role="status" aria-live="polite" aria-atomic="true" tabindex="-1"></div>
           </div>
-          <p class="su-done" data-access-done hidden>Done. We'll accept the invite on our side.</p>
+          <div data-access-closed hidden>
+            <p class="su-done" data-access-closed-text></p>
+            <p><button type="button" class="su-linkbtn" data-access-reopen hidden>Show the steps again</button></p>
+          </div>
         </div>
       </li>
 
@@ -117,7 +120,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="pin" aria-hidden="true"><span>3</span></div>
         <div class="body">
           <h2 class="su-step-title">A few quick questions</h2>
-          <p class="su-done" data-intake-next>After you give us access.</p>
+          <p class="su-done" data-intake-next>After your payment goes through.</p>
           <div data-intake-open hidden>
             <p data-intake-intro>We pull the rest, like target keywords, FAQs and categories, from your profile and website.</p>
             <form class="vform" id="intake-form" method="post" action="#" novalidate>
