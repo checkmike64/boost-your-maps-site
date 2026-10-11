@@ -69,6 +69,9 @@ the nav or footer.
 - `/welcome`: where Stripe sends the buyer. Payment, Google Business Profile access,
   a few questions, launch call.
 - `/partners/portal#k=<token>`: an agency's clients and links.
+- `/booked`: where the CRM's booking pages send someone who booked a call. Shows the call and
+  its time, pushes `book_appointment` to Tag Manager once per meeting id, and takes the
+  meeting id, token and visitor key out of the address before Tag Manager loads.
 
 The pages (`assets/signup.js`, `assets/portal.js`) only call this site's functions
 (`api/signup/*.js`, `api/partner-portal.js`, helpers in `api/_signup.js`), which call the
