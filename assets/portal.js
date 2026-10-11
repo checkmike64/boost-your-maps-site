@@ -73,11 +73,13 @@
     return td;
   }
 
-  function render(portal) {
+  function render(portal, token) {
     var title = document.querySelector("[data-p-title]");
     if (portal.partnerName) title.textContent = "Hello, " + portal.partnerName + " team";
 
-    $("[data-p-signup]").href = "/partners/signup" + (portal.partnerSlug ? "?partner=" + encodeURIComponent(portal.partnerSlug) : "");
+    // The signup form knows the agency (and its contact) from the same key,
+    // carried in the fragment so it never reaches a server log or analytics.
+    $("[data-p-signup]").href = "/partners/signup#k=" + token;
 
     var book = $("[data-p-book]");
     if (isHttpUrl(portal.bookingUrl)) {
@@ -156,7 +158,7 @@
       window.clearTimeout(timer);
     }
 
-    if (status === 200 && data.ok === true && data.portal) return render(data.portal);
+    if (status === 200 && data.ok === true && data.portal) return render(data.portal, token);
     if (status === 404 || data.error === "portal_not_found") return showProblem(NOT_FOUND, false);
     if (data.error === "rate_limited") return showProblem("Too many tries in a row. Please wait a minute and try again.", true);
     showProblem("We can't load your portal right now. Please try again in a minute, or email " + TEAM_EMAIL + ".", true);

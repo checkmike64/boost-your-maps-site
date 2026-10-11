@@ -66,6 +66,8 @@ the nav or footer.
 - `/get-started` (US, $450 a month per location), `/get-started/canada` ($300, billed in
   USD) and `/partners/signup` (agencies, $250, agency picked from a dropdown; `?partner=<slug>`
   preselects one): details form, then Stripe checkout.
+  From the portal's "Sign up a new client" link (`/partners/signup#k=<portal key>`) the agency
+  and its contact come from the CRM, so only the client's details are asked.
 - `/welcome`: where Stripe sends the buyer. Payment, Google Business Profile access,
   a few questions, launch call.
 - `/partners/portal#k=<token>`: an agency's clients and links.
