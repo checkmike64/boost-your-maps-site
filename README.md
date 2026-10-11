@@ -58,6 +58,26 @@ The two mini-forms on `index.html` are intentional teasers — they GET-submit t
 `/visibility-report?service=…&location=…`, which prefills the real form via the small
 script on that page. No backend needed for those.
 
+## Self-serve signup and the partner portal
+
+Private pages the team sends by link. They are `noindex`, not in the sitemap, and not in
+the nav or footer.
+
+- `/get-started` (US, $450 a month per location), `/get-started/canada` ($300, billed in
+  USD) and `/partners/signup` (agencies, $250, agency picked from a dropdown; `?partner=<slug>`
+  preselects one): details form, then Stripe checkout.
+- `/welcome`: where Stripe sends the buyer. Payment, Google Business Profile access,
+  a few questions, launch call.
+- `/partners/portal#k=<token>`: an agency's clients and links.
+
+The pages (`assets/signup.js`, `assets/portal.js`) only call this site's functions
+(`api/signup/*.js`, `api/partner-portal.js`, helpers in `api/_signup.js`), which call the
+BYM CRM's `/api/signup` and `/api/partners/portal` endpoints server to server, using the same
+`CRM_URL` as the lead forms. Without it they answer 503 and the pages say to email the team.
+The welcome and portal tokens move from `?t=` / `?k=` into the URL hash before analytics loads
+and only travel inside POST bodies. `node scripts/check_signup_payload.js` checks what the CRM
+receives without touching the network; CI runs it.
+
 ## Deploy (Vercel)
 
 The canonical repository is `https://github.com/checkmike64/boost-your-maps-site`.

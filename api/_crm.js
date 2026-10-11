@@ -179,4 +179,18 @@ async function sendToCrm(form, body, headers) {
   }
 }
 
-module.exports = { crmConfigured, sendToCrm, buildCrmPayload };
+module.exports = {
+  crmConfigured,
+  sendToCrm,
+  buildCrmPayload,
+  // Shared with the signup functions (api/_signup.js), unchanged.
+  crmUrl,
+  text,
+  cut,
+  e164,
+  pageUrlFrom,
+  sourceUrlFrom,
+  utmFrom,
+  clientIpFrom,
+  userAgentFrom,
+};
