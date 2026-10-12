@@ -1,9 +1,10 @@
 # Boost Your Maps site — handoff to finish deploy
 
 **Status:** The website uses the approved Style A design (locked 2026-08-04) and is
-a no-build static HTML site. The two full-page forms are native, API-ready forms.
-Before production launch, add their endpoint URLs, verify real submissions persist,
-then push this workspace to GitHub and deploy it on Vercel.
+a no-build static HTML site. The two full-page forms post to the site's own API, which
+sends each lead to GoHighLevel and, once `CRM_URL` is set, to the BYM CRM as well.
+Before production launch, verify real submissions persist, then push this workspace
+to GitHub and deploy it on Vercel.
 
 - **GitHub repo (already created, currently empty):** https://github.com/checkmike64/boost-your-maps-site
 - **Local repo (this folder):** `/Users/mikemoll/Documents/BYM` on `main`.
@@ -59,7 +60,8 @@ Every future push to `main` then auto-redeploys.
 - **www is canonical** — all canonicals + `sitemap.xml` use `https://www.boostyourmaps.com`.
   At domain switch, add both `boostyourmaps.com` and `www.boostyourmaps.com` in Vercel
   (Vercel 308s apex → www). Full domain checklist is in `README.md`.
-- Forms are native HTML + JavaScript and intentionally have blank `data-endpoint`
-  attributes. Set those to the future API URLs and test both flows before launch.
+- Forms are native HTML + JavaScript posting to `/api/visibility-report` and `/api/inquiry`.
+  Each lead goes to GoHighLevel and, once `CRM_URL` is set in Vercel, to the BYM CRM too
+  (`CRM_FORM_VISIBILITY_REPORT` / `CRM_FORM_INQUIRY` can change its form slugs). See `README.md`.
 - Design law is `DESIGN.md`; repo workflow is `CLAUDE.md`. Do NOT redesign — this is locked.
 - The two homepage proof-card quotes and the mascot 3D render are owner placeholders.

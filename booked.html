@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Booking details: read and checked here, then the meeting id, the one-off
+     token (m) and the visitor key (crm_vid) leave the address bar BEFORE Tag
+     Manager loads, so they never reach a GA page_view. Keep this first. -->
+<script>
+(function () {
+  var booked = { type: "", name: "", at: "", id: "" };
+  try {
+    var url = new URL(window.location.href);
+    var p = url.searchParams;
+    var type = p.get("type") || "";
+    if (/^[a-z0-9-]{1,80}$/.test(type)) booked.type = type;
+    var name = (p.get("name") || "").trim();
+    if (name.length <= 120 && !/[\u0000-\u001f\u007f]/.test(name)) booked.name = name;
+    var at = p.get("at") ? new Date(p.get("at")) : null;
+    if (at && !isNaN(at.getTime())) booked.at = at.toISOString();
+    var id = (p.get("id") || "").toLowerCase();
+    if (/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(id)) booked.id = id;
+    if (p.has("id") || p.has("m") || p.has("crm_vid")) {
+      p.delete("id");
+      p.delete("m");
+      p.delete("crm_vid");
+      window.history.replaceState(window.history.state, "", url.pathname + url.search + url.hash);
+    }
+  } catch (e) { /* an old browser keeps the address as it is; the page still works */ }
+  window.__bymBooked = booked;
+})();
+</script>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-PMH5L4HX');</script>
+<!-- End Google Tag Manager -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>You're booked | Boost Your Maps</title>
+<meta name="description" content="Your call with Boost Your Maps is booked. The calendar invite and the call link are on their way to your inbox.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-character-32.png">
+<link rel="icon" type="image/png" sizes="64x64" href="/assets/favicon-character-64.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gabarito:wght@500;600;700;800&amp;family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/styles.css?v=20261009-2">
+<script src="/assets/tracking.js?v=1" defer></script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "WebPage", "name": "You're booked", "publisher": {"@id": "https://www.boostyourmaps.com/#organization"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.boostyourmaps.com/"}, {"@type": "ListItem", "position": 2, "name": "Booked"}]}]}</script>
+</head>
+<body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PMH5L4HX"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<!-- ===== brand mascot asset ===== -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="mascot" viewBox="0 0 260 350">
+    <image href="/assets/mascot-460.webp" width="260" height="350" preserveAspectRatio="xMidYMid meet"/>
+  </symbol>
+</svg>
+<nav aria-label="Main navigation">
+  <div class="nav-in">
+    <a class="brand" href="/"><svg width="26" height="34" aria-hidden="true"><use href="#mascot" width="26" height="34"/></svg> Boost&nbsp;Your&nbsp;Maps</a>
+    <div class="nav-links">
+      <a class="plain" href="/about-us">About us</a>
+      <a class="plain" href="/services">Services</a>
+      <a class="plain" href="/pricing">Pricing</a>
+    </div>
+  </div>
+</nav>
+<div class="wrap"><nav class="breadcrumbs" aria-label="Breadcrumb"><ol><li><a href="/">Home</a></li><li aria-current="page">Booked</li></ol></nav></div>
+<main id="main-content" tabindex="-1">
+<section class="page-hero" style="padding-bottom:96px;">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span> Call booked</span>
+    <h1 style="margin-top:18px;max-width:820px;">You're booked.</h1>
+    <p class="lead" id="booked-when" style="color:var(--ink);" hidden></p>
+    <p class="lead">The calendar invite and the call link are on their way to your inbox.</p>
+    <p style="margin-top:30px;"><a class="tlink" href="/">Back to boostyourmaps.com</a></p>
+  </div>
+</section>
+</main>
+<footer>
+  <div class="wrap">
+    <a class="brand" href="/"><svg width="24" height="30" aria-hidden="true"><use href="#mascot" width="24" height="30"/></svg> Boost Your Maps</a>
+    <p>More local customers from Google Maps. © 2026 Impact Leads LLC.</p>
+    <p class="flinks"><a href="/pricing">Pricing</a> <a href="/privacy">Privacy Policy</a> <a href="/terms">Terms &amp; Conditions</a> <a href="/service-agreement">Service Agreement</a> <a href="/inquiry-form">Contact</a></p>
+  </div>
+</footer>
+<script>
+// The BYM CRM's booking pages (crm.boostyourmaps.com/book/...) send people
+// here after they book a call: /booked?type=<slug>&name=<booking type name>
+// &at=<ISO start>&id=<meeting uuid>&crm_vid=<visitor key>&m=<token>.
+// The script at the top of <head> has already checked every value, kept them
+// in window.__bymBooked, and taken id, m and crm_vid out of the address bar
+// before Tag Manager loaded. type, name and at stay, so a reload still shows
+// the time. Values are only ever written into the page as text.
+//
+// book_appointment goes to Tag Manager once per booking: the meeting id is the
+// CRM's own id for it, and this browser remembers the last 20 it has counted.
+// A visit with no id is not a booking and pushes nothing.
+//
+// Unlike the coaching site's /booked, there is no enhanced-conversions lookup
+// (the CRM's /api/book/match?m= answer with hashed email and phone): this
+// site's CSP allows connect-src 'self' only, so the CRM host is blocked, and
+// the token m is simply dropped.
+(function () {
+  "use strict";
+
+  var SEEN = "bym_booked";
+  var booked = window.__bymBooked || { type: "", name: "", at: "", id: "" };
+
+  // "Tuesday, October 13 at 1:30 pm", in the visitor's own time zone.
+  function describe(date) {
+    var parts = {};
+    new Intl.DateTimeFormat("en-US", {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true
+    }).formatToParts(date).forEach(function (part) { parts[part.type] = part.value; });
+    if (!parts.weekday || !parts.month || !parts.day || !parts.hour || !parts.minute || !parts.dayPeriod) return "";
+    return parts.weekday + ", " + parts.month + " " + parts.day + " at " + parts.hour + ":" + parts.minute + " " + parts.dayPeriod.toLowerCase();
+  }
+
+  // Without a usable name and time, only the general line shows.
+  if (booked.name && booked.at) {
+    try {
+      var when = describe(new Date(booked.at));
+      if (when) {
+        var line = document.getElementById("booked-when");
+        line.textContent = booked.name + " on " + when + " (your time).";
+        line.hidden = false;
+      }
+    } catch (e) { /* the general line is enough */ }
+  }
+
+  // Storage that cannot be read counts as empty, and storage that cannot be
+  // written is skipped: the booking is still pushed once on this visit.
+  function seenIds() {
+    try {
+      var stored = JSON.parse(window.localStorage.getItem(SEEN) || "[]");
+      if (Array.isArray(stored)) return stored.filter(function (x) { return typeof x === "string"; });
+    } catch (e) { /* blocked or broken storage */ }
+    return [];
+  }
+
+  if (booked.id) {
+    var seen = seenIds();
+    if (seen.indexOf(booked.id) === -1) {
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({ event: "book_appointment", booking_type: booked.type, meeting_id: booked.id });
+      seen.push(booked.id);
+      try { window.localStorage.setItem(SEEN, JSON.stringify(seen.slice(-20))); } catch (e) { /* fine */ }
+    }
+  }
+})();
+</script>
+</body>
+</html>
