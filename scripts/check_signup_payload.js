@@ -131,6 +131,68 @@ for (const locations of [0, 21, "abc", 1.5, "", null, undefined]) {
 }
 assert.equal(buildStartPayload(null, {}).error.field, null);
 
+// ---- POST /api/signup from the partner portal (partner_token) ---------------
+
+// Shaped as assets/signup.js posts it on /partners/signup#k=<key> when the
+// agency and its contact are known: no name or email, the portal key instead
+// of the agency slug.
+const PORTAL_BODY = {
+  plan: "partner",
+  partner: null,
+  partner_token: PORTAL_TOKEN,
+  first_name: "",
+  last_name: "",
+  email: "",
+  phone: "",
+  business_name: "Green Leaf Lawn",
+  website: "greenleaf.example.com",
+  locations: 2,
+  page_url: `https://www.boostyourmaps.com/partners/signup?utm_source=portal#k=${PORTAL_TOKEN}`,
+  hp_field_2026: "",
+};
+assert.deepEqual(buildStartPayload(PORTAL_BODY, HEADERS), {
+  payload: {
+    plan: "partner",
+    partnerToken: PORTAL_TOKEN,
+    phone: null,
+    businessName: "Green Leaf Lawn",
+    websiteUrl: "https://greenleaf.example.com/",
+    quantity: 2,
+    sourceUrl: "https://www.boostyourmaps.com/partners/signup?utm_source=portal", // never the #k= key
+    utm: { utm_source: "portal" },
+    clientIp: "198.51.100.23",
+    userAgent: HEADERS["user-agent"],
+  },
+});
+// Every page address goes without its fragment.
+assert.equal(buildStartPayload({ ...US_BODY, page_url: "https://www.boostyourmaps.com/get-started#top" }, {}).payload.sourceUrl, "https://www.boostyourmaps.com/get-started");
+
+// No contact on file: the page asks, and the person goes along with the key.
+const asked = buildStartPayload({ ...PORTAL_BODY, first_name: "Sam", last_name: "Lee", email: "sam@acme.example" }, {}).payload;
+assert.equal(asked.partnerToken, PORTAL_TOKEN);
+assert.equal("partner" in asked, false);
+assert.deepEqual([asked.firstName, asked.lastName, asked.email], ["Sam", "Lee", "sam@acme.example"]);
+// Once any of them is typed, the usual checks apply.
+assert.equal(buildStartPayload({ ...PORTAL_BODY, email: "sam@acme.example" }, {}).error.field, "firstName");
+assert.equal(buildStartPayload({ ...PORTAL_BODY, first_name: "Sam" }, {}).error.field, "email");
+assert.equal(buildStartPayload({ ...PORTAL_BODY, last_name: "Lee" }, {}).error.field, "firstName");
+// The key wins over a slug; a malformed key is refused before anything is sent.
+const both = buildStartPayload({ ...PORTAL_BODY, partner: "keepers-digital" }, {}).payload;
+assert.equal(both.partnerToken, PORTAL_TOKEN);
+assert.equal("partner" in both, false);
+for (const bad of [PORTAL_TOKEN.toUpperCase(), PORTAL_TOKEN.slice(1), `${PORTAL_TOKEN}a`, "k".repeat(64), "../"]) {
+  assert.equal(buildStartPayload({ ...PORTAL_BODY, partner_token: bad }, {}).error.field, "partnerToken", `token ${bad}`);
+}
+// A blank key falls back to the dropdown's slug, and a key on a direct plan is dropped.
+assert.equal(buildStartPayload({ ...PORTAL_BODY, partner_token: "  ", partner: "keepers-digital", first_name: "Sam", email: "sam@acme.example" }, {}).payload.partner, "keepers-digital");
+assert.equal(buildStartPayload({ ...PORTAL_BODY, partner_token: " ", partner: "" }, {}).error.field, "partner");
+const direct = buildStartPayload({ ...US_BODY, partner_token: PORTAL_TOKEN }, {}).payload;
+assert.equal("partnerToken" in direct, false);
+assert.equal(direct.partner, null);
+assert.equal(direct.firstName, "Ana");
+// Without a key the name and email are still required on every plan.
+assert.equal(buildStartPayload({ ...PORTAL_BODY, partner_token: "", partner: "keepers-digital" }, {}).error.field, "firstName");
+
 // ---- POST /api/signup/{token}/intake ---------------------------------------
 
 const INTAKE_BODY = {
@@ -250,12 +312,23 @@ assert.deepEqual(
     partnerSlug: "keepers-digital",
     reportingDashboardUrl: null,
     bookingUrl: "https://crm.boostyourmaps.com/book/partner-call",
+    contact: null,
     clients: [
       { name: "Ruiz Pest Control", city: "Austin, TX", locations: 1, stage: "live", since: "2026-10-09", links: { deliverables: "https://docs.google.com/x", photos: null, dashboard: null } },
       { name: "Odd", city: null, locations: null, stage: null, since: null, links: { deliverables: null, photos: null, dashboard: null } },
     ],
   }
 );
+
+// The agency's primary contact: { name, email } with a real email, else null.
+const contactOf = (contact) => shapePortal({ partnerName: "Keepers Digital Marketing", contact }).contact;
+assert.deepEqual(contactOf({ name: "Sean Grabowski", email: "sean@keepers.example", phone: "+15125550100" }), { name: "Sean Grabowski", email: "sean@keepers.example" });
+assert.deepEqual(contactOf({ name: "  ", email: "sean@keepers.example" }), { name: null, email: "sean@keepers.example" });
+assert.equal(contactOf({ name: "Sean", email: "not-an-email" }), null);
+assert.equal(contactOf(null), null);
+assert.equal(contactOf(undefined), null);
+assert.equal(contactOf("sean@keepers.example"), null);
+assert.equal(contactOf({ name: "n".repeat(200), email: "sean@keepers.example" }).name.length, 120);
 
 assert.deepEqual(shapePartners({ partners: [{ slug: "keepers-digital", name: "Keepers Digital Marketing", secret: 1 }, { slug: "Bad Slug", name: "x" }, { slug: "no-name", name: "" }] }), [
   { slug: "keepers-digital", name: "Keepers Digital Marketing" },
@@ -431,9 +504,9 @@ const OK_SIGNUP = {
   assert.deepEqual(r.body, { ok: false, error: "invalid_input", field: "profileLinks" });
 
   // Portal: POST { k } -> GET /api/partners/portal/{k}.
-  r = await run(portalFn, { body: { k: PORTAL_TOKEN }, crm: { status: 200, body: { ok: true, portal: { partnerName: "Keepers Digital Marketing", partnerSlug: "keepers-digital", reportingDashboardUrl: null, bookingUrl: null, clients: [] } } } });
+  r = await run(portalFn, { body: { k: PORTAL_TOKEN }, crm: { status: 200, body: { ok: true, portal: { partnerName: "Keepers Digital Marketing", partnerSlug: "keepers-digital", reportingDashboardUrl: null, bookingUrl: null, contact: { name: "Sean Grabowski", email: "sean@keepers.example" }, clients: [] } } } });
   assert.equal(r.status, 200);
-  assert.deepEqual(r.body, { ok: true, portal: { partnerName: "Keepers Digital Marketing", partnerSlug: "keepers-digital", reportingDashboardUrl: null, bookingUrl: null, clients: [] } });
+  assert.deepEqual(r.body, { ok: true, portal: { partnerName: "Keepers Digital Marketing", partnerSlug: "keepers-digital", reportingDashboardUrl: null, bookingUrl: null, contact: { name: "Sean Grabowski", email: "sean@keepers.example" }, clients: [] } });
   assert.equal(r.call.url, `${CRM_HOST}/api/partners/portal/${PORTAL_TOKEN}`);
   assert.equal(r.call.init.method, "GET");
   r = await run(portalFn, { body: { k: "short" } });
@@ -442,6 +515,25 @@ const OK_SIGNUP = {
   assert.equal(r.sent, 0);
   r = await run(portalFn, { body: { k: PORTAL_TOKEN }, crm: { status: 404, body: { ok: false, error: "portal_not_found", field: null } } });
   assert.equal(r.status, 404);
+
+  // Start from the portal: the CRM gets partnerToken and no person; its
+  // refusal for a missing contact points the page at the name or email.
+  r = await run(startFn, { body: PORTAL_BODY, crm: { status: 200, body: { ok: true, checkoutUrl: "https://checkout.stripe.com/c/pay/cs_test_456" } } });
+  assert.equal(r.status, 200);
+  assert.deepEqual(JSON.parse(r.call.init.body), buildStartPayload(PORTAL_BODY, HEADERS).payload);
+  assert.ok(!r.call.init.body.includes("#k="));
+  for (const field of ["firstName", "email"]) {
+    r = await run(startFn, { body: PORTAL_BODY, crm: { status: 400, body: { ok: false, error: "invalid_input", field } } });
+    assert.equal(r.status, 400);
+    assert.deepEqual(r.body, { ok: false, error: "invalid_input", field });
+  }
+  r = await run(startFn, { body: PORTAL_BODY, crm: { status: 400, body: { ok: false, error: "partner_unknown", field: null } } });
+  assert.deepEqual(r.body, { ok: false, error: "partner_unknown", field: null });
+  r = await run(startFn, { body: { ...PORTAL_BODY, partner_token: "nope" } });
+  assert.deepEqual(r.body, { ok: false, error: "invalid_input", field: "partnerToken" });
+  assert.equal(r.sent, 0);
+  r = await run(startFn, { body: PORTAL_BODY, crm: new TypeError(`fetch failed for ${CRM_HOST}/api/signup ${PORTAL_TOKEN}`) });
+  assert.equal(r.status, 503);
 
   // Nothing submitted and no token ever reaches the logs.
   assert.ok(allLogs.length > 0, "failures should be logged");
