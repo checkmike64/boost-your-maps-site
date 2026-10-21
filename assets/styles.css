@@ -325,6 +325,9 @@ p{font-size:1.05rem;}
 .su-summary .micro{margin-top:16px;}
 .su-form-h{font-size:1.22rem;margin-top:12px;}
 .su-form-h:first-of-type{margin-top:0;}
+.su-agency-line{font-size:1.05rem;}
+.su-agency-line strong{font-family:'Gabarito',sans-serif;font-weight:700;}
+[data-agency-known] p+p{margin-top:2px;}
 .vform select{appearance:auto;min-height:48px;}
 .su-help{margin-top:6px;color:var(--muted);font-size:.9rem;}
 .su-help a,.su-note a{color:inherit;text-underline-offset:3px;}

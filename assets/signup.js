@@ -173,21 +173,120 @@
       }
     });
 
-    if (partnerSelect) loadPartners(form, partnerSelect, button);
+    // ---- an agency coming from its portal: /partners/signup#k=<portal key> ----
+    // The key says who the agency is, and the CRM signs the client up in the
+    // name of the agency's contact, so the dropdown and (when there is a
+    // contact) the name and email fields go away. The key stays in the hash
+    // (an inline <head> script moves ?k= there before analytics) and only
+    // travels in POST bodies.
+    var agencyKnown = form.querySelector("[data-agency-known]");
+    var agencyLine = form.querySelector("[data-agency-line]");
+    var agencyReset = form.querySelector("[data-agency-reset]");
+    var partnerField = form.querySelector("[data-partner-field]");
+    var partnerNote = form.querySelector("[data-partner-note]");
+    var personFields = form.querySelectorAll("[data-person-field]");
+    var portalKey = null;
+    var portalAgency = null;
+    var contactKnown = false;
+    var BAD_KEY = "We couldn't open your partner link, so please pick your agency below.";
+
+    function keyFromUrl() {
+      var match = window.location.hash.match(/(?:^#|&)k=([^&]*)/);
+      try { return match ? decodeURIComponent(match[1]) : ""; } catch (e) { return ""; }
+    }
+
+    function clearKeyFromUrl() {
+      try { window.history.replaceState(window.history.state, "", window.location.pathname + window.location.search); } catch (e) { /* fine */ }
+    }
+
+    // The agency contact's name and email, asked for or not.
+    function showPerson(show) {
+      personFields.forEach(function (holder) {
+        holder.hidden = !show;
+        holder.querySelectorAll("input").forEach(function (input) {
+          if (input.name === "first_name" || input.name === "email") input.required = show;
+          if (!show) input.value = "";
+        });
+      });
+    }
+
+    function useAgency(portal, key) {
+      portalKey = key;
+      portalAgency = portal;
+      contactKnown = Boolean(portal.contact);
+      partnerField.hidden = true;
+      partnerSelect.required = false;
+      partnerNote.hidden = true;
+      agencyLine.textContent = "Signing up a client for ";
+      var strong = document.createElement("strong");
+      strong.textContent = portal.partnerName;
+      agencyLine.appendChild(strong);
+      var who = portal.contact ? (portal.contact.name ? portal.contact.name + " (" + portal.contact.email + ")" : portal.contact.email) : "";
+      agencyLine.appendChild(document.createTextNode(who ? " as " + who + "." : "."));
+      agencyReset.textContent = portal.contact ? "Not you? Use the regular form" : "Not " + portal.partnerName + "? Use the regular form";
+      agencyReset.hidden = false;
+      agencyKnown.hidden = false;
+      showPerson(!contactKnown);
+      button.disabled = false;
+    }
+
+    function useRegularForm(note, clearKey) {
+      portalKey = null;
+      portalAgency = null;
+      contactKnown = false;
+      if (clearKey) clearKeyFromUrl();
+      agencyKnown.hidden = true;
+      partnerField.hidden = false;
+      partnerSelect.required = true;
+      partnerNote.textContent = note || "";
+      partnerNote.hidden = !note;
+      showPerson(true);
+      button.disabled = false;
+      return loadPartners(form, partnerSelect, button);
+    }
+
+    async function startFromPortal(key) {
+      partnerField.hidden = true;
+      showPerson(false);
+      agencyLine.textContent = "Loading your agency…";
+      agencyReset.hidden = true;
+      agencyKnown.hidden = false;
+      button.disabled = true;
+      if (!TOKEN.test(key)) return useRegularForm(BAD_KEY, true);
+      var result = await call("POST", "/api/partner-portal", { k: key });
+      var portal = result.status === 200 && result.data.ok === true ? result.data.portal : null;
+      if (portal && portal.partnerName) return useAgency(portal, key);
+      // An unknown or turned-off key is dropped; after any other failure it
+      // stays in the address so a reload tries again.
+      if (result.status === 404) return useRegularForm(BAD_KEY, true);
+      return useRegularForm("We couldn't load your partner link just now, so please pick your agency below.", false);
+    }
+
+    if (partnerSelect) {
+      agencyReset.addEventListener("click", async function () {
+        clearFieldErrors(form);
+        hideStatus(status);
+        await useRegularForm("", true);
+        if (!partnerSelect.disabled) partnerSelect.focus();
+      });
+      var startKey = keyFromUrl();
+      if (startKey) startFromPortal(startKey); else loadPartners(form, partnerSelect, button);
+    }
 
     form.addEventListener("submit", async function (event) {
       event.preventDefault();
       clearFieldErrors(form);
       hideStatus(status);
 
-      if (partnerSelect && partnerSelect.disabled) {
+      if (partnerSelect && !portalKey && partnerSelect.disabled) {
         showStatus(status, "error", "Ask your Boost Your Maps contact for your signup link.");
         return;
       }
+      var askPerson = !contactKnown;
       var checks = [
-        [partnerSelect && !partnerSelect.value, "partner"],
-        [!value(form, "first_name"), "firstName"],
-        [!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value(form, "email")), "email"],
+        [partnerSelect && !portalKey && !partnerSelect.value, "partner"],
+        [askPerson && !value(form, "first_name"), "firstName"],
+        [askPerson && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value(form, "email")), "email"],
         [!value(form, "business_name"), "businessName"]
       ];
       for (var i = 0; i < checks.length; i++) {
@@ -205,15 +304,17 @@
 
       var result = await call("POST", "/api/signup/start", {
         plan: plan,
-        partner: partnerSelect ? partnerSelect.value : null,
-        first_name: value(form, "first_name"),
-        last_name: value(form, "last_name"),
-        email: value(form, "email"),
+        partner: partnerSelect && !portalKey ? partnerSelect.value : null,
+        partner_token: portalKey || "",
+        first_name: askPerson ? value(form, "first_name") : "",
+        last_name: askPerson ? value(form, "last_name") : "",
+        email: askPerson ? value(form, "email") : "",
         phone: value(form, "phone"),
         business_name: value(form, "business_name"),
         website: value(form, "website"),
         locations: Number(select.value) || 1,
-        page_url: window.location.href,
+        // Never the hash: on this page it can hold the portal key.
+        page_url: window.location.href.split("#")[0],
         hp_field_2026: value(form, "hp_field_2026")
       });
 
@@ -227,7 +328,16 @@
       var error = result.data.error;
       pushEvent({ event: "signup_error", form_id: form.id, error_type: error || String(result.status) });
 
-      if (error === "invalid_input" && START_FIELDS[result.data.field]) {
+      var personField = /^(firstName|lastName|email)$/.test(result.data.field || "");
+      if (portalKey && contactKnown && error === "invalid_input" && personField) {
+        // The CRM has no contact for this agency after all: ask once, and the
+        // CRM links this person to the agency for next time.
+        useAgency({ partnerName: portalAgency.partnerName, contact: null }, portalKey);
+        markField(fieldEl(form, START_FIELDS[result.data.field][0]), START_FIELDS[result.data.field][1]);
+      } else if (portalKey && (error === "partner_unknown" || error === "portal_not_found" || result.data.field === "partnerToken")) {
+        await useRegularForm(BAD_KEY, true);
+        if (!partnerSelect.disabled) partnerSelect.focus();
+      } else if (error === "invalid_input" && START_FIELDS[result.data.field]) {
         var field = START_FIELDS[result.data.field];
         markField(fieldEl(form, field[0]), field[1]);
       } else if (error === "partner_unknown" && partnerSelect) {
