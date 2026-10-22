@@ -1,0 +1,37 @@
+{
+  "snapshot_id": "3b6f4b5d-86ae-4de4-a17b-a78cd1c5cdd6",
+  "query": "pest control Tampa FL",
+  "run_at": "2026-09-27",
+  "source": "Outscraper maps/search-v3, limit 3",
+  "location": {
+    "label": "downtown Tampa",
+    "lat": 27.9475,
+    "lng": -82.4584
+  },
+  "results": [
+    {
+      "name": "Terminix",
+      "type": "Pest control service",
+      "rating": 4.7,
+      "reviews": 3005,
+      "place_id": "ChIJMcaPjfrFwogRrQtFGlAUexg",
+      "location_link": "https://www.google.com/maps/place/Terminix/@27.985552199999997,-82.3975449,14z/data=!4m8!1m2!2m1!1sTerminix!3m4!1s0x88c2c5fa8d8fc631:0x187b14501a450bad!8m2!3d27.985552199999997!4d-82.3975449"
+    },
+    {
+      "name": "Tri-S Pest Control",
+      "type": "Pest control service",
+      "rating": 4.8,
+      "reviews": 415,
+      "place_id": "ChIJ_dCTUcjGwogRSZe1yMw3uaU",
+      "location_link": "https://www.google.com/maps/place/Tri-S+Pest+Control/@28.0250852,-82.4668351,14z/data=!4m8!1m2!2m1!1sTri-S+Pest+Control!3m4!1s0x88c2c6c85193d0fd:0xa5b937ccc8b59749!8m2!3d28.0250852!4d-82.4668351"
+    },
+    {
+      "name": "Chet's Termite & Pest Management, Inc.",
+      "type": "Pest control service",
+      "rating": 4.7,
+      "reviews": 986,
+      "place_id": "ChIJUyhRCzbBwogR7QFJULhjXrg",
+      "location_link": "https://www.google.com/maps/place/Chet%27s+Termite+%26+Pest+Management%2C+Inc./@28.025042,-82.481053,14z/data=!4m8!1m2!2m1!1sChet%27s+Termite+%26+Pest+Management%2C+Inc.!3m4!1s0x88c2c1360b512853:0xb85e63b8504901ed!8m2!3d28.025042!4d-82.481053"
+    }
+  ]
+}
