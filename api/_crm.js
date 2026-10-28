@@ -1,7 +1,6 @@
 // BYM CRM side of a form submission: posts it to the CRM's public forms API,
-// POST ${CRM_URL}/api/forms/<slug>, next to the GoHighLevel upsert in
-// api/_ghl.js (api/_lead.js runs both). Server to server, so the site's CSP
-// does not apply. With CRM_URL unset, nothing here runs.
+// POST ${CRM_URL}/api/forms/<slug> (api/_lead.js runs it). Server to server,
+// so the site's CSP does not apply. With CRM_URL unset, nothing here runs.
 //
 // The CRM refuses a whole submission over one value it cannot take, so each
 // value is shaped here to what its forms API accepts: a name (120 characters),
@@ -58,7 +57,7 @@ function cut(value, max) {
 // The CRM keeps phones in E.164. BYM serves the US and Canada, which share +1,
 // so once punctuation is gone a 10-digit number gets +1 and an 11-digit one
 // starting with 1 gets +. A number typed with + must be +<8-15 digits>.
-// Anything else is sent as null; GHL gets the number as typed.
+// Anything else is sent as null.
 function e164(value) {
   const phone = text(value).replace(/[\s().\- ]/g, "");
   if (phone.startsWith("+")) return /^\+[0-9]{8,15}$/.test(phone) ? phone : null;
@@ -120,7 +119,7 @@ function userAgentFrom(headers) {
 
 // The JSON body the CRM receives for one submission (the body forms.js posts,
 // plus the request headers), or null when there is no email to file it under:
-// the CRM needs one, while GHL can still take a phone-only lead.
+// the CRM needs one.
 function buildCrmPayload(body, headers) {
   const fields = (body && body.fields) || {};
   const email = text(fields.email);
@@ -141,8 +140,8 @@ function buildCrmPayload(body, headers) {
 }
 
 // Posts one submission. Resolves { ok: true } only when the CRM answered that
-// it stored the lead, and never throws. Failures are logged as "BYM CRM ..." so
-// they read apart from GHL's; no submitted value is logged.
+// it stored the lead, and never throws. Failures are logged as "BYM CRM ...";
+// no submitted value is logged.
 async function sendToCrm(form, body, headers) {
   const slug = crmSlug(form);
   try {

@@ -2,7 +2,7 @@
 
 **Status:** The website uses the approved Style A design (locked 2026-08-04) and is
 a no-build static HTML site. The two full-page forms post to the site's own API, which
-sends each lead to GoHighLevel and, once `CRM_URL` is set, to the BYM CRM as well.
+sends each lead to the BYM CRM (`CRM_URL`).
 Before production launch, verify real submissions persist, then push this workspace
 to GitHub and deploy it on Vercel.
 
@@ -61,7 +61,7 @@ Every future push to `main` then auto-redeploys.
   At domain switch, add both `boostyourmaps.com` and `www.boostyourmaps.com` in Vercel
   (Vercel 308s apex → www). Full domain checklist is in `README.md`.
 - Forms are native HTML + JavaScript posting to `/api/visibility-report` and `/api/inquiry`.
-  Each lead goes to GoHighLevel and, once `CRM_URL` is set in Vercel, to the BYM CRM too
+  Each lead goes to the BYM CRM at `CRM_URL`
   (`CRM_FORM_VISIBILITY_REPORT` / `CRM_FORM_INQUIRY` can change its form slugs). See `README.md`.
 - Design law is `DESIGN.md`; repo workflow is `CLAUDE.md`. Do NOT redesign — this is locked.
 - The two homepage proof-card quotes and the mascot 3D render are owner placeholders.

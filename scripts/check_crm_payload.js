@@ -1,5 +1,5 @@
 // Checks what the BYM CRM receives from the site's two lead forms
-// (api/_crm.js) and the either-one rule the two endpoints share (api/_lead.js).
+// (api/_crm.js) and how the two endpoints answer (api/_lead.js).
 // fetch is replaced by a stub, so nothing touches the network.
 // Run: node scripts/check_crm_payload.js
 "use strict";
@@ -138,51 +138,30 @@ assert.equal(buildCrmPayload({ fields: { phone: "+18135550142" } }, {}), null);
 assert.equal(buildCrmPayload({ fields: { email: "not-an-email" } }, {}), null);
 assert.equal(buildCrmPayload(null, {}), null);
 
-// ---- Both destinations, through the two endpoints --------------------------
+// ---- The two endpoints ------------------------------------------------------
 
-const GHL_HOST = "https://services.leadconnectorhq.com";
 const CRM_HOST = "https://crm.example.test";
-const GHL_ENV = { GHL_API_TOKEN: "test-token", GHL_LOCATION_ID: "test-location" };
-const BOTH_ENV = { ...GHL_ENV, CRM_URL: `${CRM_HOST}/` };
+const CRM_ENV = { CRM_URL: `${CRM_HOST}/` };
 
-// What GoHighLevel has always received for the visibility report body above.
-const GHL_VISIBILITY_REPORT = {
-  locationId: "test-location",
-  email: "dana@example.com",
-  phone: "+1 (813) 555-0142",
-  firstName: "Dana",
-  lastName: "Reyes",
-  companyName: " Bay Pest Co ",
-  website: "https://baypest.example.com",
-  source: "Website - Visibility Report",
-  tags: ["rank report"],
-  customFields: [
-    { key: "top_service_to_grow", field_value: "pest control" },
-    { key: "target_location", field_value: "Tampa, FL" },
-  ],
-};
-
-const GHL_OK = { status: 200, body: { contact: { id: "ghl-contact-1" } } };
-const GHL_DOWN = { status: 500, body: { message: "Internal Server Error" } };
 const CRM_OK = { status: 200, body: { ok: true, result: { redirectUrl: null, eventId: "8d5c6f1e-2b1a-4c3d-9e8f-0a1b2c3d4e5f" } } };
 const CRM_REFUSED = { status: 400, body: { ok: false, error: "form_answer_rejected", fieldKey: "active_marketing" } };
 
-let replies = {};
+let reply = null;
 let calls = [];
 global.fetch = async (url, init) => {
   calls.push({ url: String(url), init });
-  const reply = String(url).startsWith(GHL_HOST) ? replies.ghl : replies.crm;
   if (reply instanceof Error) throw reply;
   const body = typeof reply.body === "string" ? reply.body : JSON.stringify(reply.body);
   return new Response(body, { status: reply.status });
 };
 
-const ENV_KEYS = ["GHL_API_TOKEN", "GHL_LOCATION_ID", "CRM_URL", "CRM_FORM_VISIBILITY_REPORT", "CRM_FORM_INQUIRY"];
+// GHL_* are cleared too, so a value left in Vercel is shown to change nothing.
+const ENV_KEYS = ["CRM_URL", "CRM_FORM_VISIBILITY_REPORT", "CRM_FORM_INQUIRY", "GHL_API_TOKEN", "GHL_LOCATION_ID"];
 
-async function run({ env, ghl, crm, body = VISIBILITY_REPORT, endpoint = visibilityReport, method = "POST" }) {
+async function run({ env, crm, body = VISIBILITY_REPORT, endpoint = visibilityReport, method = "POST" }) {
   for (const key of ENV_KEYS) delete process.env[key];
   Object.assign(process.env, env);
-  replies = { ghl, crm };
+  reply = crm;
   calls = [];
   const logs = [];
   const res = { statusCode: 0, body: null, headers: {} };
@@ -196,104 +175,87 @@ async function run({ env, ghl, crm, body = VISIBILITY_REPORT, endpoint = visibil
   } finally {
     console.error = consoleError;
   }
-  const crmCall = calls.find((call) => call.url.startsWith(CRM_HOST));
-  const ghlCall = calls.find((call) => call.url.startsWith(GHL_HOST));
-  return { status: res.statusCode, body: res.body, logs, crmCall, ghlCall, sent: calls.length };
+  // Every request goes to the CRM and nowhere else.
+  for (const call of calls) assert.ok(call.url.startsWith(CRM_HOST), `unexpected request to ${call.url}`);
+  return { status: res.statusCode, body: res.body, logs, crmCall: calls[0], sent: calls.length };
 }
 
 const logged = (logs, start) => logs.some((line) => line.startsWith(start));
 
 (async () => {
-  // CRM_URL unset: GHL alone, exactly as before, with no time limit on GHL.
-  let r = await run({ env: GHL_ENV, ghl: GHL_OK });
+  // The CRM gets the payload built above, at the form's slug, once.
+  let r = await run({ env: CRM_ENV, crm: CRM_OK });
   assert.equal(r.status, 200);
-  assert.deepEqual(r.body, { ok: true, contactId: "ghl-contact-1" });
+  assert.deepEqual(r.body, { ok: true });
   assert.equal(r.sent, 1);
-  assert.equal(r.ghlCall.url, `${GHL_HOST}/contacts/upsert`);
-  assert.deepEqual(JSON.parse(r.ghlCall.init.body), GHL_VISIBILITY_REPORT);
-  assert.equal(r.ghlCall.init.headers.Authorization, "Bearer test-token");
-  assert.equal(r.ghlCall.init.signal, undefined);
-
-  r = await run({ env: GHL_ENV, ghl: GHL_DOWN });
-  assert.equal(r.status, 502);
-  assert.deepEqual(r.body, { error: "CRM submission failed" });
-
-  // Both on: the CRM gets the payload built above, at the form's slug.
-  r = await run({ env: BOTH_ENV, ghl: GHL_OK, crm: CRM_OK });
-  assert.equal(r.status, 200);
-  assert.deepEqual(r.body, { ok: true, contactId: "ghl-contact-1" });
   assert.equal(r.crmCall.url, `${CRM_HOST}/api/forms/visibility-report`);
   assert.deepEqual(JSON.parse(r.crmCall.init.body), buildCrmPayload(VISIBILITY_REPORT, HEADERS));
   assert.equal(r.crmCall.init.headers["X-Forwarded-For"], "203.0.113.7");
   assert.ok(r.crmCall.init.signal instanceof AbortSignal);
-  assert.deepEqual(JSON.parse(r.ghlCall.init.body), GHL_VISIBILITY_REPORT);
-  assert.ok(r.ghlCall.init.signal instanceof AbortSignal);
   assert.deepEqual(r.logs, []);
 
-  // Either one storing the lead is a success; each failure is logged apart.
-  r = await run({ env: BOTH_ENV, ghl: GHL_DOWN, crm: CRM_OK });
+  // GoHighLevel is gone: its old env vars, if still set, send nothing anywhere.
+  r = await run({ env: { ...CRM_ENV, GHL_API_TOKEN: "old-token", GHL_LOCATION_ID: "old-location" }, crm: CRM_OK });
   assert.equal(r.status, 200);
-  assert.deepEqual(r.body, { ok: true });
-  assert.ok(logged(r.logs, "GHL upsert failed 500"));
+  assert.equal(r.sent, 1);
 
-  r = await run({ env: BOTH_ENV, ghl: GHL_OK, crm: CRM_REFUSED });
-  assert.equal(r.status, 200);
-  assert.ok(logged(r.logs, 'BYM CRM submission failed visibility-report 400 {"ok":false,"error":"form_answer_rejected","fieldKey":"active_marketing"}'));
-
-  r = await run({ env: BOTH_ENV, ghl: GHL_DOWN, crm: new TypeError("fetch failed") });
+  // The visitor sees success only when the CRM stored the lead.
+  r = await run({ env: CRM_ENV, crm: CRM_REFUSED });
   assert.equal(r.status, 502);
   assert.deepEqual(r.body, { error: "CRM submission failed" });
-  assert.ok(logged(r.logs, "GHL upsert failed"));
+  assert.ok(logged(r.logs, 'BYM CRM submission failed visibility-report 400 {"ok":false,"error":"form_answer_rejected","fieldKey":"active_marketing"}'));
+
+  r = await run({ env: CRM_ENV, crm: new TypeError("fetch failed") });
+  assert.equal(r.status, 502);
   assert.ok(logged(r.logs, "BYM CRM submission error visibility-report fetch failed"));
 
   // A 200 that is not the CRM saying ok (say, a wrong CRM_URL) is no success.
-  r = await run({ env: BOTH_ENV, ghl: GHL_DOWN, crm: { status: 200, body: "<html>Not the CRM</html>" } });
+  r = await run({ env: CRM_ENV, crm: { status: 200, body: "<html>Not the CRM</html>" } });
   assert.equal(r.status, 502);
-  r = await run({ env: BOTH_ENV, ghl: GHL_DOWN, crm: { status: 200, body: { status: "received" } } });
+  r = await run({ env: CRM_ENV, crm: { status: 200, body: { status: "received" } } });
   assert.equal(r.status, 502);
   assert.ok(logged(r.logs, 'BYM CRM submission failed visibility-report 200 {"status":"received"}'));
 
-  // GHL not configured: the CRM alone decides.
-  r = await run({ env: { CRM_URL: CRM_HOST }, crm: CRM_OK });
-  assert.equal(r.status, 200);
-  assert.equal(r.sent, 1);
-  assert.ok(logged(r.logs, "Missing GHL_API_TOKEN or GHL_LOCATION_ID env var"));
-
-  // Nothing configured: the same 500 as before, nothing sent.
+  // CRM_URL unset: a 500 and nothing sent.
   r = await run({ env: {} });
   assert.equal(r.status, 500);
   assert.deepEqual(r.body, { error: "Server is not configured" });
   assert.equal(r.sent, 0);
+  assert.ok(logged(r.logs, "Missing CRM_URL env var"));
 
-  // The inquiry form, with its CRM slug renamed in Vercel.
-  r = await run({ env: BOTH_ENV, ghl: GHL_OK, crm: CRM_OK, body: INQUIRY, endpoint: inquiry });
+  // The inquiry form, and each form's CRM slug renamed in Vercel.
+  r = await run({ env: CRM_ENV, crm: CRM_OK, body: INQUIRY, endpoint: inquiry });
   assert.equal(r.status, 200);
   assert.equal(r.crmCall.url, `${CRM_HOST}/api/forms/inquiry`);
   assert.deepEqual(JSON.parse(r.crmCall.init.body), buildCrmPayload(INQUIRY, HEADERS));
-  assert.deepEqual(JSON.parse(r.ghlCall.init.body).tags, ["inquiry"]);
-  assert.equal(JSON.parse(r.ghlCall.init.body).source, "Website - Contact Form");
 
-  r = await run({ env: { ...BOTH_ENV, CRM_FORM_INQUIRY: "website-inquiry" }, ghl: GHL_OK, crm: CRM_OK, body: INQUIRY, endpoint: inquiry });
+  r = await run({ env: { ...CRM_ENV, CRM_FORM_INQUIRY: "website-inquiry" }, crm: CRM_OK, body: INQUIRY, endpoint: inquiry });
   assert.equal(r.crmCall.url, `${CRM_HOST}/api/forms/website-inquiry`);
-  r = await run({ env: { ...BOTH_ENV, CRM_FORM_VISIBILITY_REPORT: "free-report" }, ghl: GHL_OK, crm: CRM_OK });
+  r = await run({ env: { ...CRM_ENV, CRM_FORM_VISIBILITY_REPORT: "free-report" }, crm: CRM_OK });
   assert.equal(r.crmCall.url, `${CRM_HOST}/api/forms/free-report`);
 
-  // A phone-only lead (only possible past the browser's own checks) still
-  // reaches GHL; the CRM, which needs an email, is skipped and that is logged.
-  r = await run({ env: BOTH_ENV, ghl: GHL_OK, crm: CRM_OK, body: { fields: { phone: "+18135550142" } } });
-  assert.equal(r.status, 200);
-  assert.equal(r.sent, 1);
+  // The CRM files every lead under an email, so a lead without one (only
+  // possible past the browser's own checks) is refused before anything is sent.
+  r = await run({ env: CRM_ENV, crm: CRM_OK, body: { fields: { phone: "+18135550142" } } });
+  assert.equal(r.status, 400);
+  assert.deepEqual(r.body, { error: "Email is required" });
+  assert.equal(r.sent, 0);
+
+  // A typed email the CRM cannot take is skipped by api/_crm.js and logged.
+  r = await run({ env: CRM_ENV, crm: CRM_OK, body: { fields: { email: "not-an-email" } } });
+  assert.equal(r.status, 502);
+  assert.equal(r.sent, 0);
   assert.ok(logged(r.logs, "BYM CRM submission skipped: no valid email visibility-report"));
 
-  // The existing request checks are unchanged and send nothing.
-  r = await run({ env: BOTH_ENV, method: "GET" });
+  // The request checks send nothing.
+  r = await run({ env: CRM_ENV, method: "GET" });
   assert.equal(r.status, 405);
-  r = await run({ env: BOTH_ENV, body: "{not json" });
+  r = await run({ env: CRM_ENV, body: "{not json" });
   assert.equal(r.status, 400);
   assert.deepEqual(r.body, { error: "Invalid JSON" });
-  r = await run({ env: BOTH_ENV, body: { fields: { first_name: "Dana" } } });
+  r = await run({ env: CRM_ENV, body: { fields: { first_name: "Dana" } } });
   assert.equal(r.status, 400);
-  assert.deepEqual(r.body, { error: "Email or phone is required" });
+  assert.deepEqual(r.body, { error: "Email is required" });
   assert.equal(r.sent, 0);
 
   console.log("CRM payload and lead routing checks passed.");
