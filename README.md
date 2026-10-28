@@ -70,14 +70,21 @@ the nav or footer.
 - `/booked`: where the CRM's booking pages send someone who booked a call. Shows the call and
   its time, pushes `book_appointment` to Tag Manager once per meeting id, and takes the
   meeting id, token and visitor key out of the address before Tag Manager loads.
+- `/agreement#t=<token>`: the service agreement the CRM emails to a lead, with their details
+  filled in. They read it, sign with their typed name and go straight to Stripe to pay. Stripe
+  sends them back to `/agreement?paid=1#t=<token>` (the page waits for the payment to confirm)
+  or, on cancel, to `/agreement#t=<token>` ("Continue to payment"). Also sent with an
+  `X-Robots-Tag: noindex` header (`vercel.json`).
 
-The pages (`assets/signup.js`, `assets/portal.js`) only call this site's functions
-(`api/signup/*.js`, `api/partner-portal.js`, helpers in `api/_signup.js`), which call the
-BYM CRM's `/api/signup` and `/api/partners/portal` endpoints server to server, using the same
+The pages (`assets/signup.js`, `assets/portal.js`, `assets/agreement.js`) only call this
+site's functions (`api/signup/*.js`, `api/partner-portal.js`, `api/agreement/*.js`, helpers in
+`api/_signup.js` and `api/_agreement.js`), which call the BYM CRM's `/api/signup`,
+`/api/partners/portal` and `/api/agreements` endpoints server to server, using the same
 `CRM_URL` as the lead forms. Without it they answer 503 and the pages say to email the team.
-The welcome and portal tokens move from `?t=` / `?k=` into the URL hash before analytics loads
-and only travel inside POST bodies. `node scripts/check_signup_payload.js` checks what the CRM
-receives without touching the network; CI runs it.
+The welcome, portal and agreement tokens move from `?t=` / `?k=` into the URL hash before
+analytics loads and only travel inside POST bodies. `node scripts/check_signup_payload.js` and
+`node scripts/check_agreement_payload.js` check what the CRM receives without touching the
+network; CI runs both.
 
 ## Deploy (Vercel)
 
