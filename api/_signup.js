@@ -114,18 +114,31 @@ function buildStartPayload(body, headers) {
   const plan = text(body.plan);
   if (!PLANS.includes(plan)) return invalid("plan");
 
+  // An agency coming from its portal sends the portal key (partner_token)
+  // instead of picking itself from the dropdown. The CRM then knows the agency
+  // and, when it has a contact for it, who is signing up, so the name and
+  // email may be left out. A key on a direct plan is dropped, like a slug.
   let partner = null;
+  let partnerToken = null;
   if (plan === "partner") {
-    partner = text(body.partner);
-    if (!PARTNER_SLUG_PATTERN.test(partner)) return invalid("partner");
+    const typedToken = text(body.partner_token);
+    if (typedToken) {
+      if (!isToken(typedToken)) return invalid("partnerToken");
+      partnerToken = typedToken;
+    } else {
+      partner = text(body.partner);
+      if (!PARTNER_SLUG_PATTERN.test(partner)) return invalid("partner");
+    }
   }
 
   const firstName = cut(text(body.first_name), 120);
-  if (!firstName) return invalid("firstName");
   const lastName = cut(text(body.last_name), 120);
-
   const email = text(body.email);
-  if (!isEmail(email)) return invalid("email");
+  const personLeftOut = partnerToken !== null && !firstName && !lastName && !email;
+  if (!personLeftOut) {
+    if (!firstName) return invalid("firstName");
+    if (!isEmail(email)) return invalid("email");
+  }
 
   const typedPhone = text(body.phone);
   const phone = e164(typedPhone);
@@ -140,14 +153,15 @@ function buildStartPayload(body, headers) {
   const quantity = Number(text(String(body.locations ?? "")));
   if (!Number.isInteger(quantity) || quantity < 1 || quantity > MAX_LOCATIONS) return invalid("quantity");
 
+  // The page address goes without its fragment: on /partners/signup that is
+  // where the portal key lives (#k=), and it must never be stored.
   const pageUrl = pageUrlFrom(body.page_url);
+  if (pageUrl) pageUrl.hash = "";
   return {
     payload: {
       plan,
-      partner,
-      firstName,
-      lastName,
-      email,
+      ...(partnerToken ? { partnerToken } : { partner }),
+      ...(personLeftOut ? {} : { firstName, lastName, email }),
       phone,
       businessName,
       websiteUrl: website.value,
@@ -258,9 +272,13 @@ function shapeSignup(signup) {
 function shapePortal(portal) {
   const p = portal && typeof portal === "object" ? portal : {};
   const clients = Array.isArray(p.clients) ? p.clients : [];
+  const c = p.contact && typeof p.contact === "object" ? p.contact : null;
   return {
     partnerName: optionalText(p.partnerName, 200),
     partnerSlug: typeof p.partnerSlug === "string" && PARTNER_SLUG_PATTERN.test(p.partnerSlug) ? p.partnerSlug : null,
+    // The agency's primary contact, so a signup started from the portal need
+    // not ask who is signing up. null when nobody is linked yet.
+    contact: c && isEmail(c.email) ? { name: optionalText(c.name, 120), email: c.email } : null,
     reportingDashboardUrl: httpUrl(p.reportingDashboardUrl),
     bookingUrl: httpUrl(p.bookingUrl),
     clients: clients
