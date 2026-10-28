@@ -333,7 +333,7 @@
       ["Service", a.service],
       ["Locations", a.locations ? String(a.locations) : ""],
       ["Price per location", a.unitPrice],
-      ["Monthly total", a.totalPrice]
+      ["Total", a.totalPrice]
     ].filter(function (row) { return row[1]; });
     if (rows.length) {
       var order = el("div", "ag-order");
@@ -407,7 +407,7 @@
 
     if (a.status === "paid") {
       titleEl.textContent = "You're all set";
-      leadEl.textContent = "Your agreement is signed and paid. We'll email you about the next steps.";
+      leadEl.textContent = "Your agreement is signed and paid. We'll contact you about the next steps.";
     } else if (confirming) {
       titleEl.textContent = "Payment received";
       leadEl.textContent = confirmSlow ? "This is taking longer than usual." : "We're confirming it with Stripe now.";
