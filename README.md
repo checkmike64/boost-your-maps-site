@@ -1,6 +1,6 @@
 # Boost Your Maps — website
 
-Static multi-page site for **boostyourmaps.com**, designed to replace the current GoHighLevel pages. No build step: plain HTML + one shared stylesheet. Deploys as-is on Vercel (or any static host).
+Static multi-page site for **boostyourmaps.com**. No build step: plain HTML + one shared stylesheet. Deploys as-is on Vercel (or any static host).
 
 ## Structure
 
@@ -18,7 +18,7 @@ service-agreement.html     Client service agreement (existing content)
 assets/styles.css          The entire design system (see DESIGN.md for the rules)
 assets/forms.js            Native validation + API-ready JSON submission handling
 assets/favicon-character PNGs, Apple touch icon, og.png, icon-512.png, responsive mascot and report-sample WebP/AVIF files
-api/                       Form endpoints: each lead goes to GoHighLevel and the BYM CRM
+api/                       Form endpoints: each lead goes to the BYM CRM
 robots.txt                 Allows all search + AI crawlers, declares sitemap
 llms.txt                   AI-engine site overview (llmstxt.org format)
 pricing.txt                Machine-readable pricing for answer engines and agents
@@ -37,22 +37,18 @@ validation and shared submission handling in `assets/forms.js`. Each form sends 
 (`form_type`, `submitted_at`, `page_url`, and a `fields` object) to its `data-endpoint`,
 shows accessible loading/success/error states, and includes a spam honeypot.
 
-The endpoints, `/api/visibility-report` and `/api/inquiry`, send each lead to two places
-at the same time:
+The endpoints, `/api/visibility-report` and `/api/inquiry`, send each lead to the BYM CRM
+through its public forms API (`api/_crm.js`), at the address in the `CRM_URL` env var
+(`https://crm.boostyourmaps.com`). Leads go to the CRM forms `visibility-report` and
+`inquiry`; `CRM_FORM_VISIBILITY_REPORT` and `CRM_FORM_INQUIRY` change those slugs. The other
+form fields arrive as answers under their form names (`business_name`, `service`,
+`location`, `website`, `message`, `service_interest`, `active_marketing`), and the CRM keeps
+only the ones its form defines.
 
-- **GoHighLevel**, as a contact upsert tagged by form (`api/_ghl.js`; needs
-  `GHL_API_TOKEN` and `GHL_LOCATION_ID`).
-- **The BYM CRM**, through its public forms API (`api/_crm.js`), once `CRM_URL` is set in
-  Vercel (for example `https://crm.boostyourmaps.com`). Until then this step is skipped.
-  Leads go to the CRM forms `visibility-report` and `inquiry`; `CRM_FORM_VISIBILITY_REPORT`
-  and `CRM_FORM_INQUIRY` change those slugs. The other form fields arrive as answers under
-  their form names (`business_name`, `service`, `location`, `website`, `message`,
-  `service_interest`, `active_marketing`), and the CRM keeps only the ones its form defines.
-
-The visitor sees the success message when either one stores the lead, so nothing is lost
-while the CRM is new. Each side's failures are logged on their own (`GHL ...` or
-`BYM CRM ...`) in the Vercel function logs. `node scripts/check_crm_payload.js` checks what
-the CRM receives without touching the network; CI runs it.
+The visitor sees the success message only when the CRM stored the lead. Failures are
+logged as `BYM CRM ...` in the Vercel function logs. `node scripts/check_crm_payload.js`
+checks what the CRM receives without touching the network; CI runs it. GoHighLevel was
+removed on 2026-10-27: the site sends nothing to it.
 
 The two mini-forms on `index.html` are intentional teasers — they GET-submit to
 `/visibility-report?service=…&location=…`, which prefills the real form via the small

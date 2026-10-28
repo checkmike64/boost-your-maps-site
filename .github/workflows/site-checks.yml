@@ -18,7 +18,7 @@ jobs:
           python-version: "3.12"
       - name: Validate static site
         run: python3 scripts/validate_site.py
-      - name: Check lead form routing (GoHighLevel + BYM CRM)
+      - name: Check lead form routing (BYM CRM)
         run: node scripts/check_crm_payload.js
       - name: Check signup and partner portal functions (BYM CRM)
         run: node scripts/check_signup_payload.js
