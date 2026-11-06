@@ -23,7 +23,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <link href="https://fonts.googleapis.com/css2?family=Gabarito:wght@500;600;700;800&amp;family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/styles.css?v=20261011-1">
 <script src="/assets/tracking.js?v=1" defer></script>
-<script src="/assets/signup.js?v=20261011-1" defer></script>
+<script src="/assets/signup.js?v=20261106-1" defer></script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "WebPage", "name": "Welcome", "publisher": {"@id": "https://www.boostyourmaps.com/#organization"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.boostyourmaps.com/"}, {"@type": "ListItem", "position": 2, "name": "Welcome"}]}]}</script>
 </head>
 <body>
@@ -64,6 +64,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <p><button type="button" class="su-linkbtn" data-w-retry hidden>Try again</button></p>
     </div>
     <div class="su-wait" data-w-loading><span class="su-spin" aria-hidden="true"></span><p>Loading your signup…</p></div>
+    <!-- #preview (agency) or #preview=direct: sample details, nothing is saved or sent. -->
+    <div class="su-panel" data-w-preview hidden>
+      <p data-w-preview-text></p>
+      <p><a class="tlink" data-w-preview-switch href="/welcome#preview=direct"></a></p>
+    </div>
 
     <ol class="route su-steps" data-w-steps hidden>
       <!-- Step 1: payment -->

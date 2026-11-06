@@ -416,6 +416,34 @@
     return ("0000000" + hash.toString(16)).slice(-8);
   }
 
+  // "#preview" shows the agency version with sample details, "#preview=direct"
+  // the direct customer's. A preview calls nothing, stores nothing and pushes
+  // no analytics events, so it can be shared to show the steps.
+  function previewFromUrl() {
+    var match = window.location.hash.match(/(?:^#|&)preview(?:=([a-z]*))?(?:&|$)/);
+    if (!match) return null;
+    return match[1] === "direct" ? "direct" : "agency";
+  }
+
+  function previewSignup(kind) {
+    var agency = kind === "agency";
+    return {
+      plan: agency ? "partner" : "us",
+      paid: true,
+      quantity: 1,
+      firstName: "Alex",
+      businessName: "Sample Plumbing",
+      partnerName: agency ? "Sample Agency" : null,
+      accessEmail: agency ? "mapsmarketingaccess@gmail.com" : TEAM_EMAIL,
+      accessConfirmed: false,
+      intakeDone: false,
+      prefill: {},
+      bookingUrl: "https://crm.boostyourmaps.com/book/review-call"
+    };
+  }
+
+  var PREVIEW_OK = { status: 200, data: { ok: true } };
+
   function tokenFromUrl() {
     var match = window.location.hash.match(/(?:^#|&)t=([^&]*)/);
     var raw = match ? match[1] : new URLSearchParams(window.location.search).get("t");
@@ -423,7 +451,8 @@
   }
 
   function initWelcome(root) {
-    var token = tokenFromUrl();
+    var preview = previewFromUrl();
+    var token = preview ? "" : tokenFromUrl();
     var signup = null;
     var editing = false;
     var prefilled = false;
@@ -437,6 +466,7 @@
     var local = readLocal();
 
     function readLocal() {
+      if (preview) return {};
       try {
         var saved = JSON.parse(window.sessionStorage.getItem(localKey) || "{}");
         return saved && typeof saved === "object" ? saved : {};
@@ -446,9 +476,13 @@
     }
 
     function writeLocal() {
+      if (preview) return;
       try {
         window.sessionStorage.setItem(localKey, JSON.stringify(local));
       } catch (e) { /* storage blocked: fine */ }
+    }
+    function track(data) {
+      if (!preview) pushEvent(data);
     }
     var pollDeadline = 0;
     var pollTimer = null;
@@ -555,13 +589,13 @@
     async function sendAccess() {
       hideStatus(accessStatus);
       accessConfirm.disabled = true;
-      var result = await call("POST", "/api/signup/access", { t: token });
+      var result = preview ? PREVIEW_OK : await call("POST", "/api/signup/access", { t: token });
       accessConfirm.disabled = false;
       if (result.status === 200 && result.data.ok === true) {
         signup.accessConfirmed = true;
         delete local.access;
         writeLocal();
-        pushEvent({ event: "signup_step", signup_step: "access_added", signup_plan: signup.plan });
+        track({ event: "signup_step", signup_step: "access_added", signup_plan: signup.plan });
         render();
         focusAfterAccess();
       } else if (result.status === 404) {
@@ -579,7 +613,7 @@
       hideStatus(accessStatus);
       local.access = kind;
       writeLocal();
-      pushEvent({ event: "signup_step", signup_step: kind === "skipped" ? "access_skipped" : "access_later", signup_plan: signup.plan });
+      track({ event: "signup_step", signup_step: kind === "skipped" ? "access_skipped" : "access_later", signup_plan: signup.plan });
       render();
       focusAfterAccess();
     }
@@ -761,7 +795,7 @@
         photosUrl: value(intakeForm, "photosUrl") || null,
         approval: partner ? approval.value : "call"
       };
-      var result = await call("POST", "/api/signup/intake", Object.assign({ t: token }, answers));
+      var result = preview ? PREVIEW_OK : await call("POST", "/api/signup/intake", Object.assign({ t: token }, answers));
 
       intakeForm.removeAttribute("aria-busy");
       button.disabled = false;
@@ -771,7 +805,7 @@
         signup.intakeDone = true;
         editing = false;
         signup.prefill = answers;
-        pushEvent({ event: "signup_step", signup_step: "intake_saved", signup_plan: signup.plan });
+        track({ event: "signup_step", signup_step: "intake_saved", signup_plan: signup.plan });
         render();
         focusStep("call");
         return;
@@ -831,6 +865,18 @@
         link.className = "btn btn-primary";
       }
       box.appendChild(wrap);
+      if (preview) {
+        link.addEventListener("click", function (event) {
+          event.preventDefault();
+          if (box.querySelector("[data-preview-call]")) return;
+          var note = document.createElement("p");
+          note.className = "su-help";
+          note.setAttribute("data-preview-call", "");
+          note.setAttribute("role", "status");
+          note.textContent = "On the real page, this opens our calendar. Nothing gets booked in the preview.";
+          box.appendChild(note);
+        });
+      }
       return "active";
     }
 
@@ -927,6 +973,27 @@
         if (state === "active" || state === "open") state = name === first ? "active" : "open";
         setStep(name, state, i + 1);
       });
+    }
+
+    if (preview) {
+      var agency = preview === "agency";
+      var note = $("[data-w-preview]");
+      var other = $("[data-w-preview-switch]");
+      $("[data-w-preview-text]").textContent = agency
+        ? "This is a preview of the page an agency sees after it signs up a client. Nothing you type here is saved or sent."
+        : "This is a preview of the page a customer sees after paying. Nothing you type here is saved or sent.";
+      other.href = agency ? "/welcome#preview=direct" : "/welcome#preview";
+      other.textContent = agency ? "Show the direct customer version" : "Show the agency version";
+      // Only the hash changes, so start the page over for the other version
+      // (the skip link changes the hash too, and must not reload).
+      window.addEventListener("hashchange", function () {
+        if (previewFromUrl()) window.location.reload();
+      });
+      note.hidden = false;
+      loading.hidden = true;
+      signup = previewSignup(preview);
+      render();
+      return;
     }
 
     if (!TOKEN.test(token)) {
