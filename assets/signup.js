@@ -975,6 +975,17 @@
       });
     }
 
+    // Switching between the previews, or pasting another welcome link into
+    // this tab, only changes the hash: start the page over. The skip link
+    // changes the hash too, and must not.
+    window.addEventListener("hashchange", function () {
+      var nextPreview = previewFromUrl();
+      var nextToken = nextPreview ? "" : tokenFromUrl();
+      if ((nextPreview || nextToken) && (nextPreview !== preview || nextToken !== token)) {
+        window.location.reload();
+      }
+    });
+
     if (preview) {
       var agency = preview === "agency";
       var note = $("[data-w-preview]");
@@ -984,11 +995,6 @@
         : "This is a preview of the page a customer sees after paying. Nothing you type here is saved or sent.";
       other.href = agency ? "/welcome#preview=direct" : "/welcome#preview";
       other.textContent = agency ? "Show the direct customer version" : "Show the agency version";
-      // Only the hash changes, so start the page over for the other version
-      // (the skip link changes the hash too, and must not reload).
-      window.addEventListener("hashchange", function () {
-        if (previewFromUrl()) window.location.reload();
-      });
       note.hidden = false;
       loading.hidden = true;
       signup = previewSignup(preview);
