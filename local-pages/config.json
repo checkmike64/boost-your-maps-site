@@ -1,5 +1,5 @@
 {
-  "_about": "Rules for the industry x city local service pages under /google-maps-marketing/. Read by scripts/local_pages/check_local_pages.py (CI) and by the BYM Team connector. Any industry and any city can be built (decided 2026-10-05). Only Mike edits this file; page pull requests may not touch it.",
+  "_about": "Rules for the industry x city local service pages under /google-maps-marketing/ (local pages 2.0). Read by scripts/local_pages/check_local_pages.py (CI) and by the BYM Team connector. The page skeleton, data modules and gates come from the vendored ai-skills shared/local-pages config (scripts/local_pages/vendor/local-pages/config.json); put a BYM-only override under local_gate. Any industry and any city can be built (decided 2026-10-05). Only Mike edits this file; page pull requests may not touch it.",
   "site_origin": "https://www.boostyourmaps.com",
   "section": "google-maps-marketing",
   "cta_text": "Get my free visibility report →",
@@ -18,12 +18,16 @@
   "publishing": {
     "paused": false,
     "pause_reason": "",
-    "_cadence_note": "0 turns a limit off. No volume limits as of 2026-10-05; the pause switch above is the brake.",
-    "first_batch_size": 0,
-    "first_batch_hold_days": 0,
-    "max_new_pages_per_30_days": 0
+    "_cadence_note": "The pause switch above is the brake. Publishing pace is advisory and set in brain.web_sites.cadence (page-pipeline cadence.py and the connector read it); no volume limits as of 2026-10-05."
   },
 
+  "_queue_note": "page-pipeline and the connector record every page as a row in brain.web_page_queue and build only from an approved one. auto_approve true keeps the 2026-10-05 'any industry, any city, no approval' rule: the connector adds or approves the row itself when the page ships, and notes that it did. Set auto_approve to false only to approve rows yourself, in batches.",
+  "queue": {
+    "require_approved_row": true,
+    "auto_approve": true
+  },
+
+  "_thresholds_note": "shingle_size, any_page and same_industry_or_city feed the local-pages overlap gate (G4). No word band here: the length band is the vendored owner-report profile's (600-1,400 words, a warning only, since the data sets the length); to change it for BYM, set local_gate.profiles.owner-report.words_min/words_max.",
   "thresholds": {
     "shingle_size": 5,
     "any_page": 0.15,
@@ -31,16 +35,11 @@
     "sitewide_boilerplate": 0.08,
     "boilerplate_min_pages": 5,
     "banned_phrase_min_pages": 3,
-    "words_min": 1000,
-    "words_max": 1600,
     "title_max": 60,
     "meta_min": 150,
     "meta_max": 160,
-    "module_sections_min": 4,
-    "module_sections_max": 6,
     "faq_min": 3,
     "faq_max": 5,
-    "fact_sheet_min_facts": 8,
     "image_max_kb": 250
   },
 
@@ -58,22 +57,5 @@
     "\\belevate\\b", "\\bunleash\\b", "\\bdelve\\b", "\\bleaving money on the table\\b",
     "\\bno[- ]sales[- ]calls?\\b", "\\bno calls? (needed|required|necessary)\\b",
     "\\bwithout (a|any) sales calls?\\b", "\\bnever (have to )?(talk|speak) (to|with) (a salesperson|sales|anyone)\\b"
-  ],
-
-  "hero_angles": [
-    "seasonal-deadline",
-    "chains-nearby",
-    "burned-by-seo",
-    "growth-suburbs",
-    "reach-beyond-neighborhood",
-    "license-and-trust"
-  ],
-
-  "snapshot_observations": [
-    "chain-in-top-three",
-    "smallest-review-count",
-    "rating-spread",
-    "newer-company",
-    "name-carries-service-city"
   ]
 }
