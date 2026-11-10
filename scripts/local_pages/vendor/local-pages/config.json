@@ -1,0 +1,113 @@
+{
+  "_about": "Defaults for shared/local-pages. Read by scripts/local_gate.py and scripts/demand.py. Values marked in _awaiting_mike are the research's recommended defaults (research/04-local-page-anatomy.md, 2026-11-10) and wait for Mike's decision. A site can override any value with its own JSON passed as --config.",
+  "_awaiting_mike": [
+    "skeleton: fixed section order and fixed H2 patterns on every page (replaces the module-order fingerprint and the heading registry)",
+    "modules.map.depth_min/depth_target: one Maps search read to depth 20-30, not top three only",
+    "modules.reviews.sample_target: a 60-review sample of the top three",
+    "floor: 12 unique sourced data points from 3 or more data modules; build_rules: the data floor refuses some pages",
+    "profiles.owner-report: BYM city pages are local market reports; the industry hub is the SEO target",
+    "profiles.buyer-page.existing_pages: Legacy Linen's 30 city x service pages, fold into 5 city hubs or keep",
+    "Tampa PR #8 (old system) is not merged as is"
+  ],
+  "skeleton": [
+    {"slot": 1, "id": "hero", "h": "h1", "pattern": "{service} in {city}, {region}", "data_slot": false, "fixed_text": true},
+    {"slot": 2, "id": "market", "h": "h2", "pattern": "The {city} map today|{service} in {city}: what we see|What we see in {city}", "data_slot": true, "modules": ["map", "first_party"]},
+    {"slot": 3, "id": "timing", "h": "h2", "pattern": "When people in {city} search for {service}|When {city} .+", "data_slot": true, "modules": ["demand"]},
+    {"slot": 4, "id": "voices", "h": "h2", "pattern": "What {city} customers say|What {city} .+ say", "data_slot": true, "modules": ["reviews"]},
+    {"slot": 5, "id": "results", "h": "h2", "pattern": "Results in {city}|Results near {city}", "data_slot": true, "modules": ["proof"]},
+    {"slot": 6, "id": "price", "h": "h2", "pattern": "Price and how it works|How it works", "data_slot": false, "modules": ["offer", "price"], "fixed_text": true},
+    {"slot": 7, "id": "questions", "h": "h2", "pattern": "Questions from {city}.*", "data_slot": true, "modules": ["questions"]},
+    {"slot": 8, "id": "next", "h": "h2", "pattern": ".+", "data_slot": false, "fixed_text": true}
+  ],
+  "fixed_text_max_words": 150,
+  "modules": {
+    "map": {"code": "M1", "counts": true, "min_facts": 6, "depth_min": 20, "depth_target": 30, "min_results": 3},
+    "first_party": {"code": "M2", "counts": true, "min_facts": 3, "min_jobs_12m": 3},
+    "demand": {"code": "M3", "counts": true, "min_facts": 3, "core_min_monthly": 50, "terms_with_data_min": 3, "term_min_monthly": 10},
+    "reviews": {"code": "M4", "counts": true, "min_facts": 3, "sample_min": 30, "sample_target": 60, "businesses_min": 2, "max_age_months": 36, "quote_window_months": 24},
+    "proof": {"code": "M5", "counts": true, "min_facts": 1},
+    "price": {"code": "M6", "counts": true, "min_facts": 1, "price_tags_min": 10},
+    "questions": {"code": "M7", "counts": true, "min_facts": 3},
+    "offer": {"code": "FIXED", "counts": false, "min_facts": 0}
+  },
+  "floor": {
+    "min_unique_data_points": 12,
+    "min_data_modules": 3
+  },
+  "swap_test": {
+    "min_data_sentence_share": 0.7,
+    "first_sentence_must_carry_data": true,
+    "min_sentence_words": 4
+  },
+  "similarity": {
+    "shingle_size": 5,
+    "any_page_max": 0.15,
+    "same_service_or_city_max": 0.12
+  },
+  "sourcing": {
+    "ignore_small_integers_upto": 3,
+    "warn_age_days": 120,
+    "fail_age_days": 365,
+    "first_party_sources_ok_without_url": true
+  },
+  "profiles": {
+    "owner-report": {
+      "_about": "Reader = the owner of a company in the trade (BYM industry x city). The page is a local market report; the industry hub carries the national keyword.",
+      "competitor_names_allowed": true,
+      "words_min": 600,
+      "words_max": 1400
+    },
+    "buyer-page": {
+      "_about": "Reader = someone buying the service (a client's service x city page). Competitors are never named; the map read is internal.",
+      "competitor_names_allowed": false,
+      "words_min": 500,
+      "words_max": 1400,
+      "existing_pages": "keep-until-mike-decides"
+    }
+  },
+  "build_rules": {
+    "owner-report": {
+      "demand_min_monthly": 100,
+      "proof_levels_that_count": [
+        1,
+        2,
+        3
+      ],
+      "snapshot_fresh_days": 30,
+      "require_parent_hub": true,
+      "serp_overlap_organic_top10": 7,
+      "serp_overlap_maps_top3": 2
+    },
+    "buyer-page": {
+      "demand_min_monthly": 30,
+      "gsc_impressions_90d_min": 50,
+      "first_party_min": 3,
+      "proof_levels_that_count": [
+        1,
+        2,
+        3
+      ],
+      "snapshot_fresh_days": 30,
+      "require_parent_hub": true,
+      "serp_overlap_organic_top10": 7,
+      "serp_overlap_maps_top3": 2
+    },
+    "default_grid_spacing_km": 2.0
+  },
+  "banned_filler": [
+    {"group": "people counts", "severity": "error", "pattern": "\\bcensus\\b|\\bpopulation\\b|\\bresidents?\\b|\\bdemographics?\\b|\\bmedian (household )?income\\b|\\bpeople live\\b|\\bcity limits\\b|\\b\\d[\\d,]* people in (19|20)\\d\\d\\b|\\bgrew from (about )?\\d"},
+    {"group": "history and trivia", "severity": "error", "pattern": "\\bfounded in\\b|\\bwas founded\\b|\\bincorporated in \\d{4}\\b|\\bhistory of\\b|\\bhistoric(al)?\\b|\\bnicknamed?\\b|\\bknown as the\\b|\\blandmarks?\\b|\\bmuseums?\\b|\\battractions?\\b|\\b(state|national|city|county|regional) parks?\\b|\\bparks and recreation\\b"},
+    {"group": "roads and distance", "severity": "error", "pattern": "\\bhighways?\\b|\\binterstate\\b|\\bfreeways?\\b|\\bbridges?\\b|\\bI-\\d+\\b|\\b(US|SR|State Route|Loop) \\d+\\b|\\bmiles?\\b|\\bdrive time\\b|\\bminutes? (away|from|drive)\\b|\\bhow far\\b"},
+    {"group": "weather", "severity": "error", "pattern": "\\bweather\\b|\\brainfall\\b|\\btemperatures?\\b|\\bhurricane season\\b|\\brainy season\\b|\\bmonsoon\\b|\\binches of rain\\b|\\bdegrees\\b"},
+    {"group": "rules and permits", "severity": "error", "hub_severity": "warn", "pattern": "\\bpermits?\\b|\\blicen[cs]e[ds]?\\b|\\blicen[cs]ing\\b|\\bordinances?\\b|\\bstatutes?\\b|\\b(building|city|county|health|fire|municipal|zoning) codes?\\b|\\bcode (compliance|violations?|requirements?)\\b|\\binspection form\\b|\\bstate board\\b|\\b(sales|property|income|transaction privilege) tax\\b|\\btax (rate|registration)\\b"},
+    {"group": "utilities", "severity": "error", "pattern": "\\bwater (hardness|quality)\\b|\\bhard water\\b|\\butility (company|rates?|bills?)\\b|\\bzip codes?\\b"},
+    {"group": "tourism counts", "severity": "error", "pattern": "\\btouris(m|ts?)\\b|\\b(million|annual|\\d[\\d,]*) visitors\\b|\\bvisitors? (per|a|each) year\\b|\\bhotel rooms\\b|\\boccupancy\\b|\\baverage daily rate\\b|\\bconvention (center|space)\\b|\\bairport passengers\\b"}
+  ],
+  "place_list_max_items": 6,
+  "embedded_map_is_filler": true,
+  "demand": {
+    "keyword_planner_dir": "~/Claude/keyword-planner",
+    "keyword_planner_python": ".venv/bin/python",
+    "source_url": "https://ads.google.com/aw/keywordplanner/home"
+  }
+}
