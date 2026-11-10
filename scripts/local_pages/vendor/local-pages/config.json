@@ -21,7 +21,7 @@
   ],
   "fixed_text_max_words": 150,
   "modules": {
-    "map": {"code": "M1", "counts": true, "min_facts": 6, "depth_min": 20, "depth_target": 30, "min_results": 3},
+    "map": {"code": "M1", "counts": true, "min_facts": 6, "depth_min": 20, "depth_target": 30, "min_results": 3, "real_business_min_reviews": 10},
     "first_party": {"code": "M2", "counts": true, "min_facts": 3, "min_jobs_12m": 3},
     "demand": {"code": "M3", "counts": true, "min_facts": 3, "core_min_monthly": 50, "terms_with_data_min": 3, "term_min_monthly": 10},
     "reviews": {"code": "M4", "counts": true, "min_facts": 3, "sample_min": 30, "sample_target": 60, "businesses_min": 2, "max_age_months": 36, "quote_window_months": 24},
@@ -101,6 +101,7 @@
     {"group": "weather", "severity": "error", "pattern": "\\bweather\\b|\\brainfall\\b|\\btemperatures?\\b|\\bhurricane season\\b|\\brainy season\\b|\\bmonsoon\\b|\\binches of rain\\b|\\bdegrees\\b"},
     {"group": "rules and permits", "severity": "error", "hub_severity": "warn", "pattern": "\\bpermits?\\b|\\blicen[cs]e[ds]?\\b|\\blicen[cs]ing\\b|\\bordinances?\\b|\\bstatutes?\\b|\\b(building|city|county|health|fire|municipal|zoning) codes?\\b|\\bcode (compliance|violations?|requirements?)\\b|\\binspection form\\b|\\bstate board\\b|\\b(sales|property|income|transaction privilege) tax\\b|\\btax (rate|registration)\\b"},
     {"group": "utilities", "severity": "error", "pattern": "\\bwater (hardness|quality)\\b|\\bhard water\\b|\\butility (company|rates?|bills?)\\b|\\bzip codes?\\b"},
+    {"group": "review content requests", "severity": "error", "pattern": "\\bask(?:ing)? (?:the |your |every |each |happy )?(?:customers?|clients?|them|people|buyers?|guests?)\\b[^.]{0,40}?\\b(?:to )?(?:mention|name|include|say|write about|talk about|use the words?)\\b|\\breviews? (?:that|which) (?:mention|name|include)s?\\b|\\brequest(?:ing)? (?:specific|certain|particular) (?:content|words|keywords|details)\\b|\\b(?:keywords?|the city name|your city) in (?:their|your|the) reviews?\\b|\\breview quotas?\\b"},
     {"group": "tourism counts", "severity": "error", "pattern": "\\btouris(m|ts?)\\b|\\b(million|annual|\\d[\\d,]*) visitors\\b|\\bvisitors? (per|a|each) year\\b|\\bhotel rooms\\b|\\boccupancy\\b|\\baverage daily rate\\b|\\bconvention (center|space)\\b|\\bairport passengers\\b"}
   ],
   "place_list_max_items": 6,

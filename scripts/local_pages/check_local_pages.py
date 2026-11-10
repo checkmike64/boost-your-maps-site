@@ -447,15 +447,20 @@ def check_data(p: Page, r: Report):
     return True
 
 
+V1_ONLY_KEYS = ("fact_sheet_min_facts", "module_sections_min", "module_sections_max")
+
+
 def gate_override() -> dict:
     """Site values that override the vendored local-pages config: similarity limits, the length band and
-    anything under "local_gate" in local-pages/config.json."""
+    anything under "local_gate" in local-pages/config.json. Anything the site file doesn't set falls back to the
+    vendored defaults. A site file still in its version 1 layout (it carries the v1-only fact-sheet and section
+    keys) keeps its similarity limits, but its 1,000-1,600 word band was v1's, so the vendored profile's applies."""
     ov: dict = {"similarity": {"shingle_size": T.get("shingle_size", 5)}}
     if "any_page" in T:
         ov["similarity"]["any_page_max"] = T["any_page"]
     if "same_industry_or_city" in T:
         ov["similarity"]["same_service_or_city_max"] = T["same_industry_or_city"]
-    if "words_min" in T and "words_max" in T:
+    if "words_min" in T and "words_max" in T and not any(k in T for k in V1_ONLY_KEYS):
         ov["profiles"] = {PROFILE: {"words_min": T["words_min"], "words_max": T["words_max"]}}
     return deep_merge(ov, CONFIG.get("local_gate") or {})
 

@@ -1,4 +1,4 @@
-# Vendored from Impact-Leads-LLC/ai-skills@65477e047fc2 shared/local-pages/scripts/local_gate.py (2026-11-10). Do not edit here: change the skill, then run scripts/local_pages/sync_local_gate.py.
+# Vendored from Impact-Leads-LLC/ai-skills@a16dd6a56633 shared/local-pages/scripts/local_gate.py (2026-11-10). Do not edit here: change the skill, then run scripts/local_pages/sync_local_gate.py.
 #!/usr/bin/env python3
 """Gate for local / service-area pages built with shared/local-pages.
 
@@ -701,6 +701,9 @@ def check_page(page: dict, data: dict, cfg: dict, siblings: list[dict], r: Repor
             if norm(f.get("unit", "")) == "name" and idx.has(fact_matchers(f)):
                 r.err("profile", f"'{f.get('value')}' is a competitor from the map read; client pages never name competitors")
 
+    # ---- G8 map honesty: a lead-gen listing is never passed off as a top-three business
+    check_top_three(page, data, cfg, r)
+
     # ---- G8 proof wording
     proof = mods.get("proof") or {}
     if proof.get("included"):
@@ -708,13 +711,68 @@ def check_page(page: dict, data: dict, cfg: dict, siblings: list[dict], r: Repor
         if meta.get("match_level") in (2, 3, 4) and meta.get("label_text"):
             if norm(meta["label_text"]) not in norm(page["text"]):
                 r.err("G8", f"borrowed proof is not labeled on the page (expected \"{meta['label_text']}\")")
-        client = meta.get("client_name")
+        client = meta.get("client_name") or meta.get("page_name")  # page_name: how an anonymous client is called
         if client and meta.get("in_snapshot") is False:
             rank_words = re.compile(r"\b(top (three|3)|#\s?1|number one|ranks?|ranked|ranking|first on (the )?map|on top of the map)\b", re.I)
             for b in page["blocks"]:
                 for sent in sentences(b.text):
                     if norm(client) in norm(sent) and rank_words.search(sent):
                         r.err("G8", f"proof client sits next to a rank claim, but it is not in the map read: \"{sent[:140]}\"")
+
+
+LEADGEN_LABEL = re.compile(r"lead[- ]?gen|lead[- ]generation|\blisting\b|\blistings\b", re.I)
+
+
+def map_rows(mod: dict) -> dict[int, dict]:
+    """Rows of the Maps read from facts named map.r<N>.<field> (name, reviews, website, no_site, lead_gen)."""
+    rows: dict[int, dict] = {}
+    for f in mod.get("facts") or []:
+        m = re.match(r"map\.r(\d+)\.(\w+)$", str(f.get("id", "")))
+        if m:
+            rows.setdefault(int(m.group(1)), {})[m.group(2)] = f.get("value")
+    return rows
+
+
+def check_top_three(page: dict, data: dict, cfg: dict, r: Report) -> None:
+    """G8 (map honesty): a Maps row that looks like a lead-generation listing is never shown as one of the city's top
+    three businesses without saying so. Likely lead-gen = fewer than map.real_business_min_reviews reviews, plus no
+    website or the city in the business name (or the row is marked lead_gen: true). The page either names the top
+    three real businesses (and says what sits above them) or labels the listing ('a listing with 3 reviews and no
+    website', 'a likely lead-generation listing') in the sentence or table row that names it."""
+    mod = (data.get("modules") or {}).get("map") or {}
+    if not mod.get("included"):
+        return
+    minrev = (cfg["modules"]["map"] or {}).get("real_business_min_reviews", 10)
+    city = norm(data.get("city", ""))
+    suspects = []
+    for n, row in sorted(map_rows(mod).items()):
+        if n > 3 or not row.get("name"):
+            continue
+        try:
+            rev = float(str(row.get("reviews")).replace(",", "")) if row.get("reviews") is not None else None
+        except ValueError:
+            rev = None
+        no_site = row.get("website") is False or "no_site" in row or norm(str(row.get("website", ""))) in ("none", "no website")
+        if row.get("lead_gen") is True or (rev is not None and rev < minrev and (no_site or (city and city in norm(row["name"])))):
+            suspects.append((n, row, rev))
+    if not suspects:
+        return
+    r.note("G8", "the top three of this Maps read include likely lead-generation listings: " + "; ".join(
+        f"#{n} {row['name']} ({'?' if rev is None else int(rev)} reviews)" for n, row, rev in suspects))
+    all_names = sorted({norm(str(x.get("name"))) for x in map_rows(mod).values() if x.get("name")}, key=len, reverse=True)
+    for n, row, rev in suspects:
+        name = norm(row["name"])
+        longer = [x for x in all_names if x != name and name in x]  # "eco pest control of phoenix" holds the shorter name
+        for b in page["blocks"]:
+            for sent in sentences(b.text):
+                ns = norm(sent)
+                for x in longer:
+                    ns = ns.replace(x, " ")
+                if name and re.search(r"(?<!\w)" + re.escape(name) + r"(?!\w)", ns) and not LEADGEN_LABEL.search(sent):
+                    r.err("G8", f"#{n} '{row['name']}' looks like a lead-generation listing ({'?' if rev is None else int(rev)}"
+                          f" reviews) but the page shows it as a business without saying so: \"{sent[:120]}\" -> label it "
+                          "in that sentence or row, or show the top three real businesses instead")
+                    break
 
 
 def shingle_set(text: str, n: int) -> set[str]:

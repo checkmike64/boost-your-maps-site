@@ -59,8 +59,11 @@ publishing" blocks the merge, because branch protection requires the `local-page
   data floor (12 unique sourced data points from 3 modules), every number backed by a fact, each
   data section opening with a local data point (city-swap test), 5-word overlap with the other city
   pages (15%, or 12% for the same trade or city), no banned filler (census, landmarks, roads,
-  weather, permits, utilities, tourism, place lists), the build check, proof labels, and the fixed
-  skeleton (slot order and H2 patterns). No word target: 600 to 1,400 words is a warning only.
+  weather, permits, utilities, tourism, place lists, asking customers for specific review content or
+  review quotas), the build check, proof labels and map honesty (a likely lead-generation listing in
+  the Maps top three is labeled wherever the page names it; anonymous proof carries no rank words
+  unless it is in the read), and the fixed skeleton (slot order and H2 patterns). No word target:
+  600 to 1,400 words is a warning only.
 - **Site rules:** title and meta lengths, canonical, the H1, the JSON-LD graph (FAQPage generated
   from the visible FAQ), dates matching `page-data.json`, banned voice terms, the CTA text, links,
   the hero image (uploaded, size, pixel dimensions), the skeleton's markup and stylesheet classes,
@@ -87,11 +90,11 @@ Any industry and any city can be built without asking Mike (decided 2026-10-05).
 is a data-quality gate on top: no consumer demand and no first-party reason, no proof and no fresh
 Maps read, no live hub, or too close to another page, and the page isn't built.
 
-**Pending Mike (2026-11-10): the queue row.** page-pipeline and the connector build a page only from
-an `approved` row in `brain.web_page_queue`. `config.json` `queue` decides how that works:
-- `"require_approved_row": true, "auto_approve": false` (the default): Mike approves rows, in batches.
-- `"auto_approve": true`: keeps the 2026-10-05 "no approval" rule. The connector adds or approves the
-  row itself when the page ships, and notes that it did.
+**The queue row.** page-pipeline and the connector record every page as a row in
+`brain.web_page_queue`, and build only from an `approved` one. To keep the 2026-10-05 "no approval"
+rule, the connector approves the row itself when a page ships (or adds it, and notes that it did).
+That is the default: `config.json` `queue.auto_approve` is `true`, or absent. Mike sets it to `false`
+only if he wants to approve rows himself, in batches.
 
 The page's spec carries `industry_name` (how the trade reads in "for roofing companies in Tampa").
 When the first page in a new industry is published, the connector adds a starter hub from
@@ -122,5 +125,7 @@ python3 scripts/local_pages/sync_local_gate.py /path/to/ai-skills --check   # ex
 ```
 
 The first line of `vendor/local-pages/scripts/local_gate.py` names the ai-skills commit it came
-from, and the checker prints it in its report. The connector reads the same vendored `config.json`
+from, and the checker prints it in its report. Anything `local-pages/config.json` doesn't set falls
+back to the vendored config (a site file still in its v1 layout keeps its similarity limits; its old
+1,000 to 1,600 word band gives way to the vendored profile's). The connector reads the same vendored `config.json`
 from `main`, so the site, CI and the connector always use one set of rules.
