@@ -3,6 +3,46 @@
 
   window.dataLayer = window.dataLayer || [];
 
+  // Meta pixel "Boost Your Maps Site" (Impact Leads LLC). PageView on every page;
+  // the site's own dataLayer events map to Meta standard events below.
+  var META_PIXEL_ID = "1483845383633230";
+  var META_EVENTS = {
+    generate_lead: "Lead",
+    begin_checkout: "InitiateCheckout",
+    book_appointment: "Schedule"
+  };
+  (function (f, b, e, v, n, t, s) {
+    if (f.fbq) return;
+    n = f.fbq = function () {
+      n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+    };
+    if (!f._fbq) f._fbq = n;
+    n.push = n;
+    n.loaded = true;
+    n.version = "2.0";
+    n.queue = [];
+    t = b.createElement(e);
+    t.async = true;
+    t.src = v;
+    s = b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t, s);
+  })(window, document, "script", "https://connect.facebook.net/en_US/fbevents.js");
+  window.fbq("init", META_PIXEL_ID);
+  window.fbq("track", "PageView");
+
+  function sendMeta(data) {
+    var name = data && META_EVENTS[data.event];
+    if (name) window.fbq("trackSingle", META_PIXEL_ID, name);
+  }
+  // Events already in the dataLayer (e.g. /booked pushes before this loads),
+  // then every later push. GTM keeps and calls this wrapper when it loads.
+  window.dataLayer.forEach(sendMeta);
+  var originalPush = window.dataLayer.push;
+  window.dataLayer.push = function () {
+    for (var i = 0; i < arguments.length; i++) sendMeta(arguments[i]);
+    return originalPush.apply(window.dataLayer, arguments);
+  };
+
   function pushEvent(data) {
     data.page_path = window.location.pathname;
     window.dataLayer.push(data);
