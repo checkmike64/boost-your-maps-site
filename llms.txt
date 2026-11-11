@@ -18,6 +18,10 @@ Key facts: no ranking guarantees (Google decides rankings); results typically be
 - [Google review link generator](https://www.boostyourmaps.com/tools/google-review-link-generator): free tool that turns a Place ID or Business Profile review link into a direct Google review link, a QR code (PNG and SVG) and a printable card, with Google's rules for asking for reviews
 - [What Google Maps marketing costs a pest control company](https://www.boostyourmaps.com/guides/pest-control-seo-cost): agency price ranges from public surveys, Google Ads click prices in Phoenix, what a pest control customer is worth from Google review price tags, review counts in the top three by part of town, and a cost worksheet
 
+## Google Maps marketing by industry and city
+
+- [Google Maps marketing for pest control companies in Phoenix, AZ](https://www.boostyourmaps.com/google-maps-marketing/pest-control/phoenix-az)
+
 ## Optional
 
 - [Privacy policy](https://www.boostyourmaps.com/privacy)

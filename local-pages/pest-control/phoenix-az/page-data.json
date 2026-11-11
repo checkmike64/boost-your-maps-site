@@ -1,0 +1,1322 @@
+{
+  "schema": "local-page-data/1",
+  "site_key": "bym",
+  "slug": "/google-maps-marketing/pest-control/phoenix-az",
+  "page_type": "city",
+  "profile": "owner-report",
+  "city": "Phoenix",
+  "region": "AZ",
+  "country": "US",
+  "service": "pest control",
+  "center": {
+    "lat": 33.4489,
+    "lng": -112.0773,
+    "label": "Phoenix City Hall"
+  },
+  "parent_hub": "/google-maps-marketing/pest-control",
+  "built_on": "2026-11-10",
+  "published": "2026-11-10",
+  "modified": "2026-11-10",
+  "_note": "Sample page for Mike's review (queue row 7), built 2026-11-10 from fresh pulls. Phoenix covers more than 300 km2, so the Maps read ran from three centers (modules.md M1): City Hall to depth 30 (shown on the page), north Phoenix and Ahwatukee to depth 10 (observations).",
+  "build_check": {
+    "sales_asset": {
+      "kind": "campaign",
+      "target": "Phoenix pest control outreach (the companies in the 2026-11-10 map read)",
+      "queue_page_type": "sales-asset"
+    },
+    "demand_core_monthly": 1600,
+    "proof_match_level": 2,
+    "snapshot_date": "2026-11-10",
+    "prospects_in_city": 0,
+    "parent_hub_live": true,
+    "serves_area": true,
+    "nearest_page_km": null,
+    "grid_spacing_km": 2,
+    "serp_overlap": {
+      "sibling": "none built",
+      "organic_shared_top10": null,
+      "maps_shared_top3": null
+    },
+    "publishing_paused": false
+  },
+  "modules": {
+    "map": {
+      "included": true,
+      "reason": "Three Google Maps reads on 2026-11-10: City Hall to depth 30 (the search the page shows), north Phoenix and Ahwatukee to depth 10, since Phoenix is a big city. The first two rows from City Hall look like lead-generation listings (3 and 2 reviews, city in the name) and are labeled wherever named.",
+      "meta": {
+        "query": "pest control phoenix az",
+        "searched_on": "2026-11-10",
+        "from": "Phoenix City Hall (33.4489, -112.0773); also north Phoenix (33.6396, -112.0740) and Ahwatukee (33.3183, -111.9850)",
+        "depth": 30,
+        "device": "mobile",
+        "zoom": 13
+      },
+      "facts": [
+        {
+          "id": "map.r1.name",
+          "text": "#1 from City Hall: Pest Control of Phoenix",
+          "value": "Pest Control of Phoenix",
+          "unit": "name",
+          "source": "OpenSEO get_local_serp_results: Google Maps, mobile, \"pest control phoenix az\", from Phoenix City Hall (33.4489, -112.0773, zoom 13), read to 30",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "map.r1.stars",
+          "text": "Pest Control of Phoenix: 5.0 stars",
+          "value": 5,
+          "unit": "rating",
+          "source": "OpenSEO get_local_serp_results: Google Maps, mobile, \"pest control phoenix az\", from Phoenix City Hall (33.4489, -112.0773, zoom 13), read to 30",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10",
+          "display": "5.0 stars from 3"
+        },
+        {
+          "id": "map.r1.reviews",
+          "text": "Pest Control of Phoenix: 3 reviews",
+          "value": 3,
+          "unit": "reviews",
+          "source": "OpenSEO get_local_serp_results: Google Maps, mobile, \"pest control phoenix az\", from Phoenix City Hall (33.4489, -112.0773, zoom 13), read to 30",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "map.r1.no_site",
+          "text": "Pest Control of Phoenix's profile links to no website",
+          "value": "no website",
+          "unit": "text",
+          "source": "OpenSEO get_local_serp_results: Google Maps, mobile, \"pest control phoenix az\", from Phoenix City Hall (33.4489, -112.0773, zoom 13), read to 30",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "map.r2.name",
+          "text": "#2 from City Hall: Eco Pest Control of Phoenix",
+          "value": "Eco Pest Control of Phoenix",
+          "unit": "name",
+          "source": "OpenSEO get_local_serp_results: Google Maps, mobile, \"pest control phoenix az\", from Phoenix City Hall (33.4489, -112.0773, zoom 13), read to 30",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "map.r2.stars",
+          "text": "Eco Pest Control of Phoenix: 5.0 stars",
+          "value": 5,
+          "unit": "rating",
+          "source": "OpenSEO get_local_serp_results: Google Maps, mobile, \"pest control phoenix az\", from Phoenix City Hall (33.4489, -112.0773, zoom 13), read to 30",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10",
+          "display": "5.0 stars from 2"
+        },
+        {
+          "id": "map.r2.reviews",
+          "text": "Eco Pest Control of Phoenix: 2 reviews",
+          "value": 2,
+          "unit": "reviews",
+          "source": "OpenSEO get_local_serp_results: Google Maps, mobile, \"pest control phoenix az\", from Phoenix City Hall (33.4489, -112.0773, zoom 13), read to 30",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "map.r2.website",
+          "text": "Eco Pest Control of Phoenix's profile links to a Phoenix page (ecopestcontrolservice.com/locations/phoenix-az.html)",
+          "value": "a Phoenix page",
+          "unit": "text",
+          "source": "OpenSEO get_local_serp_results: Google Maps, mobile, \"pest control phoenix az\", from Phoenix City Hall (33.4489, -112.0773, zoom 13), read to 30",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "map.r3.name",
+          "text": "#3 from City Hall: ACTION Termite & Pest Control",
+          "value": "ACTION Termite & Pest Control",
+          "unit": "name",
+          "source": "OpenSEO get_local_serp_results: Google Maps, mobile, \"pest control phoenix az\", from Phoenix City Hall (33.4489, -112.0773, zoom 13), read to 30",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "map.r3.stars",
+          "text": "ACTION Termite & Pest Control: 4.9 stars",
+          "value": 4.9,
+          "unit": "rating",
+          "source": "OpenSEO get_local_serp_results: Google Maps, mobile, \"pest control phoenix az\", from Phoenix City Hall (33.4489, -112.0773, zoom 13), read to 30",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "map.r3.reviews",
+          "text": "ACTION Termite & Pest Control: 6,786 reviews",
+          "value": 6786,
+          "unit": "reviews",
+          "source": "OpenSEO get_local_serp_results: Google Maps, mobile, \"pest control phoenix az\", from Phoenix City Hall (33.4489, -112.0773, zoom 13), read to 30",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "map.r3.website",
+          "text": "ACTION Termite & Pest Control's profile links to its Phoenix page (actiontermitecontrol.com/phoenix/)",
+          "value": "its Phoenix page",
+          "unit": "text",
+          "source": "OpenSEO get_local_serp_results: Google Maps, mobile, \"pest control phoenix az\", from Phoenix City Hall (33.4489, -112.0773, zoom 13), read to 30",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "map.r4.name",
+          "text": "#4 from City Hall: Phoenix Pest & Termite Control",
+          "value": "Phoenix Pest & Termite Control",
+          "unit": "name",
+          "source": "OpenSEO get_local_serp_results: Google Maps, mobile, \"pest control phoenix az\", from Phoenix City Hall (33.4489, -112.0773, zoom 13), read to 30",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "map.r4.reviews",
+          "text": "Phoenix Pest & Termite Control (City Hall read, 2911 N 26th Ave profile): 746 reviews",
+          "value": 746,
+          "unit": "reviews",
+          "source": "OpenSEO get_local_serp_results: Google Maps, mobile, \"pest control phoenix az\", from Phoenix City Hall (33.4489, -112.0773, zoom 13), read to 30",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "map.r4.rank",
+          "text": "Phoenix Pest & Termite Control came 4th from City Hall",
+          "value": 4,
+          "unit": "rank",
+          "source": "OpenSEO get_local_serp_results: Google Maps, mobile, \"pest control phoenix az\", from Phoenix City Hall (33.4489, -112.0773, zoom 13), read to 30",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10",
+          "display": [
+            "fourth",
+            "4th"
+          ]
+        },
+        {
+          "id": "map.first_over10",
+          "text": "ACTION Termite & Pest Control was the first result from City Hall with more than 10 reviews",
+          "value": "the first result with more than 10 reviews",
+          "unit": "text",
+          "source": "OpenSEO get_local_serp_results: Google Maps, mobile, \"pest control phoenix az\", from Phoenix City Hall (33.4489, -112.0773, zoom 13), read to 30",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "map.listings_label",
+          "text": "The first two results from City Hall are the two likely lead-gen listings (Pest Control of Phoenix, Eco Pest Control of Phoenix)",
+          "value": "the two lead-gen listings",
+          "unit": "text",
+          "source": "OpenSEO get_local_serp_results: Google Maps, mobile, \"pest control phoenix az\", from Phoenix City Hall (33.4489, -112.0773, zoom 13), read to 30",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "map.under10",
+          "text": "16 of the top 30 profiles from City Hall have fewer than 10 reviews",
+          "value": 16,
+          "unit": "count",
+          "source": "OpenSEO get_local_serp_results: Google Maps, mobile, \"pest control phoenix az\", from Phoenix City Hall (33.4489, -112.0773, zoom 13), read to 30",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "map.no_reviews",
+          "text": "10 of the top 30 from City Hall have no reviews at all",
+          "value": 10,
+          "unit": "count",
+          "source": "OpenSEO get_local_serp_results: Google Maps, mobile, \"pest control phoenix az\", from Phoenix City Hall (33.4489, -112.0773, zoom 13), read to 30",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "map.phx_addresses",
+          "text": "22 of the top 30 from City Hall show a Phoenix street address; 8 hide their address (service-area profiles)",
+          "value": 22,
+          "unit": "count",
+          "source": "OpenSEO get_local_serp_results: Google Maps, mobile, \"pest control phoenix az\", from Phoenix City Hall (33.4489, -112.0773, zoom 13), read to 30",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "map.hidden",
+          "text": "8 of the top 30 from City Hall hide their address (service-area profiles)",
+          "value": 8,
+          "unit": "count",
+          "source": "OpenSEO get_local_serp_results: Google Maps, mobile, \"pest control phoenix az\", from Phoenix City Hall (33.4489, -112.0773, zoom 13), read to 30",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "map.city_links",
+          "text": "3 of the top 30 from City Hall link their profile to a Phoenix page (Eco Pest Control of Phoenix, ACTION Termite & Pest Control, Budget Brothers Termite & Pest Elimination)",
+          "value": 3,
+          "unit": "count",
+          "source": "OpenSEO get_local_serp_results: Google Maps, mobile, \"pest control phoenix az\", from Phoenix City Hall (33.4489, -112.0773, zoom 13), read to 30",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "map.top30",
+          "text": "read depth 30 from Phoenix City Hall",
+          "value": 30,
+          "unit": "count",
+          "source": "OpenSEO get_local_serp_results: Google Maps, mobile, \"pest control phoenix az\", from Phoenix City Hall (33.4489, -112.0773, zoom 13), read to 30",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "map.downtown",
+          "text": "Pest Control of Phoenix (7 W Monroe St) and Eco Pest Control of Phoenix (101 N 1st Ave) both show a downtown Phoenix address; the search ran from Phoenix City Hall, downtown",
+          "value": "a downtown Phoenix address",
+          "unit": "text",
+          "source": "OpenSEO get_local_serp_results: Google Maps, mobile, \"pest control phoenix az\", from Phoenix City Hall (33.4489, -112.0773, zoom 13), read to 30",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "map.n.from",
+          "text": "Second search, same query, from north Phoenix (Bell Road and 7th Street)",
+          "value": "north Phoenix",
+          "unit": "text",
+          "source": "OpenSEO get_local_serp_results: Google Maps, mobile, \"pest control phoenix az\", from north Phoenix (Bell Road and 7th Street, 33.6396, -112.0740, zoom 13), read to 10",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "map.n.spot",
+          "text": "The north Phoenix search ran from Bell Road and 7th Street",
+          "value": "Bell Road and 7th Street",
+          "unit": "text",
+          "source": "OpenSEO get_local_serp_results: Google Maps, mobile, \"pest control phoenix az\", from north Phoenix (Bell Road and 7th Street, 33.6396, -112.0740, zoom 13), read to 10",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "map.n.min_reviews",
+          "text": "Every company in the top 10 from north Phoenix had at least 110 reviews (the smallest: Sage Solutions Pest Control, #9, 110 reviews)",
+          "value": 110,
+          "unit": "reviews",
+          "source": "OpenSEO get_local_serp_results: Google Maps, mobile, \"pest control phoenix az\", from north Phoenix (Bell Road and 7th Street, 33.6396, -112.0740, zoom 13), read to 10",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "map.n.city_links",
+          "text": "4 of the top 10 from north Phoenix link their profile to a Phoenix page (Blue Sky Pest Control, Phoenix Pest & Termite Control, Budget Brothers Termite & Pest Elimination, Truly Nolen Pest & Termite Control)",
+          "value": 4,
+          "unit": "count",
+          "source": "OpenSEO get_local_serp_results: Google Maps, mobile, \"pest control phoenix az\", from north Phoenix (Bell Road and 7th Street, 33.6396, -112.0740, zoom 13), read to 10",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "map.n1.name",
+          "text": "#1 from north Phoenix: Blue Sky Pest Control, 4.9 stars, 3,603 reviews",
+          "value": "Blue Sky Pest Control",
+          "unit": "name",
+          "source": "OpenSEO get_local_serp_results: Google Maps, mobile, \"pest control phoenix az\", from north Phoenix (Bell Road and 7th Street, 33.6396, -112.0740, zoom 13), read to 10",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "map.n1.reviews",
+          "text": "Blue Sky Pest Control: 3,603 reviews",
+          "value": 3603,
+          "unit": "reviews",
+          "source": "OpenSEO get_local_serp_results: Google Maps, mobile, \"pest control phoenix az\", from north Phoenix (Bell Road and 7th Street, 33.6396, -112.0740, zoom 13), read to 10",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "map.n2.name",
+          "text": "#2 from north Phoenix: Urban Desert Pest Control, 5.0 stars, 3,242 reviews",
+          "value": "Urban Desert Pest Control",
+          "unit": "name",
+          "source": "OpenSEO get_local_serp_results: Google Maps, mobile, \"pest control phoenix az\", from north Phoenix (Bell Road and 7th Street, 33.6396, -112.0740, zoom 13), read to 10",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "map.n2.reviews",
+          "text": "Urban Desert Pest Control: 3,242 reviews",
+          "value": 3242,
+          "unit": "reviews",
+          "source": "OpenSEO get_local_serp_results: Google Maps, mobile, \"pest control phoenix az\", from north Phoenix (Bell Road and 7th Street, 33.6396, -112.0740, zoom 13), read to 10",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "map.n3.reviews",
+          "text": "#3 from north Phoenix: Phoenix Pest & Termite Control (1919 W Lone Cactus Dr profile), 4.9 stars, 658 reviews",
+          "value": 658,
+          "unit": "reviews",
+          "source": "OpenSEO get_local_serp_results: Google Maps, mobile, \"pest control phoenix az\", from north Phoenix (Bell Road and 7th Street, 33.6396, -112.0740, zoom 13), read to 10",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "map.s.from",
+          "text": "Third search, same query, from Ahwatukee",
+          "value": "Ahwatukee",
+          "unit": "text",
+          "source": "OpenSEO get_local_serp_results: Google Maps, mobile, \"pest control phoenix az\", from Ahwatukee (33.3183, -111.9850, zoom 13), read to 10",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "map.s1.name",
+          "text": "#1 from Ahwatukee: Rove Pest Control, 4.9 stars, 422 reviews",
+          "value": "Rove Pest Control",
+          "unit": "name",
+          "source": "OpenSEO get_local_serp_results: Google Maps, mobile, \"pest control phoenix az\", from Ahwatukee (33.3183, -111.9850, zoom 13), read to 10",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "map.s1.reviews",
+          "text": "Rove Pest Control: 422 reviews",
+          "value": 422,
+          "unit": "reviews",
+          "source": "OpenSEO get_local_serp_results: Google Maps, mobile, \"pest control phoenix az\", from Ahwatukee (33.3183, -111.9850, zoom 13), read to 10",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "map.s.next_two",
+          "text": "#2 and #3 from Ahwatukee (Peak Pest Control, EcoGuard Pest Experts) have no reviews",
+          "value": "no reviews",
+          "unit": "text",
+          "source": "OpenSEO get_local_serp_results: Google Maps, mobile, \"pest control phoenix az\", from Ahwatukee (33.3183, -111.9850, zoom 13), read to 10",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "map.s.pest_top10",
+          "text": "5 of the top 10 from Ahwatukee are pest control companies; the other 5 are a hardware store, a landscaper, a general contractor, a water damage restoration company and a sporting goods store",
+          "value": 5,
+          "unit": "count",
+          "source": "OpenSEO get_local_serp_results: Google Maps, mobile, \"pest control phoenix az\", from Ahwatukee (33.3183, -111.9850, zoom 13), read to 10",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "map.s.pest_reviewed",
+          "text": "2 of the 5 pest control companies in Ahwatukee's top 10 have any reviews (Rove Pest Control 422, Exclusive Pest Solutions 52)",
+          "value": 2,
+          "unit": "count",
+          "source": "OpenSEO get_local_serp_results: Google Maps, mobile, \"pest control phoenix az\", from Ahwatukee (33.3183, -111.9850, zoom 13), read to 10",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "map.s.one_other",
+          "text": "Besides Rove Pest Control, only one other pest control company in Ahwatukee's top 10 had any reviews (Exclusive Pest Solutions, 52)",
+          "value": "Only one other pest control company",
+          "unit": "text",
+          "source": "OpenSEO get_local_serp_results: Google Maps, mobile, \"pest control phoenix az\", from Ahwatukee (33.3183, -111.9850, zoom 13), read to 10",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "map.s.others",
+          "text": "Ahwatukee's top 10 includes a hardware store and a sporting goods store (Ace Hardware & Rental, Sportsman's Warehouse)",
+          "value": "a hardware store",
+          "unit": "text",
+          "source": "OpenSEO get_local_serp_results: Google Maps, mobile, \"pest control phoenix az\", from Ahwatukee (33.3183, -111.9850, zoom 13), read to 10",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "map.distinct",
+          "text": "Across the three searches, 9 different businesses held the 9 top-three spots",
+          "value": 9,
+          "unit": "count",
+          "source": "OpenSEO get_local_serp_results, the three reads above compared",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "map.no_repeat",
+          "text": "No company made the top three in more than one of the three searches",
+          "value": "the top three in more than one",
+          "unit": "text",
+          "source": "OpenSEO get_local_serp_results, the three reads above compared",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "map.action_absent",
+          "text": "ACTION Termite & Pest Control was not in the top 10 from north Phoenix or from Ahwatukee",
+          "value": "the top 10 from north Phoenix or Ahwatukee",
+          "unit": "text",
+          "source": "OpenSEO get_local_serp_results, the three reads above compared",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "map.listings_absent",
+          "text": "Neither Pest Control of Phoenix nor Eco Pest Control of Phoenix was in the top 10 from north Phoenix or from Ahwatukee",
+          "value": "neither listing",
+          "unit": "text",
+          "source": "OpenSEO get_local_serp_results, the three reads above compared",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        }
+      ]
+    },
+    "first_party": {
+      "included": false,
+      "reason": "owner-report page; BYM has no pest control client in Phoenix"
+    },
+    "demand": {
+      "included": true,
+      "reason": "Keyword Planner for Phoenix: core group about 1,600 a month, 5 service terms with data (bed bug treatment, about 10 a month, left off the page)",
+      "meta": {
+        "source": "Google Ads Keyword Planner (historical metrics)",
+        "geo": "Phoenix,Arizona,United States (City, geoTargetConstants/1013462)",
+        "period": "Oct 2025 to Sep 2026",
+        "pulled_on": "2026-11-10",
+        "groups": [
+          {
+            "keywords": [
+              "pest control phoenix",
+              "pest control phoenix az",
+              "exterminator phoenix az"
+            ],
+            "avg": 1600
+          },
+          {
+            "keywords": [
+              "pest control near me"
+            ],
+            "avg": 720
+          },
+          {
+            "keywords": [
+              "termite control phoenix az"
+            ],
+            "avg": 110
+          },
+          {
+            "keywords": [
+              "scorpion control phoenix az"
+            ],
+            "avg": 70
+          },
+          {
+            "keywords": [
+              "bee removal phoenix az"
+            ],
+            "avg": 320
+          },
+          {
+            "keywords": [
+              "rodent control phoenix az"
+            ],
+            "avg": 110
+          }
+        ],
+        "note": "Close variants share one series; a group is counted once and never summed.",
+        "core_avg_monthly": 1600,
+        "terms_with_data": 5,
+        "core_keywords": [
+          "pest control phoenix",
+          "pest control phoenix az",
+          "exterminator phoenix az"
+        ]
+      },
+      "facts": [
+        {
+          "id": "demand.core_avg",
+          "text": "About 1,600 searches a month for 'pest control phoenix' and its close variants in Phoenix, Oct 2025 to Sep 2026",
+          "value": 1600,
+          "unit": "searches/month",
+          "source": "Google Ads Keyword Planner (historical metrics)",
+          "source_url": "https://ads.google.com/aw/keywordplanner/home",
+          "retrieved_on": "2026-11-10",
+          "query": "pest control phoenix / pest control phoenix az / exterminator phoenix az",
+          "location": "Phoenix,Arizona,United States (City, geoTargetConstants/1013462)"
+        },
+        {
+          "id": "demand.core_peak",
+          "text": "Busiest month(s): October 2025, about 2,400 searches",
+          "value": 2400,
+          "unit": "searches/month",
+          "source": "Google Ads Keyword Planner (historical metrics)",
+          "source_url": "https://ads.google.com/aw/keywordplanner/home",
+          "retrieved_on": "2026-11-10",
+          "query": "pest control phoenix / pest control phoenix az / exterminator phoenix az",
+          "location": "Phoenix,Arizona,United States (City, geoTargetConstants/1013462)"
+        },
+        {
+          "id": "demand.core_peak_month",
+          "text": "Peak month: October 2025",
+          "value": "2025-10",
+          "unit": "month",
+          "source": "Google Ads Keyword Planner (historical metrics)",
+          "source_url": "https://ads.google.com/aw/keywordplanner/home",
+          "retrieved_on": "2026-11-10",
+          "query": "pest control phoenix / pest control phoenix az / exterminator phoenix az",
+          "location": "Phoenix,Arizona,United States (City, geoTargetConstants/1013462)"
+        },
+        {
+          "id": "demand.core_low",
+          "text": "Quietest month(s): November 2025, about 880 searches",
+          "value": 880,
+          "unit": "searches/month",
+          "source": "Google Ads Keyword Planner (historical metrics)",
+          "source_url": "https://ads.google.com/aw/keywordplanner/home",
+          "retrieved_on": "2026-11-10",
+          "query": "pest control phoenix / pest control phoenix az / exterminator phoenix az",
+          "location": "Phoenix,Arizona,United States (City, geoTargetConstants/1013462)"
+        },
+        {
+          "id": "demand.core_low_month",
+          "text": "Low month: November 2025",
+          "value": "2025-11",
+          "unit": "month",
+          "source": "Google Ads Keyword Planner (historical metrics)",
+          "source_url": "https://ads.google.com/aw/keywordplanner/home",
+          "retrieved_on": "2026-11-10",
+          "query": "pest control phoenix / pest control phoenix az / exterminator phoenix az",
+          "location": "Phoenix,Arizona,United States (City, geoTargetConstants/1013462)"
+        },
+        {
+          "id": "demand.near_me",
+          "text": "About 720 searches a month for 'pest control near me' from people in Phoenix",
+          "value": 720,
+          "unit": "searches/month",
+          "source": "Google Ads Keyword Planner (historical metrics)",
+          "source_url": "https://ads.google.com/aw/keywordplanner/home",
+          "retrieved_on": "2026-11-10",
+          "query": "pest control near me",
+          "location": "Phoenix,Arizona,United States (City, geoTargetConstants/1013462)"
+        },
+        {
+          "id": "demand.term.termite_control_phoenix_az",
+          "text": "About 110 searches a month for 'termite control phoenix az'",
+          "value": 110,
+          "unit": "searches/month",
+          "source": "Google Ads Keyword Planner (historical metrics)",
+          "source_url": "https://ads.google.com/aw/keywordplanner/home",
+          "retrieved_on": "2026-11-10",
+          "query": "termite control phoenix az",
+          "location": "Phoenix,Arizona,United States (City, geoTargetConstants/1013462)"
+        },
+        {
+          "id": "demand.term_peak.termite_control_phoenix_az",
+          "text": "'termite control phoenix az' peaks in October 2025 and January 2026 at about 260",
+          "value": 260,
+          "unit": "searches/month",
+          "source": "Google Ads Keyword Planner (historical metrics)",
+          "source_url": "https://ads.google.com/aw/keywordplanner/home",
+          "retrieved_on": "2026-11-10",
+          "query": "termite control phoenix az",
+          "location": "Phoenix,Arizona,United States (City, geoTargetConstants/1013462)"
+        },
+        {
+          "id": "demand.term.scorpion_control_phoenix_az",
+          "text": "About 70 searches a month for 'scorpion control phoenix az'",
+          "value": 70,
+          "unit": "searches/month",
+          "source": "Google Ads Keyword Planner (historical metrics)",
+          "source_url": "https://ads.google.com/aw/keywordplanner/home",
+          "retrieved_on": "2026-11-10",
+          "query": "scorpion control phoenix az",
+          "location": "Phoenix,Arizona,United States (City, geoTargetConstants/1013462)"
+        },
+        {
+          "id": "demand.term_peak.scorpion_control_phoenix_az",
+          "text": "'scorpion control phoenix az' peaks in October 2025 at about 140",
+          "value": 140,
+          "unit": "searches/month",
+          "source": "Google Ads Keyword Planner (historical metrics)",
+          "source_url": "https://ads.google.com/aw/keywordplanner/home",
+          "retrieved_on": "2026-11-10",
+          "query": "scorpion control phoenix az",
+          "location": "Phoenix,Arizona,United States (City, geoTargetConstants/1013462)"
+        },
+        {
+          "id": "demand.term.bee_removal_phoenix_az",
+          "text": "About 320 searches a month for 'bee removal phoenix az'",
+          "value": 320,
+          "unit": "searches/month",
+          "source": "Google Ads Keyword Planner (historical metrics)",
+          "source_url": "https://ads.google.com/aw/keywordplanner/home",
+          "retrieved_on": "2026-11-10",
+          "query": "bee removal phoenix az",
+          "location": "Phoenix,Arizona,United States (City, geoTargetConstants/1013462)"
+        },
+        {
+          "id": "demand.term_peak.bee_removal_phoenix_az",
+          "text": "'bee removal phoenix az' peaks in February 2026 and March 2026 at about 590",
+          "value": 590,
+          "unit": "searches/month",
+          "source": "Google Ads Keyword Planner (historical metrics)",
+          "source_url": "https://ads.google.com/aw/keywordplanner/home",
+          "retrieved_on": "2026-11-10",
+          "query": "bee removal phoenix az",
+          "location": "Phoenix,Arizona,United States (City, geoTargetConstants/1013462)"
+        },
+        {
+          "id": "demand.term.rodent_control_phoenix_az",
+          "text": "About 110 searches a month for 'rodent control phoenix az'",
+          "value": 110,
+          "unit": "searches/month",
+          "source": "Google Ads Keyword Planner (historical metrics)",
+          "source_url": "https://ads.google.com/aw/keywordplanner/home",
+          "retrieved_on": "2026-11-10",
+          "query": "rodent control phoenix az",
+          "location": "Phoenix,Arizona,United States (City, geoTargetConstants/1013462)"
+        },
+        {
+          "id": "demand.term_peak.rodent_control_phoenix_az",
+          "text": "'rodent control phoenix az' peaks in October 2025 and September 2026 at about 210",
+          "value": 210,
+          "unit": "searches/month",
+          "source": "Google Ads Keyword Planner (historical metrics)",
+          "source_url": "https://ads.google.com/aw/keywordplanner/home",
+          "retrieved_on": "2026-11-10",
+          "query": "rodent control phoenix az",
+          "location": "Phoenix,Arizona,United States (City, geoTargetConstants/1013462)"
+        },
+        {
+          "id": "demand.core_may",
+          "text": "May 2026 was the next busiest month for 'pest control phoenix', at about 1,900 searches",
+          "value": 1900,
+          "unit": "searches/month",
+          "source": "Google Ads Keyword Planner (historical metrics), searches from people in Phoenix (geoTargetConstants/1013462), Oct 2025 to Sep 2026",
+          "source_url": "https://ads.google.com/aw/keywordplanner/home",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "demand.core_may_month",
+          "text": "Second-busiest month: May 2026",
+          "value": "2026-05",
+          "unit": "month",
+          "source": "Google Ads Keyword Planner (historical metrics), searches from people in Phoenix (geoTargetConstants/1013462), Oct 2025 to Sep 2026",
+          "source_url": "https://ads.google.com/aw/keywordplanner/home",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "demand.bee_feb",
+          "text": "Bee removal searches in Phoenix: about 590 in February 2026",
+          "value": "2026-02",
+          "unit": "month",
+          "source": "Google Ads Keyword Planner (historical metrics), searches from people in Phoenix (geoTargetConstants/1013462), Oct 2025 to Sep 2026",
+          "source_url": "https://ads.google.com/aw/keywordplanner/home",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "demand.bee_mar",
+          "text": "Bee removal searches in Phoenix: about 590 in March 2026",
+          "value": "2026-03",
+          "unit": "month",
+          "source": "Google Ads Keyword Planner (historical metrics), searches from people in Phoenix (geoTargetConstants/1013462), Oct 2025 to Sep 2026",
+          "source_url": "https://ads.google.com/aw/keywordplanner/home",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "demand.termite_jan",
+          "text": "Termite control searches in Phoenix: about 260 in January 2026",
+          "value": "2026-01",
+          "unit": "month",
+          "source": "Google Ads Keyword Planner (historical metrics), searches from people in Phoenix (geoTargetConstants/1013462), Oct 2025 to Sep 2026",
+          "source_url": "https://ads.google.com/aw/keywordplanner/home",
+          "retrieved_on": "2026-11-10"
+        }
+      ]
+    },
+    "reviews": {
+      "included": true,
+      "reason": "60 reviews from the last 24 months across 3 businesses, the first business with more than 10 reviews in each of the three searches",
+      "meta": {
+        "sample_size": 60,
+        "businesses": 3,
+        "sort": "newest",
+        "window": "2025-09-11 to 2026-11-10"
+      },
+      "facts": [
+        {
+          "id": "reviews.sample",
+          "text": "60 Google reviews read: the 20 newest each of ACTION Termite & Pest Control, Blue Sky Pest Control and Rove Pest Control",
+          "value": 60,
+          "unit": "reviews",
+          "source": "OpenSEO get_business_reviews: the 20 newest Google reviews each of ACTION Termite & Pest Control (cid 8540350713546847228), Blue Sky Pest Control (cid 5203820647834690950) and Rove Pest Control (cid 889666553679213509)",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "reviews.per_business",
+          "text": "20 reviews per business",
+          "value": 20,
+          "unit": "reviews",
+          "source": "OpenSEO get_business_reviews: the 20 newest Google reviews each of ACTION Termite & Pest Control (cid 8540350713546847228), Blue Sky Pest Control (cid 5203820647834690950) and Rove Pest Control (cid 889666553679213509)",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "reviews.five_star",
+          "text": "56 of the 60 reviews give five stars",
+          "value": 56,
+          "unit": "count",
+          "source": "OpenSEO get_business_reviews: the 20 newest Google reviews each of ACTION Termite & Pest Control (cid 8540350713546847228), Blue Sky Pest Control (cid 5203820647834690950) and Rove Pest Control (cid 889666553679213509)",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "reviews.bluesky_new",
+          "text": "11 of Blue Sky Pest Control's 20 newest reviews were new between November 4 and November 10, 2026; the other 9 were older reviews edited that week",
+          "value": 11,
+          "unit": "count",
+          "source": "OpenSEO get_business_reviews: the 20 newest Google reviews each of ACTION Termite & Pest Control (cid 8540350713546847228), Blue Sky Pest Control (cid 5203820647834690950) and Rove Pest Control (cid 889666553679213509)",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "reviews.bluesky_from",
+          "text": "Blue Sky Pest Control's 11 new reviews were posted from November 4, 2026",
+          "value": "2026-11-04",
+          "unit": "date",
+          "source": "OpenSEO get_business_reviews: the 20 newest Google reviews each of ACTION Termite & Pest Control (cid 8540350713546847228), Blue Sky Pest Control (cid 5203820647834690950) and Rove Pest Control (cid 889666553679213509)",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "reviews.bluesky_to",
+          "text": "to November 10, 2026",
+          "value": "2026-11-10",
+          "unit": "date",
+          "source": "OpenSEO get_business_reviews: the 20 newest Google reviews each of ACTION Termite & Pest Control (cid 8540350713546847228), Blue Sky Pest Control (cid 5203820647834690950) and Rove Pest Control (cid 889666553679213509)",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "reviews.action_new",
+          "text": "14 of ACTION Termite & Pest Control's 20 newest reviews were new between October 6 and November 4, 2026; the other 6 were older reviews edited in that time",
+          "value": 14,
+          "unit": "count",
+          "source": "OpenSEO get_business_reviews: the 20 newest Google reviews each of ACTION Termite & Pest Control (cid 8540350713546847228), Blue Sky Pest Control (cid 5203820647834690950) and Rove Pest Control (cid 889666553679213509)",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "reviews.action_from",
+          "text": "ACTION's 14 new reviews were posted from October 6, 2026",
+          "value": "2026-10-06",
+          "unit": "date",
+          "source": "OpenSEO get_business_reviews: the 20 newest Google reviews each of ACTION Termite & Pest Control (cid 8540350713546847228), Blue Sky Pest Control (cid 5203820647834690950) and Rove Pest Control (cid 889666553679213509)",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "reviews.action_to",
+          "text": "to November 4, 2026",
+          "value": "2026-11-04",
+          "unit": "date",
+          "source": "OpenSEO get_business_reviews: the 20 newest Google reviews each of ACTION Termite & Pest Control (cid 8540350713546847228), Blue Sky Pest Control (cid 5203820647834690950) and Rove Pest Control (cid 889666553679213509)",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "reviews.rove_newest",
+          "text": "Rove Pest Control's newest review is from December 2025 (December 30, 2025); its 20 newest run from September to December 2025",
+          "value": "2025-12",
+          "unit": "month",
+          "source": "OpenSEO get_business_reviews: the 20 newest Google reviews each of ACTION Termite & Pest Control (cid 8540350713546847228), Blue Sky Pest Control (cid 5203820647834690950) and Rove Pest Control (cid 889666553679213509)",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "reviews.week_bluesky",
+          "text": "In the week before the read (November 4 to 10, 2026), Blue Sky Pest Control got 11 new reviews",
+          "value": 11,
+          "unit": "count",
+          "source": "OpenSEO get_business_reviews: the 20 newest Google reviews each of ACTION Termite & Pest Control (cid 8540350713546847228), Blue Sky Pest Control (cid 5203820647834690950) and Rove Pest Control (cid 889666553679213509)",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "reviews.week_action",
+          "text": "In the same week (November 4 to 10, 2026), ACTION Termite & Pest Control got 1 new review (November 4)",
+          "value": 1,
+          "unit": "count",
+          "source": "OpenSEO get_business_reviews: the 20 newest Google reviews each of ACTION Termite & Pest Control (cid 8540350713546847228), Blue Sky Pest Control (cid 5203820647834690950) and Rove Pest Control (cid 889666553679213509)",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "reviews.tech_action",
+          "text": "In 16 of ACTION's 20 reviews the customer mentions the technician by name",
+          "value": 16,
+          "unit": "count",
+          "source": "OpenSEO get_business_reviews: the 20 newest Google reviews each of ACTION Termite & Pest Control (cid 8540350713546847228), Blue Sky Pest Control (cid 5203820647834690950) and Rove Pest Control (cid 889666553679213509)",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "reviews.tech_rove",
+          "text": "In 7 of Rove's 20 reviews the customer mentions the technician by name",
+          "value": 7,
+          "unit": "count",
+          "source": "OpenSEO get_business_reviews: the 20 newest Google reviews each of ACTION Termite & Pest Control (cid 8540350713546847228), Blue Sky Pest Control (cid 5203820647834690950) and Rove Pest Control (cid 889666553679213509)",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "reviews.tech_bluesky",
+          "text": "In 5 of Blue Sky's 20 reviews the customer mentions the technician by name",
+          "value": 5,
+          "unit": "count",
+          "source": "OpenSEO get_business_reviews: the 20 newest Google reviews each of ACTION Termite & Pest Control (cid 8540350713546847228), Blue Sky Pest Control (cid 5203820647834690950) and Rove Pest Control (cid 889666553679213509)",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "reviews.replies_action",
+          "text": "ACTION's owners answered 19 of its 20 newest reviews",
+          "value": 19,
+          "unit": "count",
+          "source": "OpenSEO get_business_reviews: the 20 newest Google reviews each of ACTION Termite & Pest Control (cid 8540350713546847228), Blue Sky Pest Control (cid 5203820647834690950) and Rove Pest Control (cid 889666553679213509)",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "reviews.replies_rove",
+          "text": "Rove's owners answered 16 of its 20 newest reviews",
+          "value": 16,
+          "unit": "count",
+          "source": "OpenSEO get_business_reviews: the 20 newest Google reviews each of ACTION Termite & Pest Control (cid 8540350713546847228), Blue Sky Pest Control (cid 5203820647834690950) and Rove Pest Control (cid 889666553679213509)",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "reviews.replies_bluesky",
+          "text": "Blue Sky's owners answered 7 of its 20 newest reviews",
+          "value": 7,
+          "unit": "count",
+          "source": "OpenSEO get_business_reviews: the 20 newest Google reviews each of ACTION Termite & Pest Control (cid 8540350713546847228), Blue Sky Pest Control (cid 5203820647834690950) and Rove Pest Control (cid 889666553679213509)",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "reviews.bluesky_unanswered",
+          "text": "Blue Sky had not answered any of its 11 new reviews at the time of the read; all 7 of its answers are on older reviews that customers edited",
+          "value": "hadn't answered",
+          "unit": "text",
+          "source": "OpenSEO get_business_reviews: the 20 newest Google reviews each of ACTION Termite & Pest Control (cid 8540350713546847228), Blue Sky Pest Control (cid 5203820647834690950) and Rove Pest Control (cid 889666553679213509)",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "reviews.termites",
+          "text": "Termites come up in 12 of the 60 reviews",
+          "value": 12,
+          "unit": "count",
+          "source": "OpenSEO get_business_reviews: the 20 newest Google reviews each of ACTION Termite & Pest Control (cid 8540350713546847228), Blue Sky Pest Control (cid 5203820647834690950) and Rove Pest Control (cid 889666553679213509)",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "reviews.two_star",
+          "text": "The two 2-star reviews in the 60 are both about termite work: paying again for a retreatment after the warranty ran out (ACTION), and termite stations set too deep (Blue Sky)",
+          "value": "termite work",
+          "unit": "text",
+          "source": "OpenSEO get_business_reviews: the 20 newest Google reviews each of ACTION Termite & Pest Control (cid 8540350713546847228), Blue Sky Pest Control (cid 5203820647834690950) and Rove Pest Control (cid 889666553679213509)",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        }
+      ]
+    },
+    "proof": {
+      "included": true,
+      "reason": "find_proof match level 2: same trade (pest control), another city (Mesa). Anonymous, labeled. Shown against demand (searches fell about a third, actions held nearly level), BYM's demand-relative reporting; the stored headline (views up 5%) is not used.",
+      "meta": {
+        "match_level": 2,
+        "approved": true,
+        "display_name": "Pest control company, Mesa, Arizona",
+        "page_name": "a pest control company in Mesa we work with",
+        "in_snapshot": false,
+        "label_text": "a pest control company in Mesa",
+        "caution": "Borrowed proof from Mesa, labeled. Never the business name or its profile link; no rank words near it (not in any of the three Phoenix reads)."
+      },
+      "facts": [
+        {
+          "id": "proof.searches_drop",
+          "text": "Searches for 'pest control' around Mesa fell by about a third (417 a month to 281) over the same stretches",
+          "value": "about a third",
+          "unit": "text",
+          "source": "brain.bym_proof 44c9c740 result_line (approved_for_pages; anonymous: Pest control company, Mesa, Arizona; Feb to Aug 2025 with April left out, vs Sep 2025 to Sep 2026)",
+          "retrieved_on": "2026-11-10",
+          "first_party": true
+        },
+        {
+          "id": "proof.held",
+          "text": "The Mesa pest control company's calls, website clicks and direction requests fell much less (215 a month to 203, about 6%) than searches (417 to 281, about a third) over the same months",
+          "value": "fell much less",
+          "unit": "text",
+          "source": "brain.bym_proof 44c9c740 result_line (approved_for_pages; anonymous: Pest control company, Mesa, Arizona; Feb to Aug 2025 with April left out, vs Sep 2025 to Sep 2026)",
+          "retrieved_on": "2026-11-10",
+          "first_party": true
+        },
+        {
+          "id": "proof.actions_before",
+          "text": "215 calls, website clicks and direction requests a month before it joined us (February to August 2025, April left out)",
+          "value": 215,
+          "unit": "actions",
+          "source": "brain.bym_proof 44c9c740 result_line (approved_for_pages; anonymous: Pest control company, Mesa, Arizona; Feb to Aug 2025 with April left out, vs Sep 2025 to Sep 2026)",
+          "retrieved_on": "2026-11-10",
+          "first_party": true
+        },
+        {
+          "id": "proof.actions_after",
+          "text": "203 calls, website clicks and direction requests a month from September 2025 to September 2026",
+          "value": 203,
+          "unit": "actions",
+          "source": "brain.bym_proof 44c9c740 result_line (approved_for_pages; anonymous: Pest control company, Mesa, Arizona; Feb to Aug 2025 with April left out, vs Sep 2025 to Sep 2026)",
+          "retrieved_on": "2026-11-10",
+          "first_party": true
+        },
+        {
+          "id": "proof.searches_before",
+          "text": "Searches for 'pest control' around Mesa: 417 a month before",
+          "value": 417,
+          "unit": "searches/month",
+          "source": "brain.bym_proof 44c9c740 result_line (approved_for_pages; anonymous: Pest control company, Mesa, Arizona; Feb to Aug 2025 with April left out, vs Sep 2025 to Sep 2026)",
+          "retrieved_on": "2026-11-10",
+          "first_party": true
+        },
+        {
+          "id": "proof.searches_after",
+          "text": "Searches for 'pest control' around Mesa: 281 a month after",
+          "value": 281,
+          "unit": "searches/month",
+          "source": "brain.bym_proof 44c9c740 result_line (approved_for_pages; anonymous: Pest control company, Mesa, Arizona; Feb to Aug 2025 with April left out, vs Sep 2025 to Sep 2026)",
+          "retrieved_on": "2026-11-10",
+          "first_party": true
+        },
+        {
+          "id": "proof.joined",
+          "text": "Joined us in September 2025",
+          "value": "2025-09",
+          "unit": "month",
+          "source": "brain.bym_proof 44c9c740 result_line (approved_for_pages; anonymous: Pest control company, Mesa, Arizona; Feb to Aug 2025 with April left out, vs Sep 2025 to Sep 2026)",
+          "retrieved_on": "2026-11-10",
+          "first_party": true
+        },
+        {
+          "id": "proof.city",
+          "text": "The proof client is in Mesa, Arizona",
+          "value": "Mesa",
+          "unit": "name",
+          "source": "brain.bym_proof 44c9c740 result_line (approved_for_pages; anonymous: Pest control company, Mesa, Arizona; Feb to Aug 2025 with April left out, vs Sep 2025 to Sep 2026)",
+          "retrieved_on": "2026-11-10",
+          "first_party": true
+        }
+      ]
+    },
+    "price": {
+      "included": true,
+      "reason": "22 review price tags plus Keyword Planner bids and average click prices for Phoenix",
+      "meta": {
+        "price_tags": 22
+      },
+      "facts": [
+        {
+          "id": "price.tags_total",
+          "text": "22 of the 60 reviews carry a Google price tag",
+          "value": 22,
+          "unit": "count",
+          "source": "OpenSEO get_business_reviews: the 20 newest Google reviews each of ACTION Termite & Pest Control (cid 8540350713546847228), Blue Sky Pest Control (cid 5203820647834690950) and Rove Pest Control (cid 889666553679213509)",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "price.tags_40_80",
+          "text": "9 price tags say $40 to $80 (5 say $40-60, 4 say $60-80)",
+          "value": 9,
+          "unit": "count",
+          "source": "OpenSEO get_business_reviews: the 20 newest Google reviews each of ACTION Termite & Pest Control (cid 8540350713546847228), Blue Sky Pest Control (cid 5203820647834690950) and Rove Pest Control (cid 889666553679213509)",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10",
+          "display": "$40 to $80"
+        },
+        {
+          "id": "price.tag_200",
+          "text": "6 price tags say $200 or more, and all 6 were on termite jobs",
+          "value": 6,
+          "unit": "count",
+          "source": "OpenSEO get_business_reviews: the 20 newest Google reviews each of ACTION Termite & Pest Control (cid 8540350713546847228), Blue Sky Pest Control (cid 5203820647834690950) and Rove Pest Control (cid 889666553679213509)",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10",
+          "display": "$200 or more"
+        },
+        {
+          "id": "price.tags_80_180",
+          "text": "7 price tags fall between $80 and $180 (2 say $80-100, 1 says $100-120, 1 says $120-140, 2 say $140-160, 1 says $160-180)",
+          "value": 7,
+          "unit": "count",
+          "source": "OpenSEO get_business_reviews: the 20 newest Google reviews each of ACTION Termite & Pest Control (cid 8540350713546847228), Blue Sky Pest Control (cid 5203820647834690950) and Rove Pest Control (cid 889666553679213509)",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10",
+          "display": "between $80 and $180"
+        },
+        {
+          "id": "price.tag_180",
+          "text": "the top of the $160 to $180 price tag",
+          "value": 180,
+          "unit": "USD",
+          "source": "OpenSEO get_business_reviews: the 20 newest Google reviews each of ACTION Termite & Pest Control (cid 8540350713546847228), Blue Sky Pest Control (cid 5203820647834690950) and Rove Pest Control (cid 889666553679213509)",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "price.termite_200",
+          "text": "All 6 of the $200-or-more tags and the only two reviews below 3 stars (both 2-star) were on termite jobs",
+          "value": "termite jobs",
+          "unit": "text",
+          "source": "OpenSEO get_business_reviews: the 20 newest Google reviews each of ACTION Termite & Pest Control (cid 8540350713546847228), Blue Sky Pest Control (cid 5203820647834690950) and Rove Pest Control (cid 889666553679213509)",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "price.tag_40",
+          "text": "5 price tags say $40 to $60",
+          "value": 40,
+          "unit": "USD",
+          "source": "OpenSEO get_business_reviews: the 20 newest Google reviews each of ACTION Termite & Pest Control (cid 8540350713546847228), Blue Sky Pest Control (cid 5203820647834690950) and Rove Pest Control (cid 889666553679213509)",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "price.tag_80",
+          "text": "the top of the $60 to $80 price tags",
+          "value": 80,
+          "unit": "USD",
+          "source": "OpenSEO get_business_reviews: the 20 newest Google reviews each of ACTION Termite & Pest Control (cid 8540350713546847228), Blue Sky Pest Control (cid 5203820647834690950) and Rove Pest Control (cid 889666553679213509)",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "price.tag_200v",
+          "text": "$200 or more",
+          "value": 200,
+          "unit": "USD",
+          "source": "OpenSEO get_business_reviews: the 20 newest Google reviews each of ACTION Termite & Pest Control (cid 8540350713546847228), Blue Sky Pest Control (cid 5203820647834690950) and Rove Pest Control (cid 889666553679213509)",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "price.ads_bid_low",
+          "text": "Low top-of-page bid for 'pest control phoenix' in Phoenix: $14.30",
+          "value": 14.3,
+          "unit": "USD",
+          "source": "Google Ads Keyword Planner (historical metrics)",
+          "source_url": "https://ads.google.com/aw/keywordplanner/home",
+          "retrieved_on": "2026-11-10",
+          "query": "pest control phoenix / pest control phoenix az / exterminator phoenix az",
+          "location": "Phoenix,Arizona,United States (City, geoTargetConstants/1013462)",
+          "display": "$14"
+        },
+        {
+          "id": "price.ads_bid_high",
+          "text": "High top-of-page bid for 'pest control phoenix' in Phoenix: $65.78",
+          "value": 65.78,
+          "unit": "USD",
+          "source": "Google Ads Keyword Planner (historical metrics)",
+          "source_url": "https://ads.google.com/aw/keywordplanner/home",
+          "retrieved_on": "2026-11-10",
+          "query": "pest control phoenix / pest control phoenix az / exterminator phoenix az",
+          "location": "Phoenix,Arizona,United States (City, geoTargetConstants/1013462)",
+          "display": "$66"
+        },
+        {
+          "id": "price.ads_avg",
+          "text": "Average cost per click for 'pest control phoenix' in Phoenix: $36.53",
+          "value": 36.53,
+          "unit": "USD",
+          "source": "Google Ads Keyword Planner (historical metrics), searches from people in Phoenix (geoTargetConstants/1013462), Oct 2025 to Sep 2026",
+          "source_url": "https://ads.google.com/aw/keywordplanner/home",
+          "retrieved_on": "2026-11-10",
+          "display": "$37"
+        },
+        {
+          "id": "price.clicks_avg",
+          "text": "At the average click price, $450 buys about 12 clicks (450 / 36.53)",
+          "value": 12,
+          "unit": "clicks",
+          "source": "Google Ads Keyword Planner (historical metrics), searches from people in Phoenix (geoTargetConstants/1013462), Oct 2025 to Sep 2026",
+          "source_url": "https://ads.google.com/aw/keywordplanner/home",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "price.scorpion_top",
+          "text": "Of the searches checked (pest control, pest control near me, termite, scorpion, bed bug, bee removal, rodent control), scorpion control had the highest average cost per click",
+          "value": "cost the most",
+          "unit": "text",
+          "source": "Google Ads Keyword Planner (historical metrics), searches from people in Phoenix (geoTargetConstants/1013462), Oct 2025 to Sep 2026",
+          "source_url": "https://ads.google.com/aw/keywordplanner/home",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "price.scorpion_avg",
+          "text": "Average cost per click for 'scorpion control phoenix az' in Phoenix: $117.68",
+          "value": 117.68,
+          "unit": "USD",
+          "source": "Google Ads Keyword Planner (historical metrics), searches from people in Phoenix (geoTargetConstants/1013462), Oct 2025 to Sep 2026",
+          "source_url": "https://ads.google.com/aw/keywordplanner/home",
+          "retrieved_on": "2026-11-10",
+          "display": "$118"
+        }
+      ]
+    },
+    "questions": {
+      "included": true,
+      "reason": "Owner questions from BYM's sales playbook and pest control brief, each answered with this page's data. No Search Console queries for Phoenix or pest control yet (checked 2026-11-10, 0 rows).",
+      "facts": [
+        {
+          "id": "q.already",
+          "text": "We're already on Google Maps. Why aren't we in the top three?",
+          "value": "We're already on Google Maps. Why aren't we in the top three?",
+          "unit": "question",
+          "source": "brain doc fe18bc0e 'Boost Your Maps — Sales & Messaging Playbook', objection list (owner questions from sales calls) ('I am already on Google Maps'), answered with the Phoenix read",
+          "retrieved_on": "2026-11-10",
+          "first_party": true
+        },
+        {
+          "id": "q.reviews",
+          "text": "Do we need thousands of reviews to make the top three?",
+          "value": "Do we need thousands of reviews to make the top three?",
+          "unit": "question",
+          "source": "brain doc 06594d71 'BYM Industry Brief — Pest Control', owner objections ('My reviews can't compete with the chain'), answered with the Phoenix read",
+          "retrieved_on": "2026-11-10",
+          "first_party": true
+        },
+        {
+          "id": "q.ads",
+          "text": "Is $450 a month a lot next to Google Ads?",
+          "value": "Is $450 a month a lot next to Google Ads?",
+          "unit": "question",
+          "source": "brain doc fe18bc0e 'Boost Your Maps — Sales & Messaging Playbook', objection list (owner questions from sales calls) ('It is too expensive'), answered with Keyword Planner click prices for Phoenix",
+          "retrieved_on": "2026-11-10",
+          "first_party": true
+        }
+      ]
+    },
+    "offer": {
+      "included": true,
+      "reason": "fixed offer text from the site's pricing.txt",
+      "facts": [
+        {
+          "id": "offer.price",
+          "text": "$450 a month",
+          "value": 450,
+          "unit": "USD",
+          "source": "pricing.txt",
+          "source_url": "https://www.boostyourmaps.com/pricing.txt",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "offer.notice",
+          "text": "7 days' notice",
+          "value": 7,
+          "unit": "days",
+          "source": "pricing.txt",
+          "source_url": "https://www.boostyourmaps.com/pricing.txt",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "offer.rebuild",
+          "text": "$1,750 one-time rebuild",
+          "value": 1750,
+          "unit": "USD",
+          "source": "pricing.txt",
+          "source_url": "https://www.boostyourmaps.com/pricing.txt",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "offer.posts",
+          "text": "6 posts and 4 fresh photos each month (/pricing; pricing.txt: 6 Google Business Profile posts plus fresh photos per month)",
+          "value": 6,
+          "unit": "posts",
+          "source": "/pricing",
+          "source_url": "https://www.boostyourmaps.com/pricing",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "offer.photos",
+          "text": "4 fresh photos each month (/pricing)",
+          "value": 4,
+          "unit": "photos",
+          "source": "/pricing",
+          "source_url": "https://www.boostyourmaps.com/pricing",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "offer.citations",
+          "text": "30 local map citations each month (/pricing and pricing.txt)",
+          "value": 30,
+          "unit": "citations",
+          "source": "/pricing",
+          "source_url": "https://www.boostyourmaps.com/pricing",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "offer.rebuild_included",
+          "text": "The full $1,750 rebuild is included in the $450 monthly plan (/pricing)",
+          "value": 1750,
+          "unit": "USD",
+          "source": "/pricing",
+          "source_url": "https://www.boostyourmaps.com/pricing",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "offer.timeline",
+          "text": "Results typically begin in 60 to 90 days (BYM's own client experience)",
+          "value": "60 to 90 days",
+          "unit": "text",
+          "source": "pricing.txt",
+          "source_url": "https://www.boostyourmaps.com/pricing.txt",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "offer.timeline60",
+          "text": "60 days",
+          "value": 60,
+          "unit": "days",
+          "source": "pricing.txt",
+          "source_url": "https://www.boostyourmaps.com/pricing.txt",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "offer.timeline90",
+          "text": "90 days",
+          "value": 90,
+          "unit": "days",
+          "source": "pricing.txt",
+          "source_url": "https://www.boostyourmaps.com/pricing.txt",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "offer.fit_reviews",
+          "text": "At least 20 Google reviews",
+          "value": 20,
+          "unit": "reviews",
+          "source": "pricing.txt",
+          "source_url": "https://www.boostyourmaps.com/pricing.txt",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "offer.report_24h",
+          "text": "The free visibility report comes back within 24 hours",
+          "value": 24,
+          "unit": "hours",
+          "source": "BYM site report form copy (templates/local-service-page-main.html, fixed text)",
+          "retrieved_on": "2026-11-10",
+          "source_url": "https://www.boostyourmaps.com/pricing.txt"
+        }
+      ]
+    }
+  }
+}
