@@ -1,14 +1,70 @@
 {
-  "_about": "Defaults for shared/local-pages. Read by scripts/local_gate.py and scripts/demand.py. Values marked in _awaiting_mike are the research's recommended defaults (research/04-local-page-anatomy.md, 2026-11-10) and wait for Mike's decision. A site can override any value with its own JSON passed as --config.",
+  "_about": "Defaults for shared/local-pages 0.3. Read by scripts/local_gate.py and scripts/demand.py (and, through the copy the BYM site vendors, by its CI and the BYM Team connector). A site can override any value with its own JSON passed as --config. 0.3 (2026-11-11, Mike approved the 'Will it rank?' standard): client service x city pages (buyer-page) are lean and built to rank only after shared/rank-check Check 1 passes; BYM industry x city pages (owner-report) are sales assets, never ranking pages. Evidence: seo-system/research/08-what-ranks.md 4.1-4.2, 09-serp-teardown.md 3.8, 5, 6(c), 10-coach-panel.md.",
+  "version": "0.3.0",
   "_awaiting_mike": [
-    "skeleton: fixed section order and fixed H2 patterns on every page (replaces the module-order fingerprint and the heading registry)",
-    "modules.map.depth_min/depth_target: one Maps search read to depth 20-30, not top three only",
-    "modules.reviews.sample_target: a 60-review sample of the top three",
-    "floor: 12 unique sourced data points from 3 or more data modules; build_rules: the data floor refuses some pages",
-    "profiles.owner-report: BYM city pages are local market reports; the industry hub is the SEO target",
-    "profiles.buyer-page.existing_pages: Legacy Linen's 30 city x service pages, fold into 5 city hubs or keep",
-    "Tampa PR #8 (old system) is not merged as is"
+    "lean.padding: over 1.6x the top-3 median word count (or median + 300) fails; over 1.25x warns",
+    "lean.local_proof_min_kinds: 2 of office or address, named staff, reviews from the city, job photos",
+    "check1.fresh_days: a Check 1 record older than 90 days is run again",
+    "owner-report sales assets ship indexable (not noindex), outside the ranking queue (bym-local-service-pages)",
+    "profiles.buyer-page.existing_pages: Legacy Linen's 30 city x service pages, fold into 5 city hubs or keep"
   ],
+  "profiles": {
+    "buyer-page": {
+      "_about": "The ranking program: a consumer business's service x city page (reader buys the service). Lean anatomy, Check 1 first, profile-first plan. Competitors are never named; the map read is internal.",
+      "role": "rank",
+      "anatomy": "lean",
+      "profile_first": true,
+      "competitor_names_allowed": false,
+      "existing_pages": "keep-until-mike-decides"
+    },
+    "owner-report": {
+      "_about": "BYM industry x city market report for the owner of a company in the trade: a sales or outreach asset sent to a named prospect or campaign, never targeted for ranking or reported on rank. Keeps the fixed skeleton below.",
+      "role": "sales-asset",
+      "anatomy": "skeleton",
+      "profile_first": false,
+      "competitor_names_allowed": true,
+      "words_min": 600,
+      "words_max": 1400
+    }
+  },
+  "check1": {
+    "_about": "Check 1 is shared/rank-check's 'should this page exist' gate (shared/rank-check/references/). local-pages only checks that its record is there, passes and is fresh, plus the local reading of two of its checks. If rank-check renames a check, add the new name under aliases; rank-check's thresholds win over the two under local.",
+    "checks": ["demand", "page_type", "authority_gap", "overlap", "unique_asset", "serves_city"],
+    "aliases": {
+      "demand": ["G0.1", "C1.1"],
+      "page_type": ["G0.2", "C1.2", "serp_type"],
+      "authority_gap": ["G0.3", "C1.3", "authority"],
+      "overlap": ["G0.4", "C1.4", "intent_ownership"],
+      "unique_asset": ["G0.5", "C1.5", "reason_we_can_win"],
+      "serves_city": ["G0.6", "C1.6", "serves_area"]
+    },
+    "fresh_days": 90,
+    "local": {
+      "demand_min_monthly": 50,
+      "gsc_impressions_90d_min": 50,
+      "demand_source_pattern": "keyword planner|demand\\.py|search console|gsc",
+      "local_pages_in_top10_min": 4
+    }
+  },
+  "lean": {
+    "_about": "buyer-page anatomy (references/anatomy.md): one page per service and city, service + city in the title, H1 and URL, phone and quote on the first phone screen, what the top 3 cover, local proof, FAQ only from real SERP questions, length from the top 3's median.",
+    "first_screen_words": 120,
+    "quote_pattern": "quote|estimate|inspection|book|schedule|appointment|request service|contact",
+    "faq_heading_pattern": "\\bfaqs?\\b|frequently asked|\\bquestions\\b",
+    "local_proof_min_kinds": 2,
+    "coverage_min_top3": 2,
+    "coverage_min_share": 0.8,
+    "unique_local_facts_min": 3,
+    "swap_note_share": 0.3,
+    "info_gain_modules": ["demand", "reviews", "price"],
+    "padding": {"words_warn_ratio": 1.25, "words_max_ratio": 1.6, "words_slack": 300, "words_thin_ratio": 0.5, "city_mentions_max_ratio": 1.5, "city_mentions_slack": 3}
+  },
+  "profile_first": {
+    "_about": "Every buyer-page build ships with its profile plan: bym/gbp-ops gets the website link to this page for the city, the primary category and the review plan; shared/citation-building gets the link and citation tasks.",
+    "gbp_ops_tasks": ["website_link", "primary_category", "reviews"],
+    "citation_building_min_tasks": 1
+  },
+  "_skeleton_about": "owner-report only (anatomy 'skeleton'): the fixed section order and H2 patterns of a BYM market report.",
   "skeleton": [
     {"slot": 1, "id": "hero", "h": "h1", "pattern": "{service} in {city}, {region}", "data_slot": false, "fixed_text": true},
     {"slot": 2, "id": "market", "h": "h2", "pattern": "The {city} map today|{service} in {city}: what we see|What we see in {city}", "data_slot": true, "modules": ["map", "first_party"]},
@@ -20,6 +76,7 @@
     {"slot": 8, "id": "next", "h": "h2", "pattern": ".+", "data_slot": false, "fixed_text": true}
   ],
   "fixed_text_max_words": 150,
+  "_modules_about": "Data modules are optional since 0.3: include one only where it adds what the top 10 lack (rank-check L7), never to reach a count. Below an included module's honesty minimums it is dropped, never padded.",
   "modules": {
     "map": {"code": "M1", "counts": true, "min_facts": 6, "depth_min": 20, "depth_target": 30, "min_results": 3, "real_business_min_reviews": 10},
     "first_party": {"code": "M2", "counts": true, "min_facts": 3, "min_jobs_12m": 3},
@@ -28,70 +85,35 @@
     "proof": {"code": "M5", "counts": true, "min_facts": 1},
     "price": {"code": "M6", "counts": true, "min_facts": 1, "price_tags_min": 10},
     "questions": {"code": "M7", "counts": true, "min_facts": 3},
-    "offer": {"code": "FIXED", "counts": false, "min_facts": 0}
+    "offer": {"code": "FIXED", "counts": false, "min_facts": 0},
+    "local_proof": {"code": "L4", "counts": true, "min_facts": 0, "kinds": ["office", "staff", "city_review", "job_photo"]}
   },
   "floor": {
     "min_unique_data_points": 12,
-    "min_data_modules": 3
+    "min_data_modules": 3,
+    "blocking": false,
+    "_about": "Advisory since 0.3 (a warning, owner-report only): the market report's expected depth, not a ranking rule."
   },
-  "swap_test": {
-    "min_data_sentence_share": 0.7,
-    "first_sentence_must_carry_data": true,
-    "min_sentence_words": 4
-  },
+  "swap_test": {"min_data_sentence_share": 0.7, "first_sentence_must_carry_data": true, "min_sentence_words": 4},
   "similarity": {
     "shingle_size": 5,
     "any_page_max": 0.15,
-    "same_service_or_city_max": 0.12
+    "same_service_or_city_max": 0.12,
+    "_about": "5-word shingle Jaccard of prose (fixed blocks and headings excluded), with each page's own city name neutralised so a city swap can't hide a copy."
   },
-  "sourcing": {
-    "ignore_small_integers_upto": 3,
-    "warn_age_days": 120,
-    "fail_age_days": 365,
-    "first_party_sources_ok_without_url": true
-  },
-  "profiles": {
-    "owner-report": {
-      "_about": "Reader = the owner of a company in the trade (BYM industry x city). The page is a local market report; the industry hub carries the national keyword.",
-      "competitor_names_allowed": true,
-      "words_min": 600,
-      "words_max": 1400
-    },
-    "buyer-page": {
-      "_about": "Reader = someone buying the service (a client's service x city page). Competitors are never named; the map read is internal.",
-      "competitor_names_allowed": false,
-      "words_min": 500,
-      "words_max": 1400,
-      "existing_pages": "keep-until-mike-decides"
-    }
-  },
+  "sourcing": {"ignore_small_integers_upto": 3, "warn_age_days": 120, "fail_age_days": 365, "first_party_sources_ok_without_url": true},
   "build_rules": {
+    "_about": "G7. buyer-page: a passing Check 1 record first. owner-report: a named sales target. Both: the doorway rules (too close, same market, no live hub, not served, paused).",
     "owner-report": {
-      "demand_min_monthly": 100,
-      "proof_levels_that_count": [
-        1,
-        2,
-        3
-      ],
+      "requires_sales_target": true,
+      "requires_proof_or_snapshot": true,
+      "proof_levels_that_count": [1, 2, 3],
       "snapshot_fresh_days": 30,
       "require_parent_hub": true,
       "serp_overlap_organic_top10": 7,
       "serp_overlap_maps_top3": 2
     },
-    "buyer-page": {
-      "demand_min_monthly": 30,
-      "gsc_impressions_90d_min": 50,
-      "first_party_min": 3,
-      "proof_levels_that_count": [
-        1,
-        2,
-        3
-      ],
-      "snapshot_fresh_days": 30,
-      "require_parent_hub": true,
-      "serp_overlap_organic_top10": 7,
-      "serp_overlap_maps_top3": 2
-    },
+    "buyer-page": {"requires_check1": true, "require_parent_hub": true, "serp_overlap_organic_top10": 7, "serp_overlap_maps_top3": 2},
     "default_grid_spacing_km": 2.0
   },
   "banned_filler": [
