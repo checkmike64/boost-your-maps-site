@@ -1,9 +1,14 @@
 # Local service pages
 
 Industry × city pages: "Local SEO and Google Maps marketing for [industry] companies in [city]".
-Since 2026-11-10 they are local market reports built with **local pages 2.0**: one fixed skeleton,
-filled with data that only exists for this trade in this city (who is on the map, how many people
-search and when, what customers say and pay, BYM's proof). The process lives in `Impact-Leads-LLC/ai-skills`:
+They are local market reports built with `shared/local-pages` (0.3): one fixed skeleton, filled with
+data that only exists for this trade in this city (who is on the map, how many people search and when,
+what customers say and pay, BYM's proof). **Since 2026-11-11 they are sales assets** (Mike approved the
+"Will it rank?" standard): each one is made for a named prospect company or campaign that will be sent
+it, has a `sales-asset` row in `brain.web_page_queue` naming that target, and is never targeted for
+ranking or reported on rank. Nobody searches "[trade] seo [city]"; BYM's ranking effort goes to the
+industry hubs. Sales assets ship indexable and in the sitemap, linked from their hub; Mike switches them
+to `noindex` if one industry passes 15 reports or a Search Console pause signal shows up. The process lives in `Impact-Leads-LLC/ai-skills`:
 `shared/page-pipeline` (the door for every page: queue row, intent check, gates, cadence, review
 record, PR), `shared/local-pages` (skeleton, data modules, gates) and `bym/bym-local-service-pages`
 (the BYM layer, also published to the BYM second brain). This folder and the files below are the
@@ -34,10 +39,11 @@ were version 1. They are retired.
 
 ## How a page gets published
 
-1. A builder runs `bym-local-service-pages` 2.0 (on `shared/local-pages`) from an approved queue
-   row: Maps snapshot, `page-data.json`, plan, draft, `local_gate.py`, `shared/anti-ai-writing`,
-   review, then `publish_page`.
-2. The connector checks the queue row, the intent (no other page owns the search) and cadence, runs
+1. A builder runs `bym-local-service-pages` 3.0 (on `shared/local-pages`) for a named prospect or
+   campaign: Maps snapshot, `page-data.json` (with `build_check.sales_asset.target`), plan, draft,
+   `local_gate.py`, `shared/anti-ai-writing`, review, then `publish_page`.
+2. The connector checks the sales target and writes (or converts) the `sales-asset` queue row, the
+   intent (no other page owns the search) and cadence, runs
    the same gate as CI, then opens a pull request on a `local-page-<industry>-<city>` branch with the
    page, its `page-data.json`, the Maps read and image briefs, plus the sitemap, llms.txt and hub
    updates. It records the review in the brain.
@@ -54,16 +60,16 @@ publishing" blocks the merge, because branch protection requires the `local-page
 
 ## What the checker enforces
 
-- **Data (the local-pages 2.0 gate):** `page-data.json` exists, matches the page's path and uses the
-  `owner-report` profile, and `local_gate.py` passes with every other city page as a sibling: the
-  data floor (12 unique sourced data points from 3 modules), every number backed by a fact, each
-  data section opening with a local data point (city-swap test), 5-word overlap with the other city
-  pages (15%, or 12% for the same trade or city), no banned filler (census, landmarks, roads,
+- **Data (the local-pages 0.3 gate):** `page-data.json` exists, matches the page's path and uses the
+  `owner-report` profile, and `local_gate.py` passes with every other city page as a sibling: a named
+  sales target (`build_check.sales_asset.target`), every number backed by a fact, each data section
+  opening with a local data point (city-swap test), 5-word overlap with the other city pages with the
+  city names neutralised (15%, or 12% for the same trade or city), no banned filler (census, landmarks, roads,
   weather, permits, utilities, tourism, place lists, asking customers for specific review content or
   review quotas), the build check, proof labels and map honesty (a likely lead-generation listing in
   the Maps top three is labeled wherever the page names it; anonymous proof carries no rank words
-  unless it is in the read), and the fixed skeleton (slot order and H2 patterns). No word target:
-  600 to 1,400 words is a warning only.
+  unless it is in the read), and the fixed skeleton (slot order and H2 patterns). The data floor (12
+  unique data points from 3 modules) and the 600 to 1,400 word band are warnings only.
 - **Site rules:** title and meta lengths, canonical, the H1, the JSON-LD graph (FAQPage generated
   from the visible FAQ), dates matching `page-data.json`, banned voice terms, the CTA text, links,
   the hero image (uploaded, size, pixel dimensions), the skeleton's markup and stylesheet classes,
@@ -86,20 +92,21 @@ industry's first page may also add that industry's starter hub and list it betwe
 
 ## New industries and cities
 
-Any industry and any city can be built without asking Mike (decided 2026-10-05). The 2.0 build check
-is a data-quality gate on top: no consumer demand and no first-party reason, no proof and no fresh
-Maps read, no live hub, or too close to another page, and the page isn't built.
+Any industry and any city can be built without asking Mike (decided 2026-10-05), as long as the report
+has a named prospect or campaign. The build check on top: no sales target, no proof and no fresh Maps
+read, no live hub, or too close to another report, and the page isn't built.
 
 **The queue row.** page-pipeline and the connector record every page as a row in
 `brain.web_page_queue`, and build only from an `approved` one. To keep the 2026-10-05 "no approval"
-rule, the connector approves the row itself when a page ships (or adds it, and notes that it did).
+rule, the connector approves the row itself when a page ships (or adds it, and notes that it did), and
+types it `sales-asset` with the target from `page-data.json`.
 That is the default: `config.json` `queue.auto_approve` is `true`, or absent. Mike sets it to `false`
 only if he wants to approve rows himself, in batches.
 
 The page's spec carries `industry_name` (how the trade reads in "for roofing companies in Tampa").
 When the first page in a new industry is published, the connector adds a starter hub from
 `templates/local-service-hub-main.html` and lists the industry on `/google-maps-marketing`, in the
-same pull request. In 2.0 the hub is the trade's ranking page, so a full hub (built through
+same pull request. The hub is the trade's ranking page, so a full hub (built through
 page-pipeline, like pest control's in `scripts/local_pages/build_hub_pages.py`) should come first.
 
 ## Pausing

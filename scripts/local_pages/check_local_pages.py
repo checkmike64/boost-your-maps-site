@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Publish gate for the industry x city local service pages (/google-maps-marketing/<industry>/<city-st>).
 
-Version 2 (2026-11-10): pages are built with ai-skills `shared/local-pages` 2.0. The content gate is
+Version 2 (2026-11-10): pages are built with ai-skills `shared/local-pages`. The content gate is
 that skill's own `local_gate.py`, vendored in `scripts/local_pages/vendor/local-pages/` (CI can't
-read the private skills repo). This script adds the site rules around it.
+read the private skills repo). This script adds the site rules around it. Since local-pages 0.3
+(2026-11-11) these pages are sales assets: the gate's build check needs a named sales target.
 
 Runs in CI on every pull request and can be run locally:
 
@@ -14,9 +15,10 @@ Runs in CI on every pull request and can be run locally:
 What it enforces (rules come from local-pages/config.json and the vendored local-pages config):
   data        local-pages/<industry>/<city>/page-data.json exists, matches the page's path, uses the
               owner-report profile, and local_gate.py passes on the page with every other city page as
-              a sibling: data floor (G1), sourcing and every number backed by a fact (G2), city swap
-              (G3), 5-word overlap with siblings (G4), banned filler (G5), build check (G7), proof
-              labels (G8), and the fixed skeleton (slot order and H2 patterns)
+              a sibling: sourcing and every number backed by a fact (G2), city swap (G3), 5-word
+              overlap with siblings, city names neutralised (G4), banned filler (G5), build check with
+              the sales target (G7), proof labels (G8), and the fixed skeleton (slot order and H2
+              patterns); the data floor (G1) warns
   structure   title/meta lengths, canonical, one H1, JSON-LD graph (WebPage, Service, BreadcrumbList,
               FAQPage == visible FAQ), dates match page-data, banned voice terms, CTA text, links,
               images (hero required, uploaded, size and pixel dimensions)
@@ -599,6 +601,13 @@ def check_guard(changes: dict[str, str], base: str, r: Report):
         r.err(path, "outside the files a local page pull request may change")
 
 
+def vendored_version() -> str:
+    try:
+        return str(json.loads((VENDOR / "config.json").read_text(encoding="utf-8")).get("version") or "0.2")
+    except (OSError, json.JSONDecodeError):
+        return "unknown"
+
+
 def vendored_from() -> str:
     first = GATE.read_text(encoding="utf-8").splitlines()[0] if GATE.exists() else ""
     m = re.search(r"ai-skills@([0-9a-f]{7,40})", first)
@@ -657,7 +666,7 @@ def main() -> int:
         check_guard(changes, a.base, r)
 
     out = ["## Local service page check", "",
-           f"Gate: `shared/local-pages` 2.0 (`local_gate.py` vendored from ai-skills@{vendored_from()}).", ""]
+           f"Gate: `shared/local-pages` {vendored_version()} (`local_gate.py` vendored from ai-skills@{vendored_from()}).", ""]
     if not targets:
         out.append("No local service pages changed in this pull request.")
     else:

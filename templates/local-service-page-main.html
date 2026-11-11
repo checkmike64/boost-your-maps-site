@@ -1,9 +1,10 @@
 <!--
-  LOCAL SERVICE PAGE: MAIN CONTENT SKELETON (local pages 2.0)
-  ===========================================================
+  LOCAL SERVICE PAGE: MAIN CONTENT SKELETON (local-pages 0.3: a market report, a sales asset)
+  ============================================================================================
   The markup a drafter fills in: everything that goes INSIDE <main>. The process is
-  ai-skills bym/bym-local-service-pages 2.0 on shared/local-pages, entered through
-  shared/page-pipeline (an approved brain.web_page_queue row). The BYM Team connector (or the
+  ai-skills bym/bym-local-service-pages 3.0 on shared/local-pages, entered through
+  shared/page-pipeline (an approved 'sales-asset' row in brain.web_page_queue that names the
+  prospect company or campaign the report is for; these pages are never built to rank). The BYM Team connector (or the
   local harness in ai-skills bym/bym-team-connector/tests) wraps it in
   templates/local-service-page-shell.html, builds the JSON-LD from the spec and the visible FAQ,
   and fills these tokens:
@@ -15,16 +16,17 @@
                        /visibility-report, built from spec.report_areas
 
   The page's data travels beside it as local-pages/<industry>/<city-st>/page-data.json. Every
-  name, number and date on the page is a fact there, with its source and date.
+  name, number and date on the page is a fact there, with its source and date, and
+  build_check.sales_asset.target names who the report is for.
 
   What CI checks (scripts/local_pages/check_local_pages.py, which runs the vendored local_gate.py):
     - the eight slots below in this order, H2s on the fixed patterns (a slot whose data dropped
       out is left out; the order never changes)
-    - the data floor (12 unique sourced data points from 3 modules), every number backed by a
-      fact, each data section opening with a local data point (city-swap test), overlap with the
+    - the sales target, every number backed by a fact, each data section opening with a local data point (city-swap test), overlap with the
       other city pages, no banned filler (census, landmarks, roads, weather, permits, utilities,
       tourism, place lists, asking for specific review content or review quotas), the build check,
-      proof labels, and a likely lead-generation listing in the top three labeled wherever it is named
+      proof labels, and a likely lead-generation listing in the top three labeled wherever it is named;
+      the data floor (12 unique sourced data points from 3 modules) is a warning
     - the hero first, the closing section last, <div class="wrap"> first in every section, only
       classes the site stylesheet defines, FAQ items as <div class="qa"><h3>..</h3><p>..</p></div>
     - primary buttons say exactly "Get my free visibility report →"; no href="#"

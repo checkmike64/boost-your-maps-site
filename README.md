@@ -116,7 +116,8 @@ Every new page goes through `ai-skills/shared/page-pipeline` (see CLAUDE.md). Th
 - **Service pages:** `templates/service-page-template.html`. READ THE
   COMMENT BLOCK AT THE TOP — it encodes Google's spam policies (no city-list stuffing,
   no doorway pages, every page needs real unique local content).
-- **City pages** (`/google-maps-marketing/<industry>/<city-st>`): the local-pages 2.0 skeleton in
+- **City pages** (`/google-maps-marketing/<industry>/<city-st>`): market reports for a named prospect or
+  campaign (sales assets, never built to rank), on the local-pages skeleton in
   `templates/local-service-page-main.html`, built from real local data. See `local-pages/README.md`.
 - **Blog posts:** copy `templates/blog-post-template.html` into `/blog/`. Answer-first
   structure, question H2s, real author byline.
