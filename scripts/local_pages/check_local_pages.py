@@ -1,25 +1,40 @@
 #!/usr/bin/env python3
 """Publish gate for the industry x city local service pages (/google-maps-marketing/<industry>/<city-st>).
 
+Version 2 (2026-11-10): pages are built with ai-skills `shared/local-pages`. The content gate is
+that skill's own `local_gate.py`, vendored in `scripts/local_pages/vendor/local-pages/` (CI can't
+read the private skills repo). This script adds the site rules around it. Since local-pages 0.3
+(2026-11-11) these pages are sales assets: the gate's build check needs a named sales target.
+
 Runs in CI on every pull request and can be run locally:
 
   python3 scripts/local_pages/check_local_pages.py                  # check every city page
   python3 scripts/local_pages/check_local_pages.py --base origin/main  # check pages changed vs main
   python3 scripts/local_pages/check_local_pages.py --base origin/main --guard   # + publisher path guard
 
-What it enforces (rules come from local-pages/config.json and the BYM local service page process):
-  structure   page-meta, title/meta lengths, canonical, one H1, JSON-LD graph, FAQ schema == visible FAQ,
-              module order, 4-6 module sections, word count, banned voice terms, CTA text, images
-  markup      the skeleton's section wrappers, R1/CLOSE/FAQ blocks, only classes the site stylesheet
-              defines, no placeholders
-  facts      fact sheet (>= 8 sourced facts, one ANCHOR) and Maps snapshot sidecars; snapshot names,
-              review counts and date appear on the page
-  variety     5-word shingle Jaccard vs every other city page (15% any, 12% same industry or city),
-              sitewide boilerplate (8%), heading and FAQ registry, module fingerprint
-  wiring      industry hub exists and links the page, sitemap.xml (with lastmod) and llms.txt list it
-  governance  industry approved, publishing not paused, first-batch hold and monthly cadence,
-              hero angle not repeated back to back in an industry
+What it enforces (rules come from local-pages/config.json and the vendored local-pages config):
+  data        local-pages/<industry>/<city>/page-data.json exists, matches the page's path, uses the
+              owner-report profile, and local_gate.py passes on the page with every other city page as
+              a sibling: sourcing and every number backed by a fact (G2), city swap (G3), 5-word
+              overlap with siblings, city names neutralised (G4), banned filler (G5), build check with
+              the sales target (G7), proof labels (G8), and the fixed skeleton (slot order and H2
+              patterns); the data floor (G1) warns
+  structure   title/meta lengths, canonical, one H1, JSON-LD graph (WebPage, Service, BreadcrumbList,
+              FAQPage == visible FAQ), dates match page-data, banned voice terms, CTA text, links,
+              images (hero required, uploaded, size and pixel dimensions)
+  markup      section wrappers, the hero and closing blocks, the FAQ wrapper, only classes the site
+              stylesheet defines, no placeholders
+  variety     the FAQ registry (no question repeated from another city page) and sitewide
+              boilerplate in the non-fixed text
+  wiring      the index and the industry hub exist, the hub links the page, sitemap.xml (with
+              lastmod) and llms.txt list it
+  governance  publishing not paused (local-pages/config.json). Cadence is advisory and lives in
+              ai-skills shared/page-pipeline (cadence.py) and the BYM Team connector, not here
   guard       (--guard) a publisher pull request only touches local-page files
+
+Retired with version 1: the fact sheet (8 facts, ANCHOR), hero angles and snapshot observations, the
+module-order fingerprint, the heading registry, the 1,000-1,600 word band (now 600-1,400, a warning
+only), the first-batch hold and the monthly cap.
 Standard library only. Exit code 1 when anything fails.
 """
 from __future__ import annotations
@@ -30,9 +45,11 @@ import html
 import json
 import os
 import re
+import shutil
 import struct
 import subprocess
 import sys
+import tempfile
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
@@ -41,7 +58,12 @@ CONFIG = json.loads((ROOT / "local-pages" / "config.json").read_text(encoding="u
 T = CONFIG["thresholds"]
 ORIGIN = CONFIG["site_origin"]
 SECTION = CONFIG["section"]
+SITE_KEY = CONFIG.get("site_key", "bym")
+PROFILE = "owner-report"
 CITY_RE = re.compile(rf"^{SECTION}/([a-z0-9-]+)/([a-z0-9-]+-[a-z]{{2}})\.html$")
+VENDOR = ROOT / "scripts" / "local_pages" / "vendor" / "local-pages"
+GATE = VENDOR / "scripts" / "local_gate.py"
+SIDECARS = ("page-data.json", "snapshot.json", "images.md")
 STOP = set("a an the and or of for to in on at by with your our you we us is are it its this that from how "
            "what why when who which do does can be".split())
 MONTHS = "January February March April May June July August September October November December".split()
@@ -88,15 +110,22 @@ def main_html(src: str) -> str:
 
 
 def authored_html(main: str) -> str:
-    """Main content minus generated blocks (form, fixed report lines, image markup)."""
+    """Main content minus generated blocks (form, image markup) and comments."""
     m = re.sub(r"<!--\s*generated:start.*?generated:end\s*-->", " ", main, flags=re.S)
     m = re.sub(r"<select\b.*?</select>", " ", m, flags=re.S)
     return re.sub(r"<!--.*?-->", " ", m, flags=re.S)
 
 
-def words_for_similarity(main: str) -> list[str]:
-    t = strip_tags(authored_html(main)).lower()
-    for phrase in CONFIG["allowed_repeat_phrases"]:
+def written_html(main: str) -> str:
+    """The page's own writing: authored content minus fixed blocks (offer, report line, CTA) and headings."""
+    m = re.sub(r"<!--\s*fixed:start\s*-->.*?<!--\s*fixed:end\s*-->", " ", main, flags=re.S)
+    m = re.sub(r"<h[1-4]\b.*?</h[1-4]>", " ", m, flags=re.S)
+    return authored_html(m)
+
+
+def similarity_words(main: str) -> list[str]:
+    t = strip_tags(written_html(main)).lower()
+    for phrase in CONFIG.get("allowed_repeat_phrases", []):
         t = t.replace(phrase, " ")
     return re.findall(r"[a-z0-9$']+", t)
 
@@ -110,12 +139,7 @@ def page_meta(src: str) -> dict[str, str]:
     return dict(re.findall(r'([a-z_]+)="([^"]*)"', m.group(1))) if m else {}
 
 
-def fingerprint(main: str) -> list[str]:
-    codes = re.findall(r"<!--\s*((?:R\d|M\d+)(?:\s*\+\s*M\d+)*|CLOSE)\b", main)
-    return [re.sub(r"\s+", "", c) for c in codes]
-
-
-def norm_heading(h: str, industry: str, city: str) -> str:
+def norm_question(h: str, industry: str, city: str) -> str:
     h = strip_tags(h).lower()
     for w in industry.split("-") + city.split("-"):
         h = re.sub(r"\b%s\b" % re.escape(w), " ", h)
@@ -172,6 +196,13 @@ def long_date(iso: str) -> str:
     return f"{MONTHS[d.month - 1]} {d.day}, {d.year}"
 
 
+def load_json(path: Path) -> tuple[dict | None, str | None]:
+    try:
+        return json.loads(path.read_text(encoding="utf-8")), None
+    except json.JSONDecodeError as exc:
+        return None, str(exc)
+
+
 class Page:
     def __init__(self, path: str, src: str):
         self.path, self.src = path, src
@@ -180,14 +211,16 @@ class Page:
         self.meta = page_meta(src)
         self.main = main_html(src)
         self.text = squash(strip_tags(authored_html(self.main)))
-        self.sh = shingles(words_for_similarity(self.main), T["shingle_size"])
-        self.fp = fingerprint(self.main)
+        self.sh = shingles(similarity_words(self.main), T.get("shingle_size", 5))
         self.faq = faq_pairs(self.main)
-        heads = re.findall(r"<h[23][^>]*>(.*?)</h[23]>", self.main, re.S)
-        self.heads = [norm_heading(h, self.industry, self.city) for h in heads]
+        self.questions = [norm_question(q, self.industry, self.city) for q, _ in self.faq]
         self.url = f"{ORIGIN}/{SECTION}/{self.industry}/{self.city}"
-        self.published = self.meta.get("published", "")
-        self.angle = self.meta.get("hero_angle", "")
+        self.folder = ROOT / "local-pages" / self.industry / self.city
+        self.data_path = self.folder / "page-data.json"
+        self.data, self.data_error = load_json(self.data_path) if self.data_path.exists() else (None, None)
+        d = self.data or {}
+        self.published = str(d.get("published") or self.meta.get("published", ""))
+        self.modified = str(d.get("modified") or self.meta.get("modified", ""))
 
 
 # ---------------------------------------------------------------- checks
@@ -196,6 +229,7 @@ class Report:
         self.errors: list[str] = []
         self.warnings: list[str] = []
         self.lines: list[str] = []
+        self.gate: dict[str, dict] = {}
 
     def err(self, where: str, msg: str):
         self.errors.append(f"`{where}`: {msg}")
@@ -207,20 +241,16 @@ class Report:
 def check_structure(p: Page, r: Report):
     where = p.path
     src = p.src
-    if p.meta.get("industry") != p.industry or p.meta.get("city") != p.city:
+    if p.meta and (p.meta.get("industry") != p.industry or p.meta.get("city") != p.city):
         r.err(where, "page-meta industry/city must match the file path")
     known = {**CONFIG.get("approved_industries", {}), **CONFIG.get("industries", {})}
     if CONFIG.get("restrict_industries") and p.industry not in known:
         r.err(where, f"industry '{p.industry}' is not on the industry list in local-pages/config.json (restrict_industries is on)")
-    if p.angle not in CONFIG["hero_angles"]:
-        r.err(where, f"page-meta hero_angle '{p.angle}' is not one of {CONFIG['hero_angles']}")
-    if p.meta.get("snapshot_observation") not in CONFIG["snapshot_observations"]:
-        r.err(where, "page-meta snapshot_observation is missing or not in the approved list")
-    for key in ("published", "modified", "snapshot_date"):
+    for key, value in (("published", p.published), ("modified", p.modified)):
         try:
-            dt.date.fromisoformat(p.meta.get(key, ""))
+            dt.date.fromisoformat(value)
         except ValueError:
-            r.err(where, f"page-meta {key} must be a YYYY-MM-DD date")
+            r.err(where, f"{key} must be a YYYY-MM-DD date in page-data.json")
 
     title = html.unescape(squash(re.search(r"<title>(.*?)</title>", src, re.S).group(1))) if "<title>" in src else ""
     if not title:
@@ -241,29 +271,8 @@ def check_structure(p: Page, r: Report):
     elif not squash(strip_tags(h1s[0])).startswith("Local SEO and Google Maps marketing for"):
         r.err(where, "H1 must read 'Local SEO and Google Maps marketing for [industry] companies in [City]'")
 
-    # module order
-    fp = p.fp
-    modules = [c for c in fp if c.startswith("M")]
-    if not fp or fp[0] != "R1":
-        r.err(where, f"R1 HERO must be the first section (found {' '.join(fp)})")
-    if "R2" not in fp[1:3]:
-        r.err(where, "R2 MARKET SNAPSHOT must be the second or third section")
-    for code in ("R3", "R4", "CLOSE"):
-        if code not in fp:
-            r.err(where, f"missing required section {code}")
-    if "R3" in fp and "R4" in fp and fp.index("R3") > fp.index("R4"):
-        r.err(where, "R3 (price, terms, proof) must come before R4 (report panel)")
-    if fp and fp[-1] != "CLOSE":
-        r.err(where, "CLOSE must be the last section")
-    if not any(c.startswith("M12") for c in modules):
-        r.err(where, "M12 FAQ is required on every page")
-    if not T["module_sections_min"] <= len(modules) <= T["module_sections_max"]:
-        r.err(where, f"use {T['module_sections_min']}-{T['module_sections_max']} module sections including the FAQ (found {len(modules)})")
-    if len(set(fp)) != len(fp):
-        r.err(where, "a section code appears twice")
-
-    # FAQ + schema
-    if not T["faq_min"] <= len(p.faq) <= T["faq_max"]:
+    # FAQ + schema. The questions slot may drop out (local-pages 2.0); when it's there it has 3-5 questions.
+    if p.faq and not T["faq_min"] <= len(p.faq) <= T["faq_max"]:
         r.err(where, f"FAQ needs {T['faq_min']}-{T['faq_max']} questions (found {len(p.faq)})")
     try:
         blocks = json_ld(src)
@@ -272,9 +281,11 @@ def check_structure(p: Page, r: Report):
         blocks = []
     graph = [n for b in blocks for n in b.get("@graph", [b])]
     types = {n.get("@type"): n for n in graph}
-    for t in ("WebPage", "Service", "BreadcrumbList", "FAQPage"):
+    for t in ("WebPage", "Service", "BreadcrumbList"):
         if t not in types:
             r.err(where, f"JSON-LD graph is missing {t}")
+    if p.faq and "FAQPage" not in types:
+        r.err(where, "JSON-LD graph is missing FAQPage (the page shows a FAQ)")
     if "FAQPage" in types:
         schema_faq = [(squash(q.get("name", "")), squash(q.get("acceptedAnswer", {}).get("text", "")))
                       for q in types["FAQPage"].get("mainEntity", [])]
@@ -290,18 +301,15 @@ def check_structure(p: Page, r: Report):
         wp = types["WebPage"]
         if wp.get("author", {}).get("name") != "Michael Moll":
             r.err(where, "WebPage author must be Michael Moll")
-        if wp.get("datePublished") != p.published or wp.get("dateModified") != p.meta.get("modified"):
-            r.err(where, "WebPage datePublished/dateModified must match page-meta published/modified")
+        if wp.get("datePublished") != p.published or wp.get("dateModified") != p.modified:
+            r.err(where, f"WebPage datePublished/dateModified must match page-data.json published/modified ({p.published}, {p.modified})")
     if "BreadcrumbList" in types:
         items = [i.get("item") for i in types["BreadcrumbList"].get("itemListElement", [])]
         want = [f"{ORIGIN}/", f"{ORIGIN}/{SECTION}", f"{ORIGIN}/{SECTION}/{p.industry}", p.url]
         if items != want:
             r.err(where, f"BreadcrumbList must be {want}")
 
-    # length + voice
-    n_words = len(p.text.split())
-    if not T["words_min"] <= n_words <= T["words_max"]:
-        r.err(where, f"main content must be {T['words_min']}-{T['words_max']} words (has {n_words})")
+    # voice
     visible = f"{title}\n{desc}\n{p.text}"
     for pat in CONFIG["banned_terms"]:
         for m in re.finditer(pat, visible, re.I):
@@ -358,8 +366,9 @@ def stylesheet_classes() -> set[str]:
     return set(re.findall(r"\.(-?[A-Za-z_][\w-]*)", css))
 
 
+# Template instructions left on the page: [Bracketed] text from the 2.0 skeleton, version 1 <Angle bracket> notes.
 PLACEHOLDER = re.compile(r"\[(?:PENDING|TODO|TBD|INSERT|PLACEHOLDER)[^\]]*\]|\bPENDING_[A-Z_]+|lorem ipsum|MAIN CONTENT SKELETON"
-                         r"|<[A-Z][a-zA-Z]*\s[^>]*>")
+                         r"|<[A-Z][a-zA-Z]*\s[^>]*>|\[(?:[A-Z]|\.\.\.)[^\]]{0,300}\]")
 
 
 def classes_of(attrs: str) -> set[str]:
@@ -373,20 +382,22 @@ def check_markup(p: Page, r: Report, css: set[str]):
     found: list[str] = []
     authored = authored_html(re.sub(r"<!-- R4 REPORT PANEL.*?<!-- /R4 -->", " ", p.main, flags=re.S))  # R4 is generated
     body = re.sub(r"<!--.*?-->", " ", p.main, flags=re.S)
-    for m in re.finditer(r"<section\b([^>]*)>\s*(?:<([a-z0-9]+)\b([^>]*)>)?", body):
+    sections = list(re.finditer(r"<section\b([^>]*)>\s*(?:<([a-z0-9]+)\b([^>]*)>)?", body))
+    for m in sections:
         cls = classes_of(m.group(1))
         label = f'<section class="{" ".join(sorted(cls))}">' if cls else "<section>"
         if not cls & {"section", "page-hero"}:
-            found.append(f"{label} needs the skeleton's section classes (\"page-hero\" for R1, \"section …\" for the rest)")
+            found.append(f"{label} needs the skeleton's section classes (\"page-hero\" for the hero, \"section …\" for the rest)")
         if m.group(2) != "div" or "wrap" not in classes_of(m.group(3) or ""):
             found.append(f"the first thing inside {label} must be <div class=\"wrap\">, as in the skeleton")
-    blocks = re.split(r"(?=<!--\s*(?:R\d|M\d+|CLOSE)\b)", p.main)
-    r1 = next((b for b in blocks if re.match(r"<!--\s*R1\b", b)), "")
-    if r1 and not ('class="page-hero"' in r1 and "lsp-hero" in r1):
-        found.append('R1 must be <section class="page-hero"><div class="wrap lsp-hero">, as in the skeleton')
-    close = next((b for b in blocks if re.match(r"<!--\s*CLOSE\b", b)), "")
-    if close and "final-cta" not in close:
-        found.append('CLOSE must be <section class="section flow final-cta">, as in the skeleton')
+    if not sections:
+        found.append("no <section> blocks: use the skeleton in templates/local-service-page-main.html")
+    else:
+        first, last = sections[0], sections[-1]
+        if "page-hero" not in classes_of(first.group(1)) or "lsp-hero" not in classes_of(first.group(3) or ""):
+            found.append('the hero must be the first section: <section class="page-hero"><div class="wrap lsp-hero">, as in the skeleton')
+        if "final-cta" not in classes_of(last.group(1)):
+            found.append('the last section must be <section class="section flow final-cta">, as in the skeleton')
     if 'class="qa"' in p.main and 'class="faq"' not in p.main:
         found.append('FAQ items go inside <div class="faq">')
     unknown = sorted({c for attrs in re.findall(r'\bclass="([^"]*)"', authored) for c in attrs.split()} - css)
@@ -399,53 +410,95 @@ def check_markup(p: Page, r: Report, css: set[str]):
         r.err(where, msg)
 
 
-def check_sidecars(p: Page, r: Report):
-    folder = ROOT / "local-pages" / p.industry / p.city
-    fs = folder / "fact-sheet.md"
-    if not fs.exists():
-        r.err(p.path, f"missing fact sheet {fs.relative_to(ROOT)}")
-    else:
-        text = fs.read_text(encoding="utf-8")
-        facts, anchors, section = 0, 0, ""
-        for line in text.splitlines():
-            if line.startswith("#"):
-                section = line.lower()
-                continue
-            if any(k in section for k in ("snapshot", "unverified", "correction", "not used")):
-                continue
-            if re.match(r"\s*(?:[-*]|\d+\.)\s", line) and "http" in line:
-                facts += 1
-                anchors += bool(re.search(r"anchor", line, re.I))
-        if facts < T["fact_sheet_min_facts"]:
-            r.err(p.path, f"fact sheet has {facts} sourced facts; the gate needs {T['fact_sheet_min_facts']}")
-        if anchors < 1:
-            r.err(p.path, "fact sheet must tag one fact as the page's ANCHOR fact")
-    sp = folder / "snapshot.json"
-    if not sp.exists():
-        r.err(p.path, f"missing Maps snapshot {sp.relative_to(ROOT)}")
+def check_data(p: Page, r: Report):
+    """page-data.json is there, belongs to this page, and the page states the search it reports."""
+    where = p.path
+    rel = p.data_path.relative_to(ROOT)
+    if p.data is None:
+        r.err(where, f"missing {rel}: local-pages 2.0 pages carry their data file (the fact sheet is retired)"
+              if not p.data_error else f"{rel} does not parse: {p.data_error}")
+        return False
+    d = p.data
+    want_slug = f"/{SECTION}/{p.industry}/{p.city}"
+    if d.get("slug") != want_slug:
+        r.err(where, f"{rel}: slug must be {want_slug} (has {d.get('slug')!r})")
+    if d.get("site_key") != SITE_KEY:
+        r.err(where, f"{rel}: site_key must be {SITE_KEY!r}")
+    if d.get("profile", PROFILE) != PROFILE:
+        r.err(where, f"{rel}: BYM city pages use the {PROFILE!r} profile (has {d.get('profile')!r})")
+    if d.get("page_type", "city") != "city":
+        r.err(where, f"{rel}: page_type must be 'city'")
+    searched = ((d.get("modules") or {}).get("map") or {}).get("meta", {}).get("searched_on")
+    if searched:
+        try:
+            if long_date(str(searched)[:10]) not in p.text:
+                r.err(where, f"the page must state the date of its Maps search ({long_date(str(searched)[:10])})")
+        except ValueError:
+            pass  # local_gate reports the bad date
+    sp = p.folder / "snapshot.json"
+    if sp.exists():
+        snap, problem = load_json(sp)
+        if snap is None:
+            r.err(where, f"{sp.relative_to(ROOT)} does not parse: {problem}")
+        else:
+            low = p.text.lower().replace("&", "and")
+            for res in (snap.get("results") or [])[:3]:
+                name = str(res.get("name", "")).lower().replace("&", "and")
+                if name and name not in low:
+                    r.err(where, f"snapshot result '{res.get('name')}' (top three) is not named on the page as it appears on Google")
+    return True
+
+
+V1_ONLY_KEYS = ("fact_sheet_min_facts", "module_sections_min", "module_sections_max")
+
+
+def gate_override() -> dict:
+    """Site values that override the vendored local-pages config: similarity limits, the length band and
+    anything under "local_gate" in local-pages/config.json. Anything the site file doesn't set falls back to the
+    vendored defaults. A site file still in its version 1 layout (it carries the v1-only fact-sheet and section
+    keys) keeps its similarity limits, but its 1,000-1,600 word band was v1's, so the vendored profile's applies."""
+    ov: dict = {"similarity": {"shingle_size": T.get("shingle_size", 5)}}
+    if "any_page" in T:
+        ov["similarity"]["any_page_max"] = T["any_page"]
+    if "same_industry_or_city" in T:
+        ov["similarity"]["same_service_or_city_max"] = T["same_industry_or_city"]
+    if "words_min" in T and "words_max" in T and not any(k in T for k in V1_ONLY_KEYS):
+        ov["profiles"] = {PROFILE: {"words_min": T["words_min"], "words_max": T["words_max"]}}
+    return deep_merge(ov, CONFIG.get("local_gate") or {})
+
+
+def deep_merge(base: dict, over: dict) -> dict:
+    out = dict(base)
+    for k, v in over.items():
+        out[k] = deep_merge(out[k], v) if isinstance(v, dict) and isinstance(out.get(k), dict) else v
+    return out
+
+
+def run_local_gate(p: Page, pages: dict[str, Page], tmp: Path, r: Report):
+    """local_gate.py on the page, with every other city page (and its page-data.json) as a sibling."""
+    sib = tmp / f"siblings-{p.industry}-{p.city}"
+    sib.mkdir(parents=True, exist_ok=True)
+    for o in pages.values():
+        if o.path == p.path:
+            continue
+        stem = f"{o.industry}__{o.city}"
+        (sib / f"{stem}.html").write_text(o.src, encoding="utf-8")
+        if o.data_path.exists():
+            shutil.copyfile(o.data_path, sib / f"{stem}.data.json")
+    override = tmp / "site-override.json"
+    override.write_text(json.dumps(gate_override()), encoding="utf-8")
+    cmd = [sys.executable, "-I", str(GATE), "--data", str(p.data_path), "--file", str(ROOT / p.path),
+           "--siblings", str(sib), "--config", str(override), "--json"]
+    res = subprocess.run(cmd, capture_output=True, text=True)
+    if res.returncode == 2 or not res.stdout.strip().startswith("{"):
+        r.err(p.path, f"local_gate could not run: {(res.stderr or res.stdout).strip()[:300]}")
         return
-    try:
-        snap = json.loads(sp.read_text(encoding="utf-8"))
-    except json.JSONDecodeError as exc:
-        r.err(p.path, f"snapshot.json does not parse: {exc}")
-        return
-    results = snap.get("results", [])
-    if len(results) != 3:
-        r.err(p.path, "snapshot.json must hold exactly the top three results")
-    run = str(snap.get("run_at", ""))[:10]
-    if run != p.meta.get("snapshot_date"):
-        r.err(p.path, "page-meta snapshot_date must match snapshot.json run_at")
-    else:
-        if long_date(run) not in p.text:
-            r.err(p.path, f"the page must state the search date ({long_date(run)})")
-    low = p.text.lower().replace("&", "and")
-    for res in results:
-        name = str(res.get("name", "")).lower().replace("&", "and")
-        if name and name not in low:
-            r.err(p.path, f"snapshot result '{res.get('name')}' is not named on the page as it appears on Google")
-        reviews = res.get("reviews")
-        if isinstance(reviews, int) and f"{reviews:,}" not in p.text and str(reviews) not in p.text:
-            r.err(p.path, f"review count {reviews:,} for '{res.get('name')}' does not appear on the page")
+    out = json.loads(res.stdout)
+    r.gate[p.path] = out
+    for e in out["errors"]:
+        r.err(p.path, f"local_gate [{e['gate']}] {e['msg']}")
+    for w in out["warnings"]:
+        r.warn(p.path, f"local_gate [{w['gate']}] {w['msg']}")
 
 
 def check_wiring(p: Page, r: Report, sitemap: dict[str, str], llms: str):
@@ -460,61 +513,36 @@ def check_wiring(p: Page, r: Report, sitemap: dict[str, str], llms: str):
         r.err(p.path, f"the hub {hub.relative_to(ROOT)} must link to {path}")
     if p.url not in sitemap:
         r.err(p.path, "add the page to sitemap.xml with a lastmod date")
-    elif sitemap[p.url] != p.meta.get("modified"):
-        r.warn(p.path, f"sitemap lastmod {sitemap[p.url]} differs from page-meta modified {p.meta.get('modified')}")
+    elif sitemap[p.url] != p.modified:
+        r.warn(p.path, f"sitemap lastmod {sitemap[p.url]} differs from page-data modified {p.modified}")
     if p.url not in llms:
         r.err(p.path, "add the page to llms.txt")
 
 
 def check_variety(p: Page, others: list[Page], r: Report):
+    """FAQ registry and sitewide boilerplate. Pairwise overlap is local_gate's G4."""
+    used: dict[str, str] = {}
     for o in others:
-        j = len(p.sh & o.sh) / max(1, len(p.sh | o.sh))
-        same = o.industry == p.industry or o.city == p.city
-        limit = T["same_industry_or_city"] if same else T["any_page"]
-        tag = "FAIL" if j > limit else "ok"
-        r.lines.append(f"| {p.path} | {o.path} | {j:.1%} | {limit:.0%}{' (same industry or city)' if same else ''} | {tag} |")
-        if j > limit:
-            r.err(p.path, f"{j:.1%} text overlap with {o.path} (limit {limit:.0%}); rewrite the overlapping sections")
-        if o.fp == p.fp and same:
-            r.err(p.path, f"module order {' '.join(p.fp)} matches {o.path}; reorder or swap a module")
-    if len(others) >= T["boilerplate_min_pages"]:
-        common = {s for s in p.sh if sum(s in o.sh for o in others) >= T["boilerplate_min_pages"]}
+        for q in o.questions:
+            used.setdefault(q, o.path)
+    for q in p.questions:
+        if q in used:
+            r.err(p.path, f"FAQ question repeats one on {used[q]} (normalized: '{q}'); write a new one from this city's data")
+    if len(others) >= T.get("boilerplate_min_pages", 5):
+        n = T.get("boilerplate_min_pages", 5)
+        common = {s for s in p.sh if sum(s in o.sh for o in others) >= n}
         share = len(common) / max(1, len(p.sh))
-        r.lines.append(f"| {p.path} | shared boilerplate (5+ pages) | {share:.1%} | {T['sitewide_boilerplate']:.0%} | {'FAIL' if share > T['sitewide_boilerplate'] else 'ok'} |")
-        if share > T["sitewide_boilerplate"]:
-            r.err(p.path, f"{share:.1%} of this page's phrasing also appears on 5+ other pages (limit {T['sitewide_boilerplate']:.0%})")
-    used = {}
-    for o in others:
-        for h in o.heads:
-            used.setdefault(h, o.path)
-    for h in p.heads:
-        if h in used:
-            r.err(p.path, f"heading or FAQ question repeats one on {used[h]} (normalized: '{h}'); write a new one")
+        limit = T.get("sitewide_boilerplate", 0.08)
+        r.lines.append(f"| {p.path} | shared phrasing on {n}+ pages (fixed blocks excluded) | {share:.1%} | {limit:.0%} | {'FAIL' if share > limit else 'ok'} |")
+        if share > limit:
+            r.err(p.path, f"{share:.1%} of this page's own phrasing also appears on {n}+ other pages (limit {limit:.0%})")
 
 
-def check_governance(new_pages: list[Page], base_pages: list[Page], r: Report, today: dt.date):
-    pub = CONFIG["publishing"]
+def check_governance(new_pages: list[Page], r: Report):
+    pub = CONFIG.get("publishing") or {}
     if new_pages and pub.get("paused"):
         for p in new_pages:
             r.err(p.path, f"publishing is paused: {pub.get('pause_reason') or 'see local-pages/config.json'}")
-    order = sorted(dt.date.fromisoformat(p.published) for p in base_pages if re.fullmatch(r"\d{4}-\d{2}-\d{2}", p.published))
-    for p in sorted(new_pages, key=lambda x: x.published):
-        try:
-            order.append(dt.date.fromisoformat(p.published))
-        except ValueError:
-            continue
-        position = len(order)
-        n = pub.get("first_batch_size", 0)
-        if n and pub.get("first_batch_hold_days", 0) and position > n:
-            batch_end = sorted(order)[n - 1]
-            if (today - batch_end).days < pub["first_batch_hold_days"]:
-                r.err(p.path, f"the first {n} pages went live by {batch_end}; wait {pub['first_batch_hold_days']} days after that before page {position}")
-        recent = [d for d in order if (today - d).days < 30]
-        if pub.get("max_new_pages_per_30_days", 0) and len(recent) > pub["max_new_pages_per_30_days"]:
-            r.err(p.path, f"more than {pub['max_new_pages_per_30_days']} new city pages in 30 days")
-        same = sorted((x for x in base_pages if x.industry == p.industry and x.published), key=lambda x: x.published)
-        if same and same[-1].angle == p.angle:
-            r.err(p.path, f"hero angle '{p.angle}' was used by the last {p.industry} page ({same[-1].path}); pick another")
 
 
 def check_guard(changes: dict[str, str], base: str, r: Report):
@@ -524,13 +552,14 @@ def check_guard(changes: dict[str, str], base: str, r: Report):
     city_pages = {m.groups() for f in changes if (m := CITY_RE.match(f))}
     allowed_pages = {f"{SECTION}/{i}/{c}.html" for i, c in city_pages}
     industries = {i for i, _ in city_pages}
+    sidecars = "|".join(re.escape(s) for s in SIDECARS)
     for path, status in changes.items():
         if status == "D":
             r.err(path, "publisher pull requests may not delete files")
             continue
         if path in allowed_pages:
             continue
-        m = re.fullmatch(r"local-pages/([a-z0-9-]+)/([a-z0-9-]+)/(fact-sheet\.md|snapshot\.json|images\.md)", path)
+        m = re.fullmatch(rf"local-pages/([a-z0-9-]+)/([a-z0-9-]+)/({sidecars})", path)
         if m and (m.group(1), m.group(2)) in city_pages:
             continue
         m = re.fullmatch(r"assets/local/([a-z0-9-]+)\.(webp|png|jpe?g|avif)", path)
@@ -572,14 +601,25 @@ def check_guard(changes: dict[str, str], base: str, r: Report):
         r.err(path, "outside the files a local page pull request may change")
 
 
+def vendored_version() -> str:
+    try:
+        return str(json.loads((VENDOR / "config.json").read_text(encoding="utf-8")).get("version") or "0.2")
+    except (OSError, json.JSONDecodeError):
+        return "unknown"
+
+
+def vendored_from() -> str:
+    first = GATE.read_text(encoding="utf-8").splitlines()[0] if GATE.exists() else ""
+    m = re.search(r"ai-skills@([0-9a-f]{7,40})", first)
+    return m.group(1)[:7] if m else "unknown"
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--base", help="git ref to compare against (checks only pages changed since it)")
     ap.add_argument("--guard", action="store_true", help="also enforce the publisher path guard")
     ap.add_argument("--report", help="write the Markdown report to this file")
-    ap.add_argument("--today", help="override today's date (YYYY-MM-DD) for cadence checks")
     a = ap.parse_args()
-    today = dt.date.fromisoformat(a.today) if a.today else dt.date.today()
 
     all_paths = sorted(str(p.relative_to(ROOT)) for p in (ROOT / SECTION).glob("*/*.html")) if (ROOT / SECTION).exists() else []
     pages = {path: Page(path, (ROOT / path).read_text(encoding="utf-8")) for path in all_paths if CITY_RE.match(path)}
@@ -587,6 +627,8 @@ def main() -> int:
     for path in all_paths:
         if not CITY_RE.match(path):
             r.err(path, f"city pages must be named {SECTION}/<industry>/<city>-<st>.html")
+    if not GATE.exists():
+        r.err(str(GATE.relative_to(ROOT)), "the vendored local_gate.py is missing; see local-pages/README.md (sync the gate)")
 
     changes: dict[str, str] = {}
     if a.base:
@@ -594,8 +636,7 @@ def main() -> int:
         base_set = set(base_city_pages(a.base))
         targets = [pages[p] for p in pages if p in changes]
         new = [pages[p] for p in pages if p not in base_set]
-        base_pages = [pages[p] for p in pages if p in base_set]
-        for p, status in changes.items():   # images or sidecars changed without the page
+        for p in changes:   # images or sidecars changed without the page
             m = re.match(r"(?:local-pages/([a-z0-9-]+)/([a-z0-9-]+)/|assets/local/)", p)
             if m and m.group(1):
                 key = f"{SECTION}/{m.group(1)}/{m.group(2)}.html"
@@ -603,7 +644,7 @@ def main() -> int:
                     targets.append(pages[key])
     else:
         targets = list(pages.values())
-        new, base_pages = [], list(pages.values())
+        new = []
 
     sm_path = ROOT / "sitemap.xml"
     ns = {"sm": "http://www.sitemaps.org/schemas/sitemap/0.9"}
@@ -611,24 +652,39 @@ def main() -> int:
     llms = (ROOT / "llms.txt").read_text(encoding="utf-8")
 
     css = stylesheet_classes()
-    r.lines += ["| Page | Compared with | Overlap | Limit | Result |", "|---|---|---|---|---|"]
-    for p in targets:
-        check_structure(p, r)
-        check_markup(p, r, css)
-        check_sidecars(p, r)
-        check_wiring(p, r, sitemap, llms)
-        check_variety(p, [o for o in pages.values() if o.path != p.path], r)
-    check_governance(new, base_pages, r, today)
+    r.lines += ["| Page | Compared with | Share | Limit | Result |", "|---|---|---|---|---|"]
+    with tempfile.TemporaryDirectory(prefix="local-pages-") as tmp:
+        for p in targets:
+            check_structure(p, r)
+            check_markup(p, r, css)
+            if check_data(p, r) and GATE.exists():
+                run_local_gate(p, pages, Path(tmp), r)
+            check_wiring(p, r, sitemap, llms)
+            check_variety(p, [o for o in pages.values() if o.path != p.path], r)
+    check_governance(new, r)
     if a.guard and a.base:
         check_guard(changes, a.base, r)
 
-    out = ["## Local service page check", ""]
+    out = ["## Local service page check", "",
+           f"Gate: `shared/local-pages` {vendored_version()} (`local_gate.py` vendored from ai-skills@{vendored_from()}).", ""]
     if not targets:
         out.append("No local service pages changed in this pull request.")
     else:
         for p in targets:
-            out.append(f"- **{p.path}**: {len(p.text.split())} words, modules `{' '.join(p.fp)}`, hero angle `{p.angle}`, {len(p.faq)} FAQ")
-        out += ["", *r.lines]
+            g = (r.gate.get(p.path) or {}).get("stats") or {}
+            bits = [f"{len(p.text.split())} words", f"{len(p.faq)} FAQ"]
+            if "unique_total" in g:
+                bits.append(f"{g['unique_total']} unique data points from {len(g.get('data_modules_present', []))} modules "
+                            f"({', '.join(g.get('data_modules_present', []))})")
+            if "swap_test" in g:
+                bits.append(f"city swap {g['swap_test']['share']:.0%}")
+            if "similarity_max" in g:
+                bits.append(f"closest page {g['similarity_max']['jaccard']:.1%} ({Path(g['similarity_max']['sibling']).stem.replace('__', '/')})")
+            if "filler_hits" in g:
+                bits.append(f"{g['filler_hits']} filler hits")
+            out.append(f"- **{p.path}**: " + ", ".join(bits))
+        if len(r.lines) > 2:
+            out += ["", *r.lines]
     out += ["", f"**Result: {'PASS' if not r.errors else 'FAIL'}**"]
     if r.errors:
         out += ["", "### Fix these before publishing", *[f"- {e}" for e in r.errors]]

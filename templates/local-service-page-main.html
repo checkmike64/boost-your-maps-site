@@ -1,118 +1,145 @@
 <!--
-  LOCAL SERVICE PAGE: MAIN CONTENT SKELETON
-  ==========================================
-  This is the markup a drafter fills in. It is everything that goes INSIDE <main>. The
-  BYM Team connector (or the local harness) wraps it in templates/local-service-page-shell.html,
-  builds the JSON-LD from the page spec and the visible FAQ, and fills these tokens:
+  LOCAL SERVICE PAGE: MAIN CONTENT SKELETON (local-pages 0.3: a market report, a sales asset)
+  ============================================================================================
+  The markup a drafter fills in: everything that goes INSIDE <main>. The process is
+  ai-skills bym/bym-local-service-pages 3.0 on shared/local-pages, entered through
+  shared/page-pipeline (an approved 'sales-asset' row in brain.web_page_queue that names the
+  prospect company or campaign the report is for; these pages are never built to rank). The BYM Team connector (or the
+  local harness in ai-skills bym/bym-team-connector/tests) wraps it in
+  templates/local-service-page-shell.html, builds the JSON-LD from the spec and the visible FAQ,
+  and fills these tokens:
 
     {{H1}}             the fixed H1 with the yellow underline on the city (from the spec)
     {{IMAGE:hero}}     the hero illustration (file, size and alt come from spec.images.hero)
     {{IMAGE:second}}   optional second illustration (spec.images.second)
-    {{REPORT_PANEL}}   the whole R4 report panel: spec.report_panel.heading + intro, the two-field
-                       form wired to /visibility-report, and the sample report
+    {{REPORT_FORM}}    the two-field report form (company, part of town) that hands off to
+                       /visibility-report, built from spec.report_areas
 
-  Rules the CI checker enforces (scripts/local_pages/check_local_pages.py):
-    - every section starts with its code comment: R1, R2, M1-M12 (merged checklist: "M6 + M4 + M7"), R3, CLOSE
-    - R1 first, R2 second or third, 4-6 module sections including M12 FAQ, R3 before {{REPORT_PANEL}}, CLOSE last
-    - order the modules strongest fact first; never copy another page's module order in the same industry or city
-    - FAQ items use exactly <div class="qa"><h3>question</h3><p>answer</p></div> (3-5 of them)
-    - primary buttons say exactly "Get my free visibility report →" and link to #report
-    - no href="#"; link the hub (/google-maps-marketing/<industry>), /services or /pricing
-    - 1,000-1,600 words, no em or en dashes, none of the banned voice terms in local-pages/config.json
-  Every heading below is an EXAMPLE of the shape only. Write every heading and sentence fresh.
-  Delete this comment block and the example comments when you draft.
+  The page's data travels beside it as local-pages/<industry>/<city-st>/page-data.json. Every
+  name, number and date on the page is a fact there, with its source and date, and
+  build_check.sales_asset.target names who the report is for.
+
+  What CI checks (scripts/local_pages/check_local_pages.py, which runs the vendored local_gate.py):
+    - the eight slots below in this order, H2s on the fixed patterns (a slot whose data dropped
+      out is left out; the order never changes)
+    - the sales target, every number backed by a fact, each data section opening with a local data point (city-swap test), overlap with the
+      other city pages, no banned filler (census, landmarks, roads, weather, permits, utilities,
+      tourism, place lists, asking for specific review content or review quotas), the build check,
+      proof labels, and a likely lead-generation listing in the top three labeled wherever it is named;
+      the data floor (12 unique sourced data points from 3 modules) is a warning
+    - the hero first, the closing section last, <div class="wrap"> first in every section, only
+      classes the site stylesheet defines, FAQ items as <div class="qa"><h3>..</h3><p>..</p></div>
+    - primary buttons say exactly "Get my free visibility report →"; no href="#"
+    - no em or en dashes, none of the banned voice terms in local-pages/config.json
+  No word target: the data sets the length (about 600 to 1,400 words).
+  Fixed text (offer, terms, report line, CTA) goes between fixed:start and fixed:end markers.
+  Every [Bracketed] instruction below is caught by CI if it is left on the page. Delete this comment block and the slot comments
+  when you draft.
 -->
 
-<!-- R1 HERO. Angle: <hero angle from the bank> -->
+<!-- slot 1: hero -->
 <section class="page-hero">
   <div class="wrap lsp-hero">
     <div>
-      <span class="eyebrow"><span class="dot"></span> <City> <industry></span>
       {{H1}}
-      <p class="lead"><Speak to the owner. Open with the hero angle, then what they're buying and the $450 a month.></p>
+      <p class="lead">[One data hook from demand and the map, written for the owner: "About 590 people a month search Google for pest control in Mesa, ...".]</p>
+      <!-- fixed:start -->
+      <p class="micro">[Price and terms from pricing.txt: $450 a month, no setup fee, 7 days' notice, the profile stays theirs.]</p>
+      <p class="micro">[Fit: 20+ Google reviews and a year on Maps; one company per area.]</p>
       <div class="btns"><a href="#report" class="btn btn-primary">Get my free visibility report →</a></div>
-      <p class="micro"><Terms line: no setup fee, 7 days' notice, the profile stays theirs. Written fresh.></p>
-      <p class="micro"><Fit rule: 20+ Google reviews and a year on Maps. Then the availability line.></p>
+      <!-- fixed:end -->
     </div>
     {{IMAGE:hero}}
   </div>
 </section>
 
-<!-- R2 MARKET SNAPSHOT. <where the search ran from> -->
+<!-- slot 2: market (map module) -->
 <section class="section tight">
   <div class="wrap">
     <div class="prose">
-      <h2><A fresh heading about who showed up first></h2>
-      <p><The date (Month D, YYYY), the exact search in quotes, and where it ran from.></p>
+      <h2>The [City] map today</h2>
+      <p>[The date (Month D, YYYY), the exact search in quotes, where it ran from and how deep you read it. Then the top three as Google names them.]</p>
       <ol class="top3">
-        <li><Name exactly as on Google>, <rating> stars from <review count> reviews</li>
-        <li>…</li>
-        <li>…</li>
+        <li>[Name exactly as on Google], [Rating] stars from [Review count] reviews, profile links to [Its homepage, a City page or no website]. [A row with under 10 reviews plus no website or the city in its name is a likely lead-generation listing: say so here and in every sentence that names it ("a listing with 3 reviews and no website"), or list the top three real businesses and say what sits above them.]</li>
+        <li>[...]</li>
+        <li>[...]</li>
       </ol>
-      <p><One plain observation the search supports. Then: other parts of town see a different three, and the free report runs the search from theirs.></p>
+      <p>[One or two observations from the deeper read, each a number from page-data and what it means for the owner.]</p>
+      <p>[One line: the map changes with where people search, and the free report runs it from their part of town.]</p>
+      <p class="src">Source: [The search, the date, where it ran from].</p>
     </div>
   </div>
 </section>
 
-<!-- M3 SEASONS AND DEMAND (example module; choose 4-6 from the library, strongest fact first) -->
+<!-- slot 3: timing (demand module) -->
 <section class="section flow">
   <div class="wrap">
     <div class="prose">
-      <h2><A heading that names the local fact></h2>
-      <p><Answer first in one or two sentences, then detail. Tie every fact to the owner's profile, calls or timing.></p>
-      <p class="src">Sources: <name each source in plain words>.</p>
+      <h2>When people in [City] search for [Trade]</h2>
+      <p>[Monthly searches for the trade in the city, the peak and the low month, from page-data.]</p>
+      <p>[The service terms with their own season. Then the start month that follows from 60 to 90 days.]</p>
+      <p class="src">Source: Google Ads Keyword Planner, [City], [Period], pulled [Date].</p>
     </div>
-    <!-- Optional crawlable season calendar: copy the .season block pattern (rows with .track and .bar) -->
   </div>
 </section>
 
-<!-- M6 + M4 + M7 PROFILE CHECKLIST (merge only when each item carries a local or industry fact) -->
+<!-- slot 4: voices (reviews module) -->
 <section class="section flow">
   <div class="wrap">
     <div class="prose">
-      <span class="eyebrow"><span class="dot"></span> What we handle</span>
-      <h2 style="margin-top:18px;"><A new heading every time></h2>
+      <h2>What [City] customers say</h2>
+      <p>[How many reviews you read, of which businesses, and the strongest theme with its count.]</p>
+      <p>[Complaints, owner replies and the prices customers tagged, each with its count. Then what that means for the owner's own profile. Never tell owners to ask for specific words, keywords or names in reviews, and no review quotas: Google's review policy bans both.]</p>
+      <p class="src">Source: Google reviews of [Businesses], read [Date].</p>
     </div>
-    <ul class="checklist">
-      <li><span class="c"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg></span><p><b><Item.></b> <Why it matters for this trade in this state.></p></li>
-    </ul>
-    <p style="margin-top:22px;"><a class="tlink" href="/services">See everything in the monthly plan →</a></p>
   </div>
 </section>
 
-<!-- R3 PRICE, TERMS, FIT, PROOF -->
+<!-- slot 5: results (proof module, from find_proof) -->
+<section class="section flow">
+  <div class="wrap">
+    <div class="prose">
+      <h2>Results in [City]</h2>
+      <p>[The client's result line exactly, with its period, said of the client in find_proof's page_name words ("a pest control company in Mesa we work with"). Proof is anonymous: never the business name, no link to its profile. Borrowed proof ("Results near [City]") says plainly where it is from, in the words of proof.meta.label_text. No rank words near a client that isn't in the map read.]</p>
+    </div>
+  </div>
+</section>
+
+<!-- slot 6: price (fixed offer text, plus one computed line from data) -->
 <section class="section section-break">
   <div class="wrap">
     <div class="prose">
-      <span class="eyebrow"><span class="dot"></span> Pricing</span>
-      <h2 style="margin-top:18px;"><A fresh pricing question or statement naming the city and trade></h2>
-      <p><$450 a month, no setup fee, 7 days' notice, $1,750 one-time rebuild, what they keep if they leave.></p>
-      <p><Burned-by-SEO answer: the monthly report lists every post, photo and listing. No-guarantee line. One company per area.></p>
-      <p><Proof line by the matching order: same industry + city, same industry, same city, else say plainly there's no client here yet and name the closest example.> <a class="plainlink" href="https://www.google.com/maps/search/<Client+Name+City>" target="_blank" rel="noopener">Look them up on Google Maps →</a></p>
+      <h2>Price and how it works</h2>
+      <!-- fixed:start -->
+      <p>[What the monthly plan includes, from pricing.txt, and that what we add stays theirs. The $1,750 one-time rebuild is the separate option.]</p>
+      <p>[Who it's for, one company per area, and that we never promise a ranking.]</p>
+      <!-- fixed:end -->
+      <p>[One computed line from page-data: what a Google Ads click for the same search costs in [City], against $450 a month.]</p>
+      <p class="src">Source: [Keyword Planner top-of-page bids, [City], pulled [Date]].</p>
+      <p><a class="tlink" href="/pricing">See everything in the monthly plan →</a></p>
     </div>
   </div>
 </section>
 
-{{REPORT_PANEL}}
-
-<!-- M12 FAQ -->
+<!-- slot 7: questions (3 to 5, from sales calls, Search Console and reviews) -->
 <section class="section section-break">
   <div class="wrap">
-    <div class="center narrow"><h2><A fresh FAQ heading></h2></div>
+    <div class="center narrow"><h2>Questions from [City] [Trade] owners</h2></div>
     <div class="faq">
-      <div class="qa"><h3><A question that names a local fact or entity?></h3><p><A direct answer.></p></div>
+      <div class="qa"><h3>[A question an owner here asks?]</h3><p>[An answer that opens with a data point from this page.]</p></div>
     </div>
   </div>
 </section>
 
-<!-- CLOSE -->
-<section class="section flow final-cta">
+<!-- slot 8: next step (report form, method line) -->
+<section class="section flow final-cta" id="report">
   <div class="wrap center narrow">
-    <h2><A heading tied to the anchor fact or season></h2>
-    <p class="lead" style="margin:14px auto 0;"><One sentence.></p>
-    <div class="btns" style="justify-content:center;"><a href="#report" class="btn btn-primary">Get my free visibility report →</a></div>
-    <p class="micro" style="margin-top:34px;">More for <industry> companies:</p>
-    <div class="related" style="justify-content:center;"><a class="plainlink" href="/google-maps-marketing/<industry>">Google Maps marketing for <industry> companies</a> <a class="plainlink" href="/services">How we run a Google profile</a></div>
-    <p class="byline">Written by Michael Moll, founder of Boost Your Maps. We ran the Maps search on <Month D, YYYY> and checked each local fact against its source.</p>
+    <h2>See where your company shows up in [City]</h2>
+    <!-- fixed:start -->
+    <p>Tell us your company and the part of town you serve. Within 24 hours we'll email a report on where you show up on the map and who's in the top three near you.</p>
+    <!-- fixed:end -->
+    {{REPORT_FORM}}
+    <p class="byline">How this page was made: [The search, the date and where it ran from; the demand source and period; the reviews read]. Written by Michael Moll, founder of Boost Your Maps. Updated [Month D, YYYY].</p>
+    <p><a class="tlink" href="/google-maps-marketing/[Industry slug]">More on Google Maps marketing for [Trade] companies →</a></p>
   </div>
 </section>
