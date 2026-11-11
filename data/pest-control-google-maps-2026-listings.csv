@@ -1,0 +1,295 @@
+city,state,position,reviews,rating,under_10_reviews,likely_lead_gen,city_in_name,website_link,address_shown,primary_category,extra_categories,photos,claimed,miles_from_center
+Atlanta,GA,1,1,5,True,True,True,no_website,True,Pest control service,0,1,False,0.39
+Atlanta,GA,2,2,5,True,True,True,no_website,True,Pest control service,0,20,True,0.3
+Atlanta,GA,3,1,5,True,False,False,homepage,True,Pest control service,0,1,True,0.3
+Atlanta,GA,4,6,5,True,False,False,homepage,True,Pest control service,0,1,True,0.76
+Atlanta,GA,5,3,5,True,False,False,homepage,True,Pest control service,0,1,True,0.93
+Atlanta,GA,6,0,,True,True,True,no_website,True,Pest control service,0,1,True,0.47
+Atlanta,GA,7,101,5,False,False,True,homepage,True,Pest control service,0,44,True,0.27
+Atlanta,GA,8,1,5,True,False,False,homepage,True,Pest control service,0,1,True,0.7
+Atlanta,GA,9,0,,True,True,False,no_website,True,Pest control service,0,,False,0.57
+Atlanta,GA,10,6,3.2,True,False,False,city_page,True,Pest control service,0,3,True,0.58
+Atlanta,GA,11,0,,True,False,False,homepage,True,Pest control service,1,2,True,0.23
+Atlanta,GA,12,0,,True,True,False,no_website,True,Pest control service,0,1,False,0.47
+Atlanta,GA,13,8,5,True,True,True,homepage,True,Pest control service,0,4,True,2.73
+Atlanta,GA,14,0,,True,False,False,homepage,True,Pest control service,0,1,True,0.7
+Atlanta,GA,15,0,,True,True,True,homepage,True,Pest control service,0,4,True,0.35
+Atlanta,GA,16,0,,True,True,False,no_website,True,Pest control service,0,2,True,0.83
+Atlanta,GA,17,0,,True,False,False,homepage,True,Pest control service,0,1,True,0.76
+Atlanta,GA,18,0,,True,False,False,homepage,True,Pest control service,0,,True,2.0
+Atlanta,GA,19,0,,True,True,True,no_website,True,Pest control service,0,1,False,1.86
+Atlanta,GA,20,0,,True,True,False,no_website,True,Pest control service,0,2,True,1.53
+Charlotte,NC,1,6396,5,False,False,False,city_page,True,Pest control service,0,247,True,0.93
+Charlotte,NC,2,283,4.9,False,False,True,homepage,True,Pest control service,0,34,True,0.19
+Charlotte,NC,3,647,4.9,False,False,False,city_page,True,Pest control service,0,171,True,1.43
+Charlotte,NC,4,1999,4.7,False,False,False,city_page,True,Pest control service,1,37,True,1.62
+Charlotte,NC,5,181,5,False,False,True,homepage,True,Pest control service,3,58,True,1.79
+Charlotte,NC,6,0,,True,False,False,homepage,True,Bird control service,0,1,True,0.3
+Charlotte,NC,7,0,,True,True,False,no_website,True,Pest control service,1,25,True,0.63
+Charlotte,NC,8,0,,True,False,False,homepage,True,Pest control service,0,1,True,0.41
+Charlotte,NC,9,1926,4.8,False,False,False,city_page,True,Pest control service,0,47,True,3.66
+Charlotte,NC,10,34,4.7,False,False,False,city_page,True,Pest control service,0,1,False,1.27
+Charlotte,NC,11,0,,True,True,False,no_website,True,Pest control service,1,18,True,1.36
+Charlotte,NC,12,152,4.8,False,False,False,homepage,True,Pest control service,0,8,True,2.58
+Charlotte,NC,13,13,4.3,False,False,True,homepage,True,Pest control service,1,22,True,0.39
+Charlotte,NC,14,0,,True,True,False,no_website,True,Pest control service,1,12,True,1.5
+Charlotte,NC,15,1160,4.8,False,False,False,city_page,True,Pest control service,0,18,True,4.21
+Charlotte,NC,16,11,5,False,False,False,homepage,True,Pest control service,1,8,True,2.45
+Charlotte,NC,17,0,,True,False,False,other_page,True,Pest control service,0,4,True,1.72
+Charlotte,NC,18,3,3.7,True,False,False,city_page,True,Pest control service,0,1,True,1.45
+Charlotte,NC,19,133,4.7,False,False,False,city_page,False,Pest control service,4,87,True,5.97
+Charlotte,NC,20,41,2.7,False,False,False,no_website,True,Pest control service,0,1,True,2.53
+Chicago,IL,1,172,4.8,False,False,True,homepage,True,Pest control service,0,8,True,0.24
+Chicago,IL,2,7,5,True,True,True,homepage,True,Pest control service,0,4,True,0.67
+Chicago,IL,3,26,4.8,False,False,False,homepage,True,Pest control service,0,8,True,0.37
+Chicago,IL,4,83,4.8,False,False,False,homepage,True,Pest control service,0,4,True,0.64
+Chicago,IL,5,1,5,True,True,True,no_website,True,Pest control service,0,1,True,0.75
+Chicago,IL,6,516,4.7,False,False,False,homepage,True,Pest control service,2,42,True,1.71
+Chicago,IL,7,465,4.7,False,False,False,homepage,True,Pest control service,1,28,True,2.15
+Chicago,IL,8,331,4.9,False,False,False,city_page,True,Pest control service,2,31,True,3.42
+Chicago,IL,9,1,5,True,True,False,no_website,True,Pest control service,0,2,False,0.42
+Chicago,IL,10,76,4.8,False,False,False,homepage,True,Pest control service,0,10,True,2.24
+Chicago,IL,11,25,4.8,False,False,False,homepage,True,Pest control service,0,2,True,2.03
+Chicago,IL,12,28,5,False,False,False,homepage,True,Pest control service,0,21,True,2.32
+Chicago,IL,13,58,4.3,False,False,False,homepage,True,Cleaning service,0,1,False,0.73
+Chicago,IL,14,0,,True,True,False,no_website,True,Pest control service,0,1,False,0.7
+Chicago,IL,15,431,4.9,False,False,False,homepage,False,Pest control service,3,28,True,6.2
+Chicago,IL,16,0,,True,False,False,homepage,True,Pest control service,0,12,True,2.42
+Chicago,IL,17,9,4.1,True,True,False,no_website,True,Pest control service,0,2,True,2.45
+Chicago,IL,18,1,5,True,True,False,no_website,True,Pest control service,0,1,True,3.37
+Chicago,IL,19,0,,True,True,False,no_website,True,Lawn care service,0,3,True,0.75
+Chicago,IL,20,26,5,False,False,False,homepage,False,Pest control service,1,14,True,6.2
+Dallas,TX,1,2904,4.9,False,False,False,other_page,True,Pest control service,2,42,True,0.32
+Dallas,TX,2,1,5,True,True,True,no_website,True,Pest control service,0,1,False,0.21
+Dallas,TX,3,2,5,True,True,True,no_website,True,Pest control service,0,1,False,0.36
+Dallas,TX,4,34,5,False,False,False,other_page,False,Pest control service,1,10,True,16.34
+Dallas,TX,5,681,4.9,False,False,False,homepage,True,Pest control service,0,7,True,1.88
+Dallas,TX,6,47,4.9,False,False,False,homepage,False,Pest control service,1,22,True,13.82
+Dallas,TX,7,138,5,False,False,False,homepage,True,Pest control service,0,8,True,3.17
+Dallas,TX,8,716,4.8,False,False,False,homepage,False,Pest control service,1,23,True,280.64
+Dallas,TX,9,431,4.8,False,False,False,homepage,False,Pest control service,1,8,True,365.84
+Dallas,TX,10,31,5,False,False,True,city_page,False,Pest control service,1,6,True,4.76
+Dallas,TX,11,0,,True,False,False,homepage,False,Pest control service,1,11,True,1980.4
+Dallas,TX,12,0,,True,True,False,no_website,True,Pest control service,0,1,False,0.37
+Dallas,TX,13,200,5,False,False,False,city_page,False,Pest control service,1,80,True,19.14
+Dallas,TX,14,325,5,False,False,False,homepage,True,Pest control service,0,7,True,3.6
+Dallas,TX,15,0,,True,False,False,homepage,True,Pest control service,1,16,True,0.65
+Dallas,TX,16,0,,True,False,False,homepage,False,Pest control service,2,8,True,14.24
+Dallas,TX,17,2,5,True,True,False,no_website,True,Pest control service,0,1,False,1.18
+Dallas,TX,18,35,4.5,False,False,False,homepage,True,Pest control service,0,4,True,1.86
+Dallas,TX,19,64,5,False,False,False,homepage,False,Pest control service,1,1101,True,10.36
+Dallas,TX,20,0,,True,True,False,no_website,True,Pest control service,1,2,True,0.58
+Houston,TX,1,3,5,True,True,True,no_website,True,Pest control service,0,27,True,0.35
+Houston,TX,2,4,5,True,True,False,no_website,True,Pest control service,0,26,True,0.27
+Houston,TX,3,46,5,False,False,False,homepage,True,Pest control service,0,16,True,0.21
+Houston,TX,4,3,5,True,True,False,no_website,True,Pest control service,0,,False,0.34
+Houston,TX,5,3,5,True,True,False,no_website,True,Pest control service,0,25,True,0.35
+Houston,TX,6,0,,True,True,False,no_website,True,Pest control service,0,28,True,0.34
+Houston,TX,7,5,5,True,True,False,no_website,True,Pest control service,0,25,True,0.42
+Houston,TX,8,0,,True,False,False,homepage,True,Pest control service,0,1,True,0.41
+Houston,TX,9,0,,True,True,True,no_website,True,Pest control service,0,1,True,0.45
+Houston,TX,10,6,5,True,True,True,no_website,True,Pest control service,0,1,True,1.11
+Houston,TX,11,2,5,True,False,False,homepage,True,Pest control service,0,,True,0.4
+Houston,TX,12,23,5,False,False,True,city_page,True,Pest control service,0,12,True,0.9
+Houston,TX,13,6,5,True,True,False,no_website,True,Pest control service,0,25,True,0.73
+Houston,TX,14,6,2.8,True,False,False,city_page,True,Pest control service,0,,False,0.21
+Houston,TX,15,7,5,True,True,True,homepage,True,Pest control service,0,38,True,1.44
+Houston,TX,16,3,5,True,True,True,no_website,True,Pest control service,0,1,True,0.76
+Houston,TX,17,0,,True,False,False,homepage,True,Animal control service,0,1,True,0.6
+Houston,TX,18,0,,True,False,False,homepage,True,Pest control service,0,1,True,0.17
+Houston,TX,19,0,,True,True,True,no_website,True,Pest control service,0,1,False,0.5
+Houston,TX,20,0,,True,True,True,homepage,True,Pest control service,0,,True,0.62
+Knoxville,TN,1,1,5,True,True,True,city_page,True,Pest control service,0,1,True,0.27
+Knoxville,TN,2,121,4.8,False,False,False,city_page,True,Pest control service,0,3,True,1.58
+Knoxville,TN,3,0,,True,False,False,homepage,True,Pest control service,0,1,True,0.27
+Knoxville,TN,4,83,4.9,False,False,False,homepage,True,Pest control service,0,46,True,0.29
+Knoxville,TN,5,413,4.9,False,False,False,city_page,True,Pest control service,1,11,True,3.6
+Knoxville,TN,6,11,4.3,False,False,False,homepage,True,Pest control service,0,2,True,1.65
+Knoxville,TN,7,0,,True,True,False,no_website,True,Pest control service,0,23,True,1.75
+Knoxville,TN,8,4,5,True,False,False,homepage,True,Pest control service,0,20,True,0.99
+Knoxville,TN,9,2,5,True,True,True,homepage,True,Pest control service,0,4,True,3.95
+Knoxville,TN,10,58,5,False,False,False,homepage,False,Pest control service,1,50,True,6.26
+Knoxville,TN,11,364,4.9,False,False,False,city_page,False,Pest control service,9,18,True,26.36
+Knoxville,TN,12,307,4.6,False,False,False,city_page,True,Lawn care service,0,40,True,1.01
+Knoxville,TN,13,917,4.8,False,False,False,homepage,True,Garden center,1,676,True,1.4
+Knoxville,TN,14,0,,True,True,False,no_website,True,Pest control service,1,1,False,2.14
+Las Vegas,NV,1,2,5,True,True,True,no_website,True,Pest control service,0,1,False,0.19
+Las Vegas,NV,2,8,5,True,True,True,homepage,True,Pest control service,0,4,True,1.05
+Las Vegas,NV,3,438,4.8,False,False,False,homepage,True,Pest control service,1,90,True,1.81
+Las Vegas,NV,4,100,4.9,False,False,False,homepage,True,Pest control service,0,27,True,2.16
+Las Vegas,NV,5,2785,4.9,False,False,True,homepage,True,Pest control service,1,11,True,3.57
+Las Vegas,NV,6,0,,True,True,True,no_website,True,Pest control service,0,1,False,0.49
+Las Vegas,NV,7,426,4.9,False,False,False,homepage,True,Pest control service,2,201,True,2.11
+Las Vegas,NV,8,2,5,True,False,False,homepage,True,Pest control service,0,1,True,0.47
+Las Vegas,NV,9,1,5,True,True,False,no_website,True,Pest control service,0,3,False,1.39
+Las Vegas,NV,10,184,4.8,False,False,False,homepage,True,Pest control service,0,8,True,4.0
+Las Vegas,NV,11,12,5,False,False,False,homepage,True,Pest control service,0,2,True,4.14
+Las Vegas,NV,12,0,,True,False,False,homepage,True,Pest control service,0,1,True,1.79
+Las Vegas,NV,13,3,3.7,True,True,False,no_website,True,Pest control service,0,1,False,0.66
+Las Vegas,NV,14,14,5,False,False,False,homepage,True,Pest control service,0,4,True,3.55
+Las Vegas,NV,15,3,5,True,False,False,homepage,True,Pest control service,0,1,True,1.84
+Las Vegas,NV,16,5,5,True,True,False,no_website,True,Pest control service,0,1,True,2.27
+Las Vegas,NV,17,64,4.7,False,False,False,homepage,True,Pest control service,1,9,True,4.15
+Las Vegas,NV,18,2,5,True,False,False,homepage,True,Pest control service,0,1,True,2.81
+Las Vegas,NV,19,4,5,True,False,False,city_page,True,Pest control service,0,1,True,4.59
+Las Vegas,NV,20,0,,True,True,True,homepage,True,Pest control service,0,3,True,2.72
+Los Angeles,CA,1,24,5,False,False,True,homepage,True,Pest control service,0,7,True,0.81
+Los Angeles,CA,2,0,,True,True,False,no_website,True,Pest control service,0,1,True,0.57
+Los Angeles,CA,3,217,4.6,False,False,False,homepage,True,Pest control service,2,24,True,1.44
+Los Angeles,CA,4,1,5,True,False,False,homepage,True,Pest control service,0,1,False,0.65
+Los Angeles,CA,5,0,,True,False,False,homepage,True,Pest control service,0,4,True,0.41
+Los Angeles,CA,6,629,4.4,False,False,False,city_page,True,Pest control service,2,46,True,2.75
+Los Angeles,CA,7,0,,True,True,False,no_website,True,Pest control service,0,1,True,0.35
+Los Angeles,CA,8,9,5,True,False,False,homepage,True,Pest control service,2,29,True,1.14
+Los Angeles,CA,9,0,,True,False,False,homepage,True,Pest control service,0,1,True,0.49
+Los Angeles,CA,10,0,,True,True,False,no_website,True,Pest control service,0,2,True,1.04
+Los Angeles,CA,11,4,5,True,True,True,homepage,True,Pest control service,0,1,True,2.31
+Los Angeles,CA,12,0,,True,True,False,no_website,True,Pest control service,0,1,True,1.94
+Los Angeles,CA,13,0,,True,False,False,homepage,True,Pest control service,0,13,True,1.84
+Los Angeles,CA,14,0,,True,False,False,homepage,True,Pest control service,0,22,True,1.44
+Los Angeles,CA,15,6,4.3,True,True,False,no_website,True,Pest control service,0,1,True,1.91
+Los Angeles,CA,16,0,,True,False,False,homepage,True,Pest control service,0,10,True,2.16
+Los Angeles,CA,17,0,,True,False,False,homepage,True,Pest control service,0,1,True,1.26
+Los Angeles,CA,18,9,3.2,True,False,False,homepage,True,Pest control service,0,2,True,2.04
+Los Angeles,CA,19,0,,True,False,False,homepage,True,Pest control service,0,2,True,3.03
+Los Angeles,CA,20,0,,True,False,False,homepage,True,Pest control service,0,12,True,3.29
+Mesa,AZ,1,12,5,False,False,True,no_website,True,Pest control service,0,2,True,0.18
+Mesa,AZ,2,253,4.9,False,False,False,city_page,True,Pest control service,1,14,True,0.82
+Mesa,AZ,3,423,4.8,False,False,False,homepage,True,Pest control service,1,286,True,0.82
+Mesa,AZ,4,3482,5,False,False,False,homepage,True,Pest control service,0,12,True,1.45
+Mesa,AZ,5,16,5,False,False,False,homepage,True,Pest control service,0,8,True,0.55
+Mesa,AZ,6,986,5,False,False,False,homepage,True,Pest control service,0,242,True,1.65
+Mesa,AZ,7,255,5,False,False,False,homepage,True,Pest control service,2,158,True,1.26
+Mesa,AZ,8,2164,4.9,False,False,False,city_page,True,Pest control service,0,27,True,1.63
+Mesa,AZ,9,97,4.9,False,False,False,homepage,True,Pest control service,0,21,True,1.95
+Mesa,AZ,10,134,4.9,False,False,False,homepage,True,Pest control service,0,16,True,0.91
+Mesa,AZ,11,1739,4.9,False,False,False,homepage,True,Pest control service,0,63,True,2.51
+Mesa,AZ,12,65,4.9,False,False,False,homepage,True,Pest control service,0,36,True,0.18
+Mesa,AZ,13,1450,4.8,False,False,False,city_page,True,Pest control service,0,20,True,1.73
+Mesa,AZ,14,143,4.9,False,False,False,homepage,True,Pest control service,0,11,True,1.89
+Mesa,AZ,15,106,4.5,False,False,False,homepage,True,Pest control service,0,20,True,2.14
+Mesa,AZ,16,322,5,False,False,False,city_page,True,Bee relocation service,2,114,True,1.75
+Mesa,AZ,17,86,4.8,False,False,True,city_page,True,Pest control service,1,313,True,2.06
+Mesa,AZ,18,129,5,False,False,False,homepage,True,Pest control service,0,22,True,2.31
+Mesa,AZ,19,31,5,False,False,True,homepage,True,Pest control service,0,28,True,3.66
+Mesa,AZ,20,1664,4.8,False,False,False,city_page,True,Pest control service,0,22,True,2.63
+Miami,FL,1,0,,True,True,False,no_website,True,Pest control service,0,1,True,0.4
+Miami,FL,2,1,5,True,True,True,no_website,True,Pest control service,0,1,False,0.71
+Miami,FL,3,0,,True,True,False,no_website,True,Pest control service,0,1,True,0.45
+Miami,FL,4,0,,True,True,True,no_website,True,Pest control service,0,1,True,0.12
+Miami,FL,5,3,3.7,True,True,True,no_website,True,Pest control service,0,1,True,0.49
+Miami,FL,6,1,5,True,True,True,no_website,True,Pest control service,0,7,True,1.35
+Miami,FL,7,1,5,True,True,True,homepage,True,Pest control service,0,1,True,0.86
+Miami,FL,8,0,,True,False,False,homepage,True,Bird control service,0,1,True,0.56
+Miami,FL,9,1,5,True,True,True,no_website,True,Pest control service,0,2,True,1.47
+Miami,FL,10,9,5,True,True,False,no_website,True,Pest control service,0,1,True,0.96
+Miami,FL,11,0,,True,False,False,homepage,True,Pest control service,0,2,True,1.55
+Miami,FL,12,15,2.9,False,False,True,no_website,True,Pest control service,0,2,True,1.05
+Miami,FL,13,6,4.3,True,True,False,no_website,True,Pest control service,0,1,True,1.52
+Miami,FL,14,6,3.2,True,False,False,homepage,True,Pest control service,0,2,True,0.68
+Miami,FL,15,3,4,True,True,False,no_website,True,Pest control service,1,9,True,0.59
+Miami,FL,16,0,,True,True,False,no_website,True,Pest control service,0,1,False,1.86
+Miami,FL,17,0,,True,True,False,no_website,True,Pest control service,0,1,False,0.27
+Miami,FL,18,2,2,True,False,False,homepage,True,Pest control service,0,6,True,0.72
+Miami,FL,19,0,,True,False,False,homepage,True,Pest control service,0,1,False,0.23
+Miami,FL,20,0,,True,False,False,homepage,True,Pest control service,0,5,True,0.85
+New Orleans,LA,1,3581,4.9,False,False,False,city_page,True,Pest control service,2,40,True,1.47
+New Orleans,LA,2,5,5,True,True,False,no_website,True,Pest control service,0,1,True,0.35
+New Orleans,LA,3,4,4,True,True,False,no_website,True,Pest control service,0,1,True,0.61
+New Orleans,LA,4,1,5,True,False,False,other_page,True,Pest control service,0,3,True,0.47
+New Orleans,LA,5,0,,True,False,False,homepage,True,Pest control service,0,1,True,0.57
+New Orleans,LA,6,373,4.8,False,False,False,homepage,True,Pest control service,0,17,True,3.12
+New Orleans,LA,7,2,5,True,True,False,no_website,True,Pest control service,0,1,False,0.48
+New Orleans,LA,8,9,4.6,True,True,False,no_website,True,Pest control service,0,1,True,0.89
+New Orleans,LA,9,7,4.4,True,True,False,no_website,True,Pest control service,0,1,True,0.98
+New Orleans,LA,10,0,,True,False,False,homepage,True,Pest control service,0,1,True,2.16
+New Orleans,LA,11,15,4.6,False,False,False,homepage,True,Pest control service,0,16,True,0.18
+New Orleans,LA,12,1,5,True,True,False,no_website,True,Pest control service,0,1,True,2.67
+New Orleans,LA,13,12,4.4,False,False,False,no_website,True,Pest control service,0,1,True,2.17
+New Orleans,LA,14,28,4.8,False,False,False,homepage,True,Pest control service,0,9,True,4.92
+New Orleans,LA,15,0,,True,False,False,homepage,True,Bird control service,0,1,True,2.97
+New Orleans,LA,16,1,5,True,True,False,no_website,True,Pest control service,0,1,False,2.06
+New Orleans,LA,17,1,5,True,True,False,no_website,True,Pest control service,0,1,False,3.48
+New Orleans,LA,18,4,5,True,True,False,no_website,True,Pest control service,0,3,True,2.58
+New Orleans,LA,19,320,5,False,False,False,homepage,False,Pest control service,1,17,True,10.72
+New Orleans,LA,20,0,,True,False,False,homepage,True,Pest control service,0,1,True,3.37
+Philadelphia,PA,1,2,5,True,True,True,no_website,True,Pest control service,0,1,True,0.37
+Philadelphia,PA,2,253,4.8,False,False,False,homepage,True,Pest control service,0,121,True,0.8
+Philadelphia,PA,3,809,4.9,False,False,False,homepage,True,Pest control service,1,14,True,1.04
+Philadelphia,PA,4,33,4.5,False,False,False,homepage,True,Pest control service,0,45,True,0.35
+Philadelphia,PA,5,108,4.8,False,False,True,homepage,True,Pest control service,0,3,True,1.48
+Philadelphia,PA,6,0,,True,False,False,homepage,True,Pest control service,3,41,True,0.34
+Philadelphia,PA,7,1,5,True,True,True,no_website,True,Pest control service,0,,False,0.24
+Philadelphia,PA,8,10,4.6,False,False,False,no_website,True,Pest control service,2,1,True,0.56
+Philadelphia,PA,9,1,5,True,False,False,city_page,True,Pest control service,2,27,True,1.11
+Philadelphia,PA,10,0,,True,False,False,homepage,True,Pest control service,0,1,True,0.34
+Philadelphia,PA,11,7,4.3,True,True,False,no_website,True,Pest control service,0,2,True,0.35
+Philadelphia,PA,12,34,4.7,False,False,False,no_website,True,Pest control service,0,38,True,2.02
+Philadelphia,PA,13,66,4.9,False,False,False,homepage,True,Pest control service,0,8,True,1.21
+Philadelphia,PA,14,13,4.5,False,False,False,homepage,True,Pest control service,0,14,True,1.04
+Philadelphia,PA,15,12,4.9,False,False,False,no_website,True,Pest control service,0,1,True,1.55
+Philadelphia,PA,16,1,5,True,False,False,homepage,True,Pest control service,0,3,True,1.09
+Philadelphia,PA,17,52,4.9,False,False,False,homepage,True,Pest control service,0,58,True,2.15
+Philadelphia,PA,18,69,5,False,False,False,homepage,True,Pest control service,0,2,True,2.27
+Philadelphia,PA,19,1,5,True,True,True,no_website,True,Pest control service,2,1,True,2.19
+Philadelphia,PA,20,120,4.8,False,False,False,homepage,True,Pest control service,1,62,True,2.43
+Phoenix,AZ,1,3,5,True,True,True,no_website,True,Pest control service,1,7,True,0.12
+Phoenix,AZ,2,2,5,True,True,True,city_page,True,Pest control service,0,1,True,0.13
+Phoenix,AZ,3,141,3.6,False,False,True,no_website,True,Pest control service,0,1,False,0.62
+Phoenix,AZ,4,53,4.8,False,False,False,homepage,True,Pest control service,2,2,True,0.21
+Phoenix,AZ,5,0,,True,True,True,no_website,True,Pest control service,0,1,False,0.24
+Phoenix,AZ,6,4,5,True,True,True,homepage,True,Pest control service,0,12,True,0.73
+Phoenix,AZ,7,6786,4.9,False,False,False,city_page,True,Pest control service,2,108,True,2.98
+Phoenix,AZ,8,663,4.9,False,False,False,homepage,False,Pest control service,3,7,True,50.4
+Phoenix,AZ,9,0,,True,False,False,homepage,True,Pest control service,0,1,True,0.32
+Phoenix,AZ,10,0,,True,False,False,homepage,True,Pest control service,9,38,True,0.52
+Phoenix,AZ,11,0,,True,False,False,homepage,True,Cleaners,0,1,True,0.57
+Phoenix,AZ,12,0,,True,True,False,no_website,True,Pest control service,0,1,True,1.6
+Phoenix,AZ,13,105,5,False,False,False,homepage,True,Pest control service,0,233,True,1.59
+Phoenix,AZ,14,382,5,False,False,False,homepage,False,Pest control service,1,54,True,9.14
+Phoenix,AZ,15,23,5,False,False,False,homepage,True,Pest control service,0,76,True,3.66
+Phoenix,AZ,16,1,5,True,False,False,other_page,True,Environmental health service,0,,False,0.76
+Phoenix,AZ,17,267,4.9,False,False,False,homepage,False,Pest control service,1,17,True,13.29
+Phoenix,AZ,18,262,5,False,False,False,homepage,False,Pest control service,1,5,True,12.44
+Phoenix,AZ,19,165,5,False,False,False,homepage,False,Pest control service,1,136,True,19.74
+Phoenix,AZ,20,152,4.9,False,False,False,homepage,False,Pest control service,1,23,True,4.83
+San Antonio,TX,1,1,5,True,True,True,no_website,True,Pest control service,0,1,False,0.55
+San Antonio,TX,2,251,5,False,False,False,homepage,True,Pest control service,0,1,True,1.17
+San Antonio,TX,3,1,5,True,False,False,homepage,True,Pest control service,0,5,True,1.09
+San Antonio,TX,4,0,,True,False,False,homepage,True,Pest control service,0,11,True,0.35
+San Antonio,TX,5,0,,True,False,False,homepage,True,Pest control service,0,,True,0.23
+San Antonio,TX,6,0,,True,False,False,homepage,True,Animal control service,0,1,True,0.29
+San Antonio,TX,7,0,,True,False,False,homepage,True,Pest control service,0,1,True,0.85
+San Antonio,TX,8,237,4.3,False,False,False,homepage,True,Pest control service,1,27,True,0.87
+San Antonio,TX,9,16,4.8,False,False,False,homepage,True,Pest control service,0,11,True,1.65
+San Antonio,TX,10,19,4,False,False,False,homepage,True,Pest control service,0,1,True,1.47
+San Antonio,TX,11,0,,True,False,False,homepage,True,Pest control service,0,1,True,2.35
+San Antonio,TX,12,88,4.9,False,False,False,homepage,True,Pest control service,0,5,True,4.46
+San Antonio,TX,13,0,,True,False,False,homepage,True,Pest control service,0,2,True,1.4
+San Antonio,TX,14,5,5,True,True,True,homepage,True,Pest control service,0,28,True,4.61
+San Antonio,TX,15,101,5,False,False,False,homepage,True,Pest control service,0,20,True,4.62
+San Antonio,TX,16,3,5,True,False,False,homepage,True,Pest control service,0,9,True,2.25
+San Antonio,TX,17,5,5,True,True,False,no_website,True,Pest control service,0,1,True,2.47
+San Antonio,TX,18,1,5,True,False,False,homepage,True,Pest control service,0,1,True,5.12
+San Antonio,TX,19,2,5,True,True,False,no_website,True,Pest control service,0,1,False,2.86
+San Antonio,TX,20,164,4.9,False,False,False,homepage,True,Pest control service,1,101,True,2.83
+Tampa,FL,1,346,5,False,False,False,homepage,True,Pest control service,0,65,True,1.37
+Tampa,FL,2,1248,4.8,False,False,False,city_page,True,Pest control service,1,31,True,2.75
+Tampa,FL,3,6,5,True,True,True,homepage,True,Pest control service,0,1,False,2.25
+Tampa,FL,4,1,1,True,True,True,homepage,True,Pest control service,0,26,True,0.24
+Tampa,FL,5,0,,True,True,False,no_website,True,Pest control service,0,1,True,0.38
+Tampa,FL,6,1,5,True,False,False,homepage,True,Pest control service,0,9,False,0.25
+Tampa,FL,7,0,,True,True,False,no_website,True,Pest control service,0,,True,0.13
+Tampa,FL,8,54,5,False,False,False,city_page,True,Pest control service,0,78,True,1.44
+Tampa,FL,9,0,,True,True,True,homepage,True,Cleaners,0,1,True,1.26
+Tampa,FL,10,0,,True,True,False,no_website,True,Pest control service,0,,True,0.32
+Tampa,FL,11,1,5,True,True,True,no_website,True,Pest control service,0,1,True,1.59
+Tampa,FL,12,0,,True,False,False,homepage,True,Animal control service,0,1,True,0.83
+Tampa,FL,13,6,5,True,False,False,homepage,True,Pest control service,0,1,True,0.58
+Tampa,FL,14,262,4.6,False,False,False,city_page,True,Pest control service,0,12,True,3.43
+Tampa,FL,15,43,5,False,False,False,homepage,True,Pest control service,0,11,True,2.6
+Tampa,FL,16,50,4.3,False,False,False,homepage,True,Pest control service,3,278,True,2.49
+Tampa,FL,17,250,3.9,False,False,False,city_page,True,Pest control service,0,10,True,2.18
+Tampa,FL,18,1307,4.9,False,False,False,homepage,False,Pest control service,1,273,True,35.07
+Tampa,FL,19,137,3.7,False,False,False,homepage,True,Pest control service,0,14,True,3.34
+Tampa,FL,20,2,5,True,False,False,homepage,True,Pest control service,3,17,True,0.25

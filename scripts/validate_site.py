@@ -140,7 +140,7 @@ for page in HTML_FILES:
             continue
         if target == "/":
             candidate = ROOT / "index.html"
-        elif target.startswith("/assets/"):
+        elif target.startswith(("/assets/", "/data/")):
             candidate = ROOT / target.lstrip("/")
         else:
             candidate = ROOT / f"{target.strip('/')}.html"
