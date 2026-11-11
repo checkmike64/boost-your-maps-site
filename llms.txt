@@ -14,6 +14,7 @@ Key facts: no ranking guarantees (Google decides rankings); results typically be
 - [Free visibility report](https://www.boostyourmaps.com/visibility-report): request the free 24-hour map ranking report
 - [Google Maps marketing by industry](https://www.boostyourmaps.com/google-maps-marketing): the trades we work with and the cities we have studied
 - [Pest control SEO and Google Maps marketing](https://www.boostyourmaps.com/google-maps-marketing/pest-control): how Google picks the top three for pest control searches, what we change on a pest control profile, pricing and FAQ
+- [Google review link generator](https://www.boostyourmaps.com/tools/google-review-link-generator): free tool that turns a Place ID or Business Profile review link into a direct Google review link, a QR code (PNG and SVG) and a printable card, with Google's rules for asking for reviews
 
 ## Optional
 

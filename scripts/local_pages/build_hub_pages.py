@@ -167,7 +167,7 @@ PEST_MAIN = f"""
       <li>{CHECK}<p><b>Your service area.</b> Most customers never visit a pest control office, so Google asks you to hide the address and list the areas you serve. We set it to match where your trucks go.</p></li>
       <li>{CHECK}<p><b>Posts and photos.</b> Six posts and four new photos each month, planned around the weeks your phones ring most.</p></li>
       <li>{CHECK}<p><b>Your listings.</b> Thirty new map and directory listings each month with your name, address and phone the same everywhere, so Google trusts the details.</p></li>
-      <li>{CHECK}<p><b>Your reviews.</b> They stay yours. We never write or buy them, and we give you a simple plan for asking every customer.</p></li>
+      <li>{CHECK}<p><b>Your reviews.</b> They stay yours. We never write or buy them, and we give you a <a class="plainlink" href="/tools/google-review-link-generator">simple plan for asking every customer</a>.</p></li>
     </ul>
     <p style="margin-top:22px;"><a class="tlink" href="/pricing">See everything in the monthly plan →</a></p>
   </div>
