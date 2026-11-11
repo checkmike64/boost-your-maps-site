@@ -15,6 +15,8 @@ Mike Moll (owner, non-developer). Talk plainly, no jargon. He directs; you build
 6. Tell Mike what changed and give him the Vercel preview URL to check.
 
 ## Design system — DESIGN.md is law
+**Stylesheet version:** any PR that changes `assets/styles.css` sets the `?v=` on EVERY page (and template) to one new value. Browsers keep `styles.css?v=X` for up to a week (`stale-while-revalidate`), so a new page that reuses another page's `?v=` can show without its new styles (2026-11-11: the cost guide rendered unstyled this way).
+
 Read `DESIGN.md` before touching any visual. The short version:
 - White canvas ONLY. No colored section backgrounds, ever.
 - One accent: deep red #C5221F (buttons, numerals, mascot, key stat). Green #12B76A for checkmarks only. Yellow #FFC42E only in the h1 hand-underline.
