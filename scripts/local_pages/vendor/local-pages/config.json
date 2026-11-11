@@ -72,7 +72,7 @@
     {"slot": 4, "id": "voices", "h": "h2", "pattern": "What {city} customers say|What {city} .+ say", "data_slot": true, "modules": ["reviews"]},
     {"slot": 5, "id": "results", "h": "h2", "pattern": "Results in {city}|Results near {city}", "data_slot": true, "modules": ["proof"]},
     {"slot": 6, "id": "price", "h": "h2", "pattern": "Price and how it works|How it works", "data_slot": false, "modules": ["offer", "price"], "fixed_text": true},
-    {"slot": 7, "id": "questions", "h": "h2", "pattern": "Questions from {city}.*", "data_slot": true, "modules": ["questions"]},
+    {"slot": 7, "id": "questions", "h": "h2", "pattern": "Questions from {city}.*|Questions {service} owners ask us|Questions .+ ask us", "data_slot": true, "modules": ["questions"]},
     {"slot": 8, "id": "next", "h": "h2", "pattern": ".+", "data_slot": false, "fixed_text": true}
   ],
   "fixed_text_max_words": 150,

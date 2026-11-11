@@ -19,6 +19,11 @@
   "modified": "2026-11-10",
   "_note": "Sample page for Mike's review (queue row 7), built 2026-11-10 from fresh pulls. Phoenix covers more than 300 km2, so the Maps read ran from three centers (modules.md M1): City Hall to depth 30 (shown on the page), north Phoenix and Ahwatukee to depth 10 (observations).",
   "build_check": {
+    "sales_asset": {
+      "kind": "campaign",
+      "target": "Phoenix pest control outreach (the companies in the 2026-11-10 map read)",
+      "queue_page_type": "sales-asset"
+    },
     "demand_core_monthly": 1600,
     "proof_match_level": 2,
     "snapshot_date": "2026-11-10",
@@ -192,6 +197,15 @@
           "id": "map.first_over10",
           "text": "ACTION Termite & Pest Control was the first result from City Hall with more than 10 reviews",
           "value": "the first result with more than 10 reviews",
+          "unit": "text",
+          "source": "OpenSEO get_local_serp_results: Google Maps, mobile, \"pest control phoenix az\", from Phoenix City Hall (33.4489, -112.0773, zoom 13), read to 30",
+          "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "map.listings_label",
+          "text": "The first two results from City Hall are the two likely lead-gen listings (Pest Control of Phoenix, Eco Pest Control of Phoenix)",
+          "value": "the two lead-gen listings",
           "unit": "text",
           "source": "OpenSEO get_local_serp_results: Google Maps, mobile, \"pest control phoenix az\", from Phoenix City Hall (33.4489, -112.0773, zoom 13), read to 30",
           "source_url": "https://app.openseo.so/p/4a4955f8-c0d0-423d-9bf0-e5ff85d46d41",
@@ -917,7 +931,7 @@
     },
     "proof": {
       "included": true,
-      "reason": "find_proof match level 2: same trade (pest control), another city (Mesa). Anonymous, labeled.",
+      "reason": "find_proof match level 2: same trade (pest control), another city (Mesa). Anonymous, labeled. Shown against demand (searches fell about a third, actions held nearly level), BYM's demand-relative reporting; the stored headline (views up 5%) is not used.",
       "meta": {
         "match_level": 2,
         "approved": true,
@@ -929,35 +943,26 @@
       },
       "facts": [
         {
-          "id": "proof.views_up",
-          "text": "A pest control company in Mesa we work with: views up 5% while pest control searches around Mesa fell by a third",
-          "value": 5,
-          "unit": "percent",
+          "id": "proof.searches_drop",
+          "text": "Searches for 'pest control' around Mesa fell by about a third (417 a month to 281) over the same stretches",
+          "value": "about a third",
+          "unit": "text",
           "source": "brain.bym_proof 44c9c740 result_line (approved_for_pages; anonymous: Pest control company, Mesa, Arizona; Feb to Aug 2025 with April left out, vs Sep 2025 to Sep 2026)",
           "retrieved_on": "2026-11-10",
           "first_party": true
         },
         {
-          "id": "proof.views_before",
-          "text": "854 profile views a month before it joined us (Feb to Aug 2025, April left out)",
-          "value": 854,
-          "unit": "views",
-          "source": "brain.bym_proof 44c9c740 result_line (approved_for_pages; anonymous: Pest control company, Mesa, Arizona; Feb to Aug 2025 with April left out, vs Sep 2025 to Sep 2026)",
-          "retrieved_on": "2026-11-10",
-          "first_party": true
-        },
-        {
-          "id": "proof.views_after",
-          "text": "894 profile views a month from September 2025 to September 2026",
-          "value": 894,
-          "unit": "views",
+          "id": "proof.held",
+          "text": "The Mesa pest control company's calls, website clicks and direction requests fell much less (215 a month to 203, about 6%) than searches (417 to 281, about a third) over the same months",
+          "value": "fell much less",
+          "unit": "text",
           "source": "brain.bym_proof 44c9c740 result_line (approved_for_pages; anonymous: Pest control company, Mesa, Arizona; Feb to Aug 2025 with April left out, vs Sep 2025 to Sep 2026)",
           "retrieved_on": "2026-11-10",
           "first_party": true
         },
         {
           "id": "proof.actions_before",
-          "text": "215 calls, website clicks and direction requests a month before it joined us",
+          "text": "215 calls, website clicks and direction requests a month before it joined us (February to August 2025, April left out)",
           "value": 215,
           "unit": "actions",
           "source": "brain.bym_proof 44c9c740 result_line (approved_for_pages; anonymous: Pest control company, Mesa, Arizona; Feb to Aug 2025 with April left out, vs Sep 2025 to Sep 2026)",
@@ -1189,11 +1194,11 @@
           "first_party": true
         },
         {
-          "id": "q.diy",
-          "text": "Can we do some of this ourselves?",
-          "value": "Can we do some of this ourselves?",
+          "id": "q.ads",
+          "text": "Is $450 a month a lot next to Google Ads?",
+          "value": "Is $450 a month a lot next to Google Ads?",
           "unit": "question",
-          "source": "brain doc fe18bc0e 'Boost Your Maps — Sales & Messaging Playbook', objection list (owner questions from sales calls) ('I will do it in-house'), answered with the Phoenix read and reviews",
+          "source": "brain doc fe18bc0e 'Boost Your Maps — Sales & Messaging Playbook', objection list (owner questions from sales calls) ('It is too expensive'), answered with Keyword Planner click prices for Phoenix",
           "retrieved_on": "2026-11-10",
           "first_party": true
         }
@@ -1232,20 +1237,38 @@
         },
         {
           "id": "offer.posts",
-          "text": "6 Google Business Profile posts plus fresh photos per month",
+          "text": "6 posts and 4 fresh photos each month (/pricing; pricing.txt: 6 Google Business Profile posts plus fresh photos per month)",
           "value": 6,
           "unit": "posts",
-          "source": "pricing.txt",
-          "source_url": "https://www.boostyourmaps.com/pricing.txt",
+          "source": "/pricing",
+          "source_url": "https://www.boostyourmaps.com/pricing",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "offer.photos",
+          "text": "4 fresh photos each month (/pricing)",
+          "value": 4,
+          "unit": "photos",
+          "source": "/pricing",
+          "source_url": "https://www.boostyourmaps.com/pricing",
           "retrieved_on": "2026-11-10"
         },
         {
           "id": "offer.citations",
-          "text": "30 local map citations per month (listings on other map and directory sites)",
+          "text": "30 local map citations each month (/pricing and pricing.txt)",
           "value": 30,
           "unit": "citations",
-          "source": "pricing.txt",
-          "source_url": "https://www.boostyourmaps.com/pricing.txt",
+          "source": "/pricing",
+          "source_url": "https://www.boostyourmaps.com/pricing",
+          "retrieved_on": "2026-11-10"
+        },
+        {
+          "id": "offer.rebuild_included",
+          "text": "The full $1,750 rebuild is included in the $450 monthly plan (/pricing)",
+          "value": 1750,
+          "unit": "USD",
+          "source": "/pricing",
+          "source_url": "https://www.boostyourmaps.com/pricing",
           "retrieved_on": "2026-11-10"
         },
         {
