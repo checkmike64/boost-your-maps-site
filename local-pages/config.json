@@ -1,5 +1,6 @@
 {
-  "_about": "Rules for the industry x city local service pages under /google-maps-marketing/ (local pages 2.0). Read by scripts/local_pages/check_local_pages.py (CI) and by the BYM Team connector. The page skeleton, data modules and gates come from the vendored ai-skills shared/local-pages config (scripts/local_pages/vendor/local-pages/config.json); put a BYM-only override under local_gate. Any industry and any city can be built (decided 2026-10-05). Only Mike edits this file; page pull requests may not touch it.",
+  "_about": "Rules for the industry x city local service pages under /google-maps-marketing/ (local-pages 0.3). Read by scripts/local_pages/check_local_pages.py (CI) and by the BYM Team connector. The page skeleton, data modules and gates come from the vendored ai-skills shared/local-pages config (scripts/local_pages/vendor/local-pages/config.json); put a BYM-only override under local_gate. Any industry and any city can be built (decided 2026-10-05). Only Mike edits this file; page pull requests may not touch it.",
+  "_sales_asset_note": "Since 2026-11-11 these pages are sales assets (bym-local-service-pages 3.0, Mike approved the Will it rank standard): each is a market report for a named prospect company or campaign (page-data build_check.sales_asset.target; a 'sales-asset' row in brain.web_page_queue with sales_target), never targeted for ranking or reported on rank. They ship indexable, in the sitemap and linked from their hub; Mike switches them to noindex if one industry passes 15 reports or a Search Console pause signal shows up.",
   "site_origin": "https://www.boostyourmaps.com",
   "section": "google-maps-marketing",
   "cta_text": "Get my free visibility report →",
@@ -21,13 +22,13 @@
     "_cadence_note": "The pause switch above is the brake. Publishing pace is advisory and set in brain.web_sites.cadence (page-pipeline cadence.py and the connector read it); no volume limits as of 2026-10-05."
   },
 
-  "_queue_note": "page-pipeline and the connector record every page as a row in brain.web_page_queue and build only from an approved one. auto_approve true keeps the 2026-10-05 'any industry, any city, no approval' rule: the connector adds or approves the row itself when the page ships, and notes that it did. Set auto_approve to false only to approve rows yourself, in batches.",
+  "_queue_note": "page-pipeline and the connector record every page as a row in brain.web_page_queue and build only from an approved one. auto_approve true keeps the 2026-10-05 'any industry, any city, no approval' rule: the connector adds or approves the row itself when the page ships (as a 'sales-asset' row with the target from page-data), and notes that it did. Set auto_approve to false only to approve rows yourself, in batches.",
   "queue": {
     "require_approved_row": true,
     "auto_approve": true
   },
 
-  "_thresholds_note": "shingle_size, any_page and same_industry_or_city feed the local-pages overlap gate (G4). No word band here: the length band is the vendored owner-report profile's (600-1,400 words, a warning only, since the data sets the length); to change it for BYM, set local_gate.profiles.owner-report.words_min/words_max.",
+  "_thresholds_note": "shingle_size, any_page and same_industry_or_city feed the local-pages overlap gate (G4). No word band here: the length band is the vendored owner-report profile's (600-1,400 words, a warning only, since the data sets the length; the data floor is a warning too since local-pages 0.3); to change it for BYM, set local_gate.profiles.owner-report.words_min/words_max.",
   "thresholds": {
     "shingle_size": 5,
     "any_page": 0.15,
