@@ -1,4 +1,4 @@
-# Vendored from Impact-Leads-LLC/ai-skills@3c18416926fe shared/local-pages/scripts/local_gate.py (2026-11-11). Do not edit here: change the skill, then run scripts/local_pages/sync_local_gate.py.
+# Vendored from Impact-Leads-LLC/ai-skills@cd172db83d0d shared/local-pages/scripts/local_gate.py (2026-11-11). Do not edit here: change the skill, then run scripts/local_pages/sync_local_gate.py.
 #!/usr/bin/env python3
 """Gate for local / service-area pages built with shared/local-pages (0.3).
 
@@ -479,11 +479,25 @@ def check_module_minimum(mid: str, mod: dict, cfg: dict, r: Report, pcfg: dict |
                     r.err("L4", f"local_proof.facts[{i}]: review from {rd} is older than {cfg['modules']['reviews']['max_age_months']} months; never quote it")
 
 
+def check1_status(v) -> str:
+    """pass, fail or unknown for one Check 1 entry: {pass: bool} (hand-written) or rank-check gate.py's
+    {id, result: PASS | PASS_WITH_PLAN | FAIL | UNKNOWN}."""
+    if isinstance(v, dict):
+        if "pass" in v:
+            return "pass" if v["pass"] is True else "fail"
+        res = norm(v.get("result") or "")
+        if res in ("pass", "pass_with_plan"):
+            return "pass"
+        return "unknown" if res == "unknown" else "fail"
+    return "pass" if v is True else "fail"
+
+
 def check1_problems(bc: dict, cfg: dict) -> tuple[list[str], list[str]]:
     """Check 1 ("should this page exist", owned by shared/rank-check): the record must be there, say pass, cover
-    every check and be fresh. For a local page, demand is Keyword Planner (demand.py) for the service query group
-    in the city, or Search Console impressions; page type is the count of local service or location pages in the
-    city's top 10. Returns (stop reasons, warnings)."""
+    every check and be fresh. Takes rank-check gate.py's --json output as it is (checks as a list of {id: G0.x,
+    result}, a verdict) or a hand-written record (checks keyed by name, {pass: bool}). For a local page, demand is
+    Keyword Planner (demand.py) for the service query group in the city, or Search Console impressions; page type
+    is the count of local service or location pages in the city's top 10. Returns (stop reasons, warnings)."""
     c = cfg["check1"]
     rec = bc.get("check1")
     if not isinstance(rec, dict) or not rec:
@@ -492,6 +506,8 @@ def check1_problems(bc: dict, cfg: dict) -> tuple[list[str], list[str]]:
     stop: list[str] = []
     warn: list[str] = []
     checks = rec.get("checks") or {}
+    if isinstance(checks, list):
+        checks = {str(x.get("id")): x for x in checks if isinstance(x, dict) and x.get("id")}
     aliases = c.get("aliases") or {}
 
     def find(cid):
@@ -501,13 +517,11 @@ def check1_problems(bc: dict, cfg: dict) -> tuple[list[str], list[str]]:
         return None
 
     missing = [cid for cid in c["checks"] if find(cid) is None]
-    failed = []
-    for cid in c["checks"]:
-        v = find(cid)
-        if v is not None and (v.get("pass") if isinstance(v, dict) else v) is not True:
-            failed.append(cid)
+    failed = [cid for cid in c["checks"] if find(cid) is not None and check1_status(find(cid)) == "fail"]
+    unknown = [cid for cid in c["checks"] if find(cid) is not None and check1_status(find(cid)) == "unknown"]
     result = norm(rec.get("result") or rec.get("verdict") or "")
-    if result != "pass":
+    passed = result == "pass" or result.startswith("build to rank")
+    if not passed:
         stop.append(f"Check 1 result is '{rec.get('result') or rec.get('verdict') or 'missing'}', not pass"
                     + (f" (failed: {', '.join(failed)})" if failed else ""))
     else:
@@ -515,7 +529,9 @@ def check1_problems(bc: dict, cfg: dict) -> tuple[list[str], list[str]]:
             stop.append(f"Check 1 says pass, but {', '.join(failed)} did not pass")
         if missing:
             stop.append(f"Check 1 record has no {', '.join(missing)}")
-    checked = parse_date(rec.get("checked_on"))
+        if unknown:
+            warn.append(f"Check 1 couldn't read {', '.join(unknown)}; settle it in the brief before building")
+    checked = parse_date(rec.get("checked_on") or (rec.get("snapshot") or {}).get("read_at"))
     if not checked:
         stop.append("Check 1 record needs checked_on (YYYY-MM-DD)")
     elif (TODAY - checked).days > c["fresh_days"]:
@@ -538,7 +554,7 @@ def check1_problems(bc: dict, cfg: dict) -> tuple[list[str], list[str]]:
         elif (v or 0) < loc["demand_min_monthly"] and g < loc["gsc_impressions_90d_min"]:
             stop.append(f"no demand: {val}/mo for the service in the city (min {loc['demand_min_monthly']}) and "
                         f"{gsc or 0} Search Console impressions in 90 days (min {loc['gsc_impressions_90d_min']})")
-        if v is not None and not re.search(loc["demand_source_pattern"], str(d.get("source", "")), re.I):
+        if v is not None and not re.search(loc["demand_source_pattern"], str(d.get("source") or d.get("evidence") or ""), re.I):
             warn.append("Check 1 demand should come from Keyword Planner through scripts/demand.py (name it in checks.demand.source)")
     p = find("page_type")
     if isinstance(p, dict):
