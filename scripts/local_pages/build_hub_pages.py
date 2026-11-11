@@ -126,7 +126,7 @@ PEST_FAQ = [
      "We take one pest control company in each area. If we already work with one near you, your free report will say so."),
     ("Will you write reviews for our company?",
      "No. We never write or buy reviews, and Google's rules don't allow fake ones. Your reviews belong to you. We give "
-     "your techs a simple way to ask customers after a visit that went well."),
+     "your techs a simple way to ask every customer for a review after each job."),
     ("How long before our profile shows up more often?",
      "Most profiles show a change on the map within 60 to 90 days. Your monthly report shows where you appear and what "
      "we did that month."),
@@ -167,7 +167,7 @@ PEST_MAIN = f"""
       <li>{CHECK}<p><b>Your service area.</b> Most customers never visit a pest control office, so Google asks you to hide the address and list the areas you serve. We set it to match where your trucks go.</p></li>
       <li>{CHECK}<p><b>Posts and photos.</b> Six posts and four new photos each month, planned around the weeks your phones ring most.</p></li>
       <li>{CHECK}<p><b>Your listings.</b> Thirty new map and directory listings each month with your name, address and phone the same everywhere, so Google trusts the details.</p></li>
-      <li>{CHECK}<p><b>Your reviews.</b> They stay yours. We never write or buy them, and we give you a simple plan for asking happy customers.</p></li>
+      <li>{CHECK}<p><b>Your reviews.</b> They stay yours. We never write or buy them, and we give you a simple plan for asking every customer.</p></li>
     </ul>
     <p style="margin-top:22px;"><a class="tlink" href="/pricing">See everything in the monthly plan →</a></p>
   </div>

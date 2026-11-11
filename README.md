@@ -111,9 +111,14 @@ Vercel dashboard) for click-through testing before the domain switch.
 
 ## Adding pages (SEO rules baked in)
 
-- **Service/location pages:** copy `templates/service-page-template.html`. READ THE
+Every new page goes through `ai-skills/shared/page-pipeline` (see CLAUDE.md). The templates below are its step 4 markup.
+
+- **Service pages:** `templates/service-page-template.html`. READ THE
   COMMENT BLOCK AT THE TOP — it encodes Google's spam policies (no city-list stuffing,
-  no doorway pages, every page needs real unique local content). One service+city per page.
+  no doorway pages, every page needs real unique local content).
+- **City pages** (`/google-maps-marketing/<industry>/<city-st>`): market reports for a named prospect or
+  campaign (sales assets, never built to rank), on the local-pages skeleton in
+  `templates/local-service-page-main.html`, built from real local data. See `local-pages/README.md`.
 - **Blog posts:** copy `templates/blog-post-template.html` into `/blog/`. Answer-first
   structure, question H2s, real author byline.
 - Every new page: unique title (~50-60 chars) + meta description (~150-160), one H1,
