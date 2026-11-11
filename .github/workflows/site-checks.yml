@@ -24,3 +24,5 @@ jobs:
         run: node scripts/check_signup_payload.js
       - name: Check agreement functions (BYM CRM)
         run: node scripts/check_agreement_payload.js
+      - name: Check the review link tool (parsing, QR code, places route)
+        run: node scripts/check_review_link.js
