@@ -1,0 +1,27 @@
+Who shows up on Google Maps for pest control: 15 US cities, 2026
+Method note. Boost Your Maps, November 11, 2026.
+Study page: https://www.boostyourmaps.com/research/pest-control-google-maps-2026
+
+WHAT WE SEARCHED
+On November 11, 2026 we searched "pest control" on Google Maps, as a phone would, once in each of 15 cities: Atlanta, Charlotte, Chicago, Dallas, Houston, Knoxville, Las Vegas, Los Angeles, Mesa, Miami, New Orleans, Philadelphia, Phoenix, San Antonio and Tampa. Each search ran from one point downtown: city hall, or a downtown point in Miami and Charlotte, where city hall sits away from the core. The exact points are the search_lat and search_lng columns in the cities file. We used OpenSEO's local results tool, which reads Google Maps through DataForSEO and asks for mobile results in English at map zoom 13, with no signed-in user. We kept the first 20 results in each city. Knoxville returned 14. Mesa returned two paid Maps ads at the top; we removed them, so every count here is of the free results. Local Services Ads are not part of this data. That leaves 294 listings, 45 of them in a top-three spot.
+
+WHAT WE RECORDED FOR EACH LISTING
+Its place in the results, its Google review count and star rating, whether it shows a street address, its main and extra categories, its photo count, whether the owner has claimed it, the straight-line distance from the point we searched from to its map pin (Google gives a pin for service-area listings that hide their address, too), and where the profile's website button goes. We sorted the website button into four kinds: a page about that city (a city or location page), the homepage, some other page, or no website at all.
+
+HOW WE FLAGGED LIKELY LEAD-GENERATION LISTINGS
+Some listings exist to catch calls and sell them on to other companies. We used one fixed rule and applied it the same way in every city: fewer than 10 Google reviews, plus either no website or the city's name inside the business name. We didn't call these listings or check who owns them, and a new local company can fit the rule, so read it as a flag. We publish the rule so anyone can check it against the data.
+
+SEARCH DEMAND
+Monthly searches come from Google Ads Keyword Planner for each city's own geo target, November 2025 to October 2026, pulled on November 11, 2026. The main series is "pest control [city]" with its close variants, which Keyword Planner groups into one number. We also pulled termite control, mosquito control, bed bug exterminator, rodent control, ant control, roach control and scorpion control with the city and state. Where Keyword Planner groups a pest term with "pest control [city]", we mark it "grouped" and leave it out of the pest totals. Yearly figures in the cities file add up the 12 monthly values. Keyword Planner rounds small numbers into steps (10, 20, 30, 40, 50, 70, 90...), so small terms are rough.
+
+PRICE TAGS FROM REVIEWS
+Google lets reviewers tag what they paid ("$40 to $60", "$200+") and whether the price felt fair. In each city we took the two highest-placed pest control listings with 100 or more reviews and read their 20 newest reviews. Atlanta had one such listing, and Houston and Miami had none. In San Antonio the second one was a chimney company, and one Phoenix pull returned a different company, so we read one company in each of those. That gave 460 reviews from 23 companies in 13 cities. 134 of them carried a price tag. Price ranges and pest types are Google's own review tags. We kept the tags and the dates only, with no review text and no reviewer names.
+
+WHAT THIS DOES NOT SHOW
+One search from one point in each city on one day. Google Maps results change with where the searcher stands, so a search from the suburbs would show other companies. Results also change from day to day. Fifteen cities is a sample, not the whole country. The price tags come from customers of established companies who chose to tag a price, not from invoices.
+
+WHY THE DATA IS ANONYMOUS
+The files hold no business names, websites or addresses, because the study is about kinds of listings. We kept the full rows on file and can check any row for an editor who asks.
+
+HOW TO CITE
+Boost Your Maps, "Who shows up on Google Maps for pest control: 15 US cities" (November 2026), https://www.boostyourmaps.com/research/pest-control-google-maps-2026. Free to use with that credit and a link.
