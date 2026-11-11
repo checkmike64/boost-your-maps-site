@@ -59,7 +59,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </div>
 </nav>
 <div class="wrap"><nav class="breadcrumbs crumbs-wrap" aria-label="Breadcrumb"><ol><li><a href="/">Home</a></li><li><a href="/google-maps-marketing">Google Maps marketing</a></li><li><a href="/google-maps-marketing/pest-control">Pest control</a></li><li aria-current="page">What it costs</li></ol></nav></div>
-<main id="main-content" tabindex="-1">
+<main id="main-content" class="gpage" tabindex="-1">
 <article>
 <section class="page-hero">
   <div class="wrap">
@@ -79,13 +79,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <figure class="gfig proute" data-anim>
       <p class="gfig-h">Share of the 260 agencies at each monthly fee</p>
       <ol>
-        <li style="--i:0;--s:.88"><svg class="pin" viewBox="0 0 260 350" aria-hidden="true"><use href="#mascot"/></svg><p class="band">Under $500<small>Our monthly fee falls in this range</small></p><span class="meter"><span class="bar"></span><span class="pct">30%</span></span></li>
+        <li class="ours" style="--i:0;--s:.88"><svg class="pin" viewBox="0 0 260 350" aria-hidden="true"><use href="#mascot"/></svg><p class="band">Under $500<br><span class="gbubble">We charge $450 a month</span></p><span class="meter"><span class="bar"></span><span class="pct">30%</span></span></li>
         <li class="most" style="--i:1;--s:1"><span class="stop"></span><p class="band">$500 to $1,000<small>The most common fee</small></p><span class="meter"><span class="bar"></span><span class="pct">34%</span></span></li>
         <li style="--i:2;--s:.59"><span class="stop"></span><p class="band">$1,000 to $2,000</p><span class="meter"><span class="bar"></span><span class="pct">20%</span></span></li>
         <li style="--i:3;--s:.38"><span class="stop"></span><p class="band">$2,000 to $5,000</p><span class="meter"><span class="bar"></span><span class="pct">13%</span></span></li>
         <li style="--i:4;--s:.06"><span class="stop"></span><p class="band">Over $5,000</p><span class="meter"><span class="bar"></span><span class="pct">2%</span></span></li>
       </ol>
-      <figcaption class="gnote">Source: SE Ranking and Duda, SEO pricing study of 260 agencies, published December 13, 2024. The study reports 64% of agencies under $1,000 a month; the $500 to $1,000 share is that 64% minus the 30% under $500.</figcaption>
+      <figcaption class="gnote">Source: SE Ranking and Duda, SEO pricing study of 260 agencies, published December 13, 2024. The study reports 64% of agencies under $1,000 a month; the $500 to $1,000 share is that 64% minus the 30% under $500. Shares are rounded, so they add to 99%.</figcaption>
     </figure>
     <div class="prose" style="margin-top:30px;">
       <p>Ahrefs found that providers who sell to local businesses charge $1,557 a month on average. That figure comes from a poll of 439 SEO providers, updated in August 2024. Ahrefs assumed every provider charges the top of its price band, so the average runs high. For work billed by the hour, Ahrefs puts the average rate at $111.</p>
@@ -127,22 +127,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <figure class="gfig gtags">
       <p class="gfig-h">The price customers tagged on 22 reviews</p>
       <ul>
-        <li><b>9<span>reviews</span></b><em>$40 to $80</em><small>The most common price</small></li>
-        <li><b>7<span>reviews</span></b><em>$80 to $180</em></li>
-        <li><b>6<span>reviews</span></b><em>$200 or more</em><small>All six were termite jobs</small></li>
+        <li><b>$40 to $80</b><span class="ct">9 of 22 reviews</span><small>The most common price</small></li>
+        <li><b>$80 to $180</b><span class="ct">7 of 22 reviews</span></li>
+        <li><b>$200 or more</b><span class="ct">6 of 22 reviews</span><small>All six were termite jobs</small></li>
       </ul>
-      <figcaption class="gnote">Source: Google review price tags on the 20 newest reviews of each of three Phoenix pest control companies, read November 10, 2026.</figcaption>
+      <figcaption class="gnote">All 22 tagged reviews fall in these three bands. Source: Google review price tags on the 20 newest reviews of each of three Phoenix pest control companies, read November 10, 2026.</figcaption>
     </figure>
     <div class="prose" style="margin-top:30px;">
       <p>At the middle of the most common band, it takes about eight visits to cover one month of our fee, or two or three termite jobs. If your customers stay on a plan, count what one customer pays you over the years they stay. The worksheet below does that with your prices.</p>
     </div>
     <form class="gcalc" id="cost-calc" onsubmit="return false" aria-labelledby="calc-title">
-      <h3 id="calc-title">Worksheet: how many new customers a year cover the cost?</h3>
+      <h3 id="calc-title">How many new customers a year cover the cost?</h3>
       <p class="say">A customer pays you <span class="fi">$<input id="c-visit" class="w" type="number" inputmode="decimal" min="0" step="1" value="60" aria-label="What a customer pays you per visit, in dollars"></span> a visit.</p>
       <p class="say">They book <span class="fi"><input id="c-visits" type="number" inputmode="decimal" min="0" step="1" value="4" aria-label="Visits a customer books in a year (a quarterly plan is 4)"> <span id="u-visits">visits</span></span> a year and stay <span class="fi"><input id="c-years" type="number" inputmode="decimal" min="0" step="0.5" value="1" aria-label="Years a customer stays with you"> <span id="u-years">year</span>.</span></p>
       <p class="say">The monthly cost you're checking is <span class="fi">$<input id="c-fee" class="w" type="number" inputmode="decimal" min="0" step="1" value="450" aria-label="The monthly cost you're checking, in dollars">.</span></p>
-      <p class="say">One ad click in your area costs <span class="fi">$<input id="c-click" type="number" inputmode="decimal" min="0" step="1" value="46" aria-label="Price of one ad click in your area, in dollars">.</span></p>
-      <output id="calc-out" for="c-visit c-visits c-years c-fee c-click" aria-live="polite"></output>
+      <output id="calc-out" for="c-visit c-visits c-years c-fee" aria-live="polite"></output>
     </form>
   </div>
 </section>
@@ -154,7 +153,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <p>We ran three map searches for "pest control phoenix az" on November 10, 2026. They used the results that show up on a phone in downtown, north Phoenix and Ahwatukee.</p>
     </div>
     <figure class="gfig">
-      <p class="gfig-h">Reviews on each listing in the top three</p>
+      <p class="gfig-h">Reviews on the top-three listings ranged from 0 to 6,786</p>
       <div class="gpack" data-anim>
         <div>
           <h3>Downtown</h3>
@@ -210,10 +209,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <li><b>New map and directory listings</b><span class="amt">30 a month</span><p>Each one has the same name, address and phone as your profile.</p></li>
         <li><b>Posts on your profile</b><span class="amt">6 a month</span></li>
         <li><b>New photos on your profile</b><span class="amt">4 a month</span></li>
-        <li><b>Your monthly report</b><span class="amt">Every month</span><p>It lists what we did, where your profile ranks, and the calls, website clicks and direction requests your profile got.</p></li>
+        <li><b>Your monthly report</b><span class="amt">Included</span><p>It lists what we did, where your profile ranks, and the calls, website clicks and direction requests your profile got.</p></li>
       </ul>
       <p class="total"><span>Your monthly fee</span><b>$450<small>a month</small></b></p>
-      <p class="terms">Month to month with 7 days' written notice to cancel. The profile and everything we built stay yours.</p>
+      <p class="terms">You pay month to month and can cancel with 7 days' written notice. The profile and everything we built stay yours.</p>
     </div>
     <div class="prose" style="margin-top:34px;">
       <h3>What we won't do</h3>
@@ -298,7 +297,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   }
 })();
 (function () {
-  var ids = ["c-visit", "c-visits", "c-years", "c-fee", "c-click"];
+  var ids = ["c-visit", "c-visits", "c-years", "c-fee"];
   var out = document.getElementById("calc-out");
   if (!out) return;
   function num(id) {
@@ -309,7 +308,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     return "$" + Math.round(v).toLocaleString("en-US");
   }
   function render() {
-    var visit = num("c-visit"), visits = num("c-visits"), years = num("c-years") || 1, fee = num("c-fee"), click = num("c-click");
+    var visit = num("c-visit"), visits = num("c-visits"), years = num("c-years") || 1, fee = num("c-fee");
     var worth = visit * visits * years, cost = fee * 12;
     document.getElementById("u-visits").textContent = visits === 1 ? "visit" : "visits";
     document.getElementById("u-years").textContent = years === 1 ? "year" : "years";
@@ -318,12 +317,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       var need = Math.ceil(cost / worth);
       html += '<div class="res"><b>' + need.toLocaleString("en-US") + "</b><span>new customer" + (need === 1 ? " a year covers " : "s a year cover ") + money(fee) + " a month</span></div>";
     }
-    if (fee > 0 && click > 0) {
-      var clicks = Math.round(fee / click);
-      html += '<div class="res"><b>' + clicks.toLocaleString("en-US") + "</b><span>ad click" + (clicks === 1 ? "" : "s") + " a month for the same " + money(fee) + "</span></div>";
-    }
     if (worth > 0) {
-      html += '<p class="worth">One customer brings you ' + money(worth) + " over " + (years === 1 ? "a year" : years + " years") + ".</p>";
+      html += '<p class="worth">One customer pays you ' + money(worth) + " over " + (years === 1 ? "a year" : years + " years") + ".</p>";
     } else {
       html += '<p class="empty">Add what a customer pays per visit and how many visits they book in a year.</p>';
     }

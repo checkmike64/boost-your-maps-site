@@ -1,5 +1,7 @@
 /* ===== Guides: /guides/<slug> (cost guide redesign, 2026-11-11) =====
-   Page-only stylesheet. Every chart makes one point; the BYM pin on the price route is the page's one loud device. */
+   Page-only stylesheet. Every chart makes one point; the pin on the price route is the page's one loud device.
+   One chart grey (--chart) for bars, squares and stops; ink marks the row the chart is about. */
+.gpage{--chart:#C9D1CE;}
 .guide-h1{font-size:clamp(2.1rem,4.6vw,3.6rem);max-width:880px;}
 .crumbs-wrap ol{flex-wrap:wrap;row-gap:2px;}
 .crumbs-wrap li{white-space:nowrap;}
@@ -8,79 +10,75 @@
 .nolist li:last-child{border-bottom:1px solid var(--hairline);}
 .nolist b{font-family:'Gabarito',sans-serif;font-weight:700;}
 .gnote{margin-top:16px;color:var(--muted);font-size:.9rem;max-width:720px;line-height:1.55;}
-.gfig{margin:34px 0 0;}
+.gfig{margin:34px 0 0;max-width:880px;}
 .gfig-h{font-family:'Gabarito',sans-serif;font-weight:700;font-size:1.05rem;margin-bottom:14px;}
 
-/* 1. Price route: agency fee bands as stops on the dashed route, the pin at our band */
-.proute{max-width:780px;}
+/* 1. Price route: agency fee bands as stops on the dashed route, the pin and its bubble at our band */
 .proute ol{list-style:none;position:relative;}
-.proute ol::before{content:"";position:absolute;left:21px;top:30px;bottom:30px;border-left:2px dashed #DFE4E1;}
-.proute li{position:relative;display:grid;grid-template-columns:44px 170px minmax(0,1fr);gap:0 20px;align-items:center;padding:13px 0;}
-.proute .stop{justify-self:center;width:14px;height:14px;border-radius:50%;background:#fff;border:2px solid #AEB8B4;position:relative;z-index:1;}
-.proute .pin{justify-self:center;width:36px;height:48px;color:var(--red);position:relative;z-index:1;margin-top:-10px;}
+.proute ol::before{content:"";position:absolute;left:35px;top:40px;bottom:30px;border-left:2px dashed #DFE4E1;}
+.proute li{position:relative;display:grid;grid-template-columns:72px 210px minmax(0,1fr);gap:0 20px;align-items:center;padding:13px 0;}
+.proute .stop{justify-self:center;width:14px;height:14px;border-radius:50%;background:#fff;border:2px solid var(--muted);position:relative;z-index:1;}
+.proute .pin{justify-self:center;width:54px;height:72px;position:relative;z-index:1;}
 .proute .band{font-family:'Gabarito',sans-serif;font-weight:700;font-size:1.2rem;line-height:1.2;}
-.proute .band small{display:block;margin-top:3px;font-family:'Hanken Grotesk',sans-serif;font-weight:600;font-size:.9rem;color:var(--ink);}
+.proute .band small{display:block;margin-top:3px;font-family:'Hanken Grotesk',sans-serif;font-weight:600;font-size:.9rem;color:var(--muted);}
+.gbubble{position:relative;display:inline-block;margin-top:10px;padding:7px 13px;background:#fff;border:1px solid var(--hairline);border-radius:12px;font-size:.9rem;font-weight:700;line-height:1.3;white-space:nowrap;}
+.gbubble::before{content:"";position:absolute;left:-7px;top:50%;width:12px;height:12px;margin-top:-6px;background:#fff;border-left:1px solid var(--hairline);border-bottom:1px solid var(--hairline);transform:rotate(45deg);}
 .proute .meter{display:flex;align-items:center;gap:14px;min-width:0;}
-.proute .bar{display:block;height:30px;border-radius:7px;background:#C9D1CE;width:calc((100% - 84px) * var(--s));min-width:6px;flex:0 0 auto;transform-origin:left center;}
-.proute .most .bar{background:var(--ink);}
+.proute .bar{display:block;height:30px;border-radius:7px;background:var(--chart);width:calc((100% - 84px) * var(--s));min-width:6px;flex:0 0 auto;transform-origin:left center;}
+.proute .ours .bar{background:var(--ink);}
 .proute .pct{font-family:'Gabarito',sans-serif;font-weight:800;font-size:1.9rem;line-height:1;white-space:nowrap;}
-.proute .pct span{font-weight:600;font-size:.9rem;color:var(--muted);margin-left:4px;}
 
 /* 2. Clicks: one square per ad click that $450 buys */
-.gclicks{max-width:800px;}
 .gclicks ol{list-style:none;border-top:1px solid var(--hairline);}
 .gclicks li{display:grid;grid-template-columns:260px minmax(0,1fr) 84px;gap:8px 22px;align-items:center;padding:16px 0;border-bottom:1px solid var(--hairline);}
 .gclicks .q b{display:block;font-family:'Gabarito',sans-serif;font-weight:700;font-size:1.2rem;line-height:1.2;}
 .gclicks .q small{display:block;color:var(--muted);font-size:.9rem;margin-top:2px;}
 .gclicks .units{display:flex;flex-wrap:wrap;gap:6px;}
-.gclicks .units i{display:block;width:24px;height:24px;border-radius:6px;background:#C9D1CE;}
+.gclicks .units i{display:block;width:24px;height:24px;border-radius:6px;background:var(--chart);}
 .gclicks .key .units i{background:var(--ink);}
 .gclicks .n{text-align:right;font-family:'Gabarito',sans-serif;font-weight:800;font-size:1.9rem;line-height:1;white-space:nowrap;}
 .gclicks .n span{display:block;font-weight:600;font-size:.9rem;color:var(--muted);margin-top:4px;}
 
-/* 3. Price tags customers left on reviews */
-.gtags{max-width:880px;}
+/* 3. Price tags customers left on reviews: the price leads, the count follows */
 .gtags ul{list-style:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline);}
 .gtags li{padding:24px 24px 24px 0;}
 .gtags li+li{padding-left:24px;border-left:1px solid var(--hairline);}
-.gtags b{display:block;font-family:'Gabarito',sans-serif;font-weight:800;font-size:clamp(2.6rem,5vw,3.6rem);line-height:.95;}
-.gtags b span{font-size:1.05rem;font-weight:600;color:var(--muted);margin-left:6px;letter-spacing:0;}
-.gtags em{display:block;font-style:normal;font-family:'Gabarito',sans-serif;font-weight:700;font-size:1.2rem;margin-top:12px;}
+.gtags b{display:block;font-family:'Gabarito',sans-serif;font-weight:800;font-size:1.9rem;line-height:1.05;white-space:nowrap;}
+.gtags .ct{display:block;margin-top:8px;font-family:'Gabarito',sans-serif;font-weight:700;font-size:1.05rem;}
 .gtags small{display:block;color:var(--muted);font-size:.9rem;margin-top:2px;}
 
-/* 4. Worksheet: fill-in sentences, two big answers */
-.gcalc{margin-top:30px;max-width:780px;border:1px solid var(--hairline);border-radius:16px;padding:30px;}
+/* 4. Worksheet: fill-in-the-blank sentences, one big answer */
+.gcalc{margin-top:30px;max-width:880px;border:1px solid var(--hairline);border-radius:16px;padding:30px;}
 .gcalc h3{font-size:1.2rem;}
-.gcalc .say{margin-top:18px;font-size:1.2rem;line-height:1.6;color:var(--ink);}
-.gcalc .say+.say{margin-top:12px;}
+.gcalc .say{margin-top:16px;font-size:1.2rem;line-height:1.9;color:var(--ink);}
+.gcalc .say+.say{margin-top:6px;}
 .gcalc .fi{white-space:nowrap;}
-.gcalc input{width:5.4ch;font-family:'Gabarito',sans-serif;font-weight:700;font-size:1.2rem;text-align:center;padding:4px 6px;margin:0 3px;border:1px solid #7B8884;border-radius:9px;background:#fff;color:var(--ink);min-height:44px;-moz-appearance:textfield;appearance:textfield;}
-.gcalc input.w{width:6.6ch;}
+.gcalc input{width:4.6ch;font-family:'Gabarito',sans-serif;font-weight:800;font-size:1.2rem;text-align:center;padding:2px 4px;margin:0 4px;border:0;border-bottom:1.5px solid var(--ink);border-radius:0;background:transparent;color:var(--ink);min-height:44px;-moz-appearance:textfield;appearance:textfield;}
+.gcalc input.w{width:5.6ch;}
 .gcalc input::-webkit-outer-spin-button,.gcalc input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
-.gcalc input:focus{border-color:var(--ink);outline:2px solid var(--ink);outline-offset:1px;}
-.gcalc output{display:grid;grid-template-columns:1fr 1fr;gap:20px 28px;margin-top:24px;padding-top:24px;border-top:1px solid var(--hairline);}
+.gcalc input:focus{outline:2px solid var(--ink);outline-offset:2px;border-radius:4px;}
+.gcalc output{display:block;margin-top:22px;padding-top:24px;border-top:1px solid var(--hairline);}
 .gcalc .res b{display:block;font-family:'Gabarito',sans-serif;font-weight:800;font-size:clamp(2.8rem,6vw,4rem);line-height:.95;}
 .gcalc .res span{display:block;margin-top:8px;font-size:1.05rem;}
-.gcalc .worth{grid-column:1 / -1;color:var(--muted);font-size:.9rem;}
-.gcalc .empty{grid-column:1 / -1;}
+.gcalc .worth{margin-top:14px;color:var(--muted);font-size:.9rem;}
 
 /* 5. Reviews on each top-three listing, three searches */
-.gpack{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:34px;max-width:1040px;}
+.gpack{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:30px;}
 .gpack h3{font-size:1.2rem;}
 .gpack .where{color:var(--muted);font-size:.9rem;margin-top:2px;min-height:3.3em;}
 .gpack ol{list-style:none;margin-top:14px;border-top:1px solid var(--hairline);}
 .gpack li{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--hairline);}
 .gpack .pos{font-family:'Gabarito',sans-serif;font-weight:700;font-size:.9rem;color:var(--muted);}
 .gpack .track{display:block;height:16px;}
-.gpack .track i{display:block;height:16px;border-radius:5px;background:var(--ink);width:var(--w);min-width:4px;transform-origin:left center;}
+.gpack .track i{display:block;height:16px;border-radius:5px;background:var(--chart);width:var(--w);min-width:4px;transform-origin:left center;}
 .gpack .track i.zero{min-width:0;width:0;}
 .gpack li b{font-family:'Gabarito',sans-serif;font-weight:800;font-size:1.2rem;white-space:nowrap;text-align:right;}
 .gpack li b span{font-weight:600;font-size:.9rem;color:var(--muted);margin-left:3px;}
 
 /* 6. The bill: what the monthly fee pays for */
-.gbill{margin-top:30px;max-width:780px;border:1px solid var(--hairline);border-radius:16px;padding:8px 30px 26px;}
+.gbill{margin-top:30px;max-width:880px;border:1px solid var(--hairline);border-radius:16px;padding:8px 30px 26px;}
 .gbill ul{list-style:none;}
-.gbill li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 24px;align-items:baseline;padding:20px 0;border-bottom:1px solid var(--hairline);}
+.gbill li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 20px;align-items:baseline;padding:20px 0;border-bottom:1px solid var(--hairline);}
 .gbill li b{font-family:'Gabarito',sans-serif;font-weight:700;font-size:1.2rem;line-height:1.25;}
 .gbill li .amt{grid-column:2;grid-row:1;font-family:'Gabarito',sans-serif;font-weight:700;font-size:1.05rem;text-align:right;white-space:nowrap;}
 .gbill li p{grid-column:1 / -1;color:var(--muted);font-size:1.05rem;max-width:600px;}
@@ -93,14 +91,16 @@
 /* Motion: only when JS is on and the visitor allows it. Bars grow, squares fill, the pin drops once. */
 .ganim .proute .bar,.ganim .gpack .track i{transform:scaleX(0);}
 .ganim .proute.in .bar,.ganim .gpack.in .track i{transform:scaleX(1);transition:transform .75s cubic-bezier(.32,.72,0,1) calc(var(--i,0) * 90ms);}
-.ganim .proute .pin{opacity:0;transform:translateY(-34px);}
+.ganim .proute .pin,.ganim .proute .gbubble{opacity:0;transform:translateY(-34px);}
 .ganim .proute.in .pin{animation:gdrop .7s cubic-bezier(.32,.72,0,1) .5s forwards;}
+.ganim .proute.in .gbubble{animation:gpop .35s cubic-bezier(.32,.72,0,1) 1.05s forwards;}
 @keyframes gdrop{0%{opacity:0;transform:translateY(-34px);}60%{opacity:1;transform:translateY(4px);}100%{opacity:1;transform:translateY(0);}}
+@keyframes gpop{0%{opacity:0;transform:translateX(-6px);}100%{opacity:1;transform:none;}}
 .ganim .gclicks .units i{opacity:0;transform:scale(.4);}
 .ganim .gclicks.in .units i{opacity:1;transform:none;transition:opacity .3s ease calc(var(--i,0) * 45ms),transform .4s cubic-bezier(.32,.72,0,1) calc(var(--i,0) * 45ms);}
 @media(prefers-reduced-motion:reduce){
   .ganim .proute .bar,.ganim .gpack .track i,.ganim .gclicks .units i{transform:none;opacity:1;transition:none;}
-  .ganim .proute .pin{opacity:1;transform:none;animation:none;}
+  .ganim .proute .pin,.ganim .proute .gbubble{opacity:1;transform:none;animation:none;}
 }
 
 @media(max-width:880px){
@@ -109,25 +109,26 @@
   .gclicks li{grid-template-columns:minmax(0,1fr) auto;}
   .gclicks .q{grid-column:1 / -1;}
   .gtags ul{grid-template-columns:1fr;}
-  .gtags li,.gtags li+li{padding:20px 0;border-left:0;}
+  .gtags li,.gtags li+li{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:baseline;gap:0 16px;padding:18px 0;border-left:0;}
   .gtags li+li{border-top:1px solid var(--hairline);}
+  .gtags .ct{margin-top:0;text-align:right;}
+  .gtags small{grid-column:1 / -1;}
 }
 @media(max-width:560px){
-  .proute ol::before{left:17px;}
-  .proute li{grid-template-columns:36px minmax(0,1fr);gap:8px 14px;align-items:start;}
+  .proute ol::before{left:27px;top:36px;}
+  .proute li{grid-template-columns:56px minmax(0,1fr);gap:8px 12px;align-items:start;}
   .proute .stop{margin-top:6px;}
-  .proute .pin{width:30px;height:40px;margin-top:-4px;}
+  .proute .pin{width:44px;height:59px;margin-top:-6px;}
   .proute .meter{grid-column:2;}
   .proute .bar{height:24px;}
   .proute .pct{font-size:1.5rem;}
   .gclicks .units{gap:5px;}
   .gclicks .units i{width:19px;height:19px;border-radius:5px;}
   .gclicks .n{font-size:1.6rem;}
+  .gtags b{font-size:1.6rem;}
   .gcalc{padding:22px 18px;}
-  .gcalc .say{font-size:1.05rem;line-height:2.4;}
+  .gcalc .say{font-size:1.05rem;line-height:1.9;}
   .gcalc input{font-size:1.05rem;}
-  .gcalc output{grid-template-columns:1fr;}
   .gbill{padding:4px 18px 22px;}
-  .gbill li{grid-template-columns:1fr;}
-  .gbill li .amt{grid-column:1;grid-row:auto;text-align:left;color:var(--muted);}
+  .gbill li b{font-size:1.05rem;}
 }
