@@ -176,6 +176,29 @@ combined = "\n".join((ROOT / name).read_text(encoding="utf-8") for name in (
 if combined.lower().count("6 monthly posts") < 2 or "4 monthly posts" in combined.lower():
     fail("pricing", "monthly post deliverables are inconsistent")
 
+# Every stylesheet must close what it opens. An unclosed @media block (2026-11-11: a lost "}" after
+# @media print) silently turns every later rule into a print-only rule.
+for css_path in sorted((ROOT / "assets").glob("*.css")):
+    css = re.sub(r"/\*.*?\*/", "", css_path.read_text(encoding="utf-8"), flags=re.S)
+    css = re.sub(r"\"(?:\\.|[^\"\\])*\"|'(?:\\.|[^'\\])*'", "", css)
+    depth = 0
+    for line_no, line in enumerate(css.splitlines(), 1):
+        depth += line.count("{") - line.count("}")
+        if depth < 0:
+            fail(css_path.relative_to(ROOT), f"unexpected '}}' on line {line_no}")
+            break
+    if depth > 0:
+        fail(css_path.relative_to(ROOT), f"{depth} unclosed '{{' block(s); later rules would sit inside it")
+
+# One styles.css version across the site (CLAUDE.md, "Stylesheet version").
+style_versions: dict[str, list[str]] = {}
+for page in HTML_FILES + sorted((ROOT / "templates").glob("*.html")):
+    for version in re.findall(r"/assets/styles\.css\?v=([\w.-]+)", page.read_text(encoding="utf-8")):
+        style_versions.setdefault(version, []).append(str(page.relative_to(ROOT)))
+if len(style_versions) > 1:
+    summary = "; ".join(f"v={v} on {len(pages)} page(s), e.g. {pages[0]}" for v, pages in sorted(style_versions.items()))
+    fail("assets/styles.css", f"pages load different stylesheet versions: {summary}")
+
 if errors:
     print("Site validation failed:")
     for error in errors:
