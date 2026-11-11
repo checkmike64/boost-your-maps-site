@@ -15,7 +15,7 @@ Mike Moll (owner, non-developer). Talk plainly, no jargon. He directs; you build
 6. Tell Mike what changed and give him the Vercel preview URL to check.
 
 ## Design system — DESIGN.md is law
-**Stylesheet version:** any PR that changes `assets/styles.css` sets the `?v=` on EVERY page (and template) to one new value. Browsers keep `styles.css?v=X` for up to a week (`stale-while-revalidate`), so a new page that reuses another page's `?v=` can show without its new styles (2026-11-11: the cost guide rendered unstyled this way).
+**Stylesheet version:** any PR that changes `assets/styles.css` sets the `?v=` on EVERY page (and template) to one new value. Browsers keep `styles.css?v=X` for up to a week (`stale-while-revalidate`), so a new page that reuses another page's `?v=` can show without its new styles. `validate_site.py` fails when pages load different versions, and when any stylesheet in `assets/` leaves a `{` unclosed (2026-11-11: a merge dropped the `}` after `@media print`, so the cost guide's rules only applied when printing). After resolving a conflict in a stylesheet, run the validator before pushing.
 
 Read `DESIGN.md` before touching any visual. The short version:
 - White canvas ONLY. No colored section backgrounds, ever.
