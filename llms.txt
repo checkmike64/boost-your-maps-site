@@ -14,6 +14,7 @@ Key facts: no ranking guarantees (Google decides rankings); results typically be
 - [Free visibility report](https://www.boostyourmaps.com/visibility-report): request the free 24-hour map ranking report
 - [Google Maps marketing by industry](https://www.boostyourmaps.com/google-maps-marketing): the trades we work with and the cities we have studied
 - [Pest control SEO and Google Maps marketing](https://www.boostyourmaps.com/google-maps-marketing/pest-control): how Google picks the top three for pest control searches, what we change on a pest control profile, pricing and FAQ
+- [Who shows up on Google Maps for pest control: 15 US cities (2026 study)](https://www.boostyourmaps.com/research/pest-control-google-maps-2026): one Google Maps search from the center of 15 cities, 294 listings; listings with fewer than 10 reviews held 24 of 45 top-three spots; free CSV and JSON data with the method
 
 ## Optional
 
