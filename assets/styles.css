@@ -172,6 +172,7 @@ p{font-size:1.05rem;}
 .flinks a:hover{color:var(--redDeep);border-color:var(--redDeep);}
 .breadcrumbs{position:static;background:#fff;border:0;backdrop-filter:none;}
 .breadcrumbs ol{display:flex;align-items:center;gap:8px;list-style:none;padding:16px 0 0;color:var(--muted);font-size:.9rem;}
+.breadcrumbs ol{flex-wrap:wrap;row-gap:4px;} .breadcrumbs li{white-space:nowrap;}
 .breadcrumbs li+li::before{content:"/";margin-right:8px;color:#88938F;}
 .breadcrumbs a{color:var(--muted);text-underline-offset:3px;}
 .breadcrumbs [aria-current="page"]{color:var(--ink);}
