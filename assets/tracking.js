@@ -48,6 +48,18 @@
     window.dataLayer.push(data);
   }
 
+  // Lead source per page (2026-11-11): the first page of the visit and the site that sent the visitor,
+  // kept for this tab only. forms.js adds them to the page URL the CRM stores, so each lead shows the page
+  // that brought it. Paths and a host name only; nothing about the person.
+  try {
+    if (!window.sessionStorage.getItem("bym_landing")) {
+      window.sessionStorage.setItem("bym_landing", window.location.pathname);
+      var refHost = "";
+      try { refHost = document.referrer ? new URL(document.referrer).hostname : ""; } catch (e) {}
+      window.sessionStorage.setItem("bym_landing_ref", refHost === window.location.hostname ? "" : refHost);
+    }
+  } catch (e) {}
+
   function ctaLocation(el) {
     if (el.closest("nav")) return "nav";
     if (el.closest(".page-hero")) return "hero";
