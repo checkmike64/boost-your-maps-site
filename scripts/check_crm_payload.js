@@ -129,6 +129,15 @@ assert.equal(edge.utm.utm_source.length, 200);
 assert.equal(edge.clientIp, null);
 assert.equal(edge.userAgent.length, 512);
 
+// Lead source per page (2026-11-11): forms.js adds landing, ref and from to the page URL; the CRM keeps them.
+const sourced = buildCrmPayload({
+  page_url: "https://www.boostyourmaps.com/visibility-report?location=Toronto%2C+ON&landing=%2Flocal-seo%2Ftoronto-on&ref=www.google.com&from=%2Flocal-seo%2Ftoronto-on",
+  fields: { email: "a@example.com" },
+}, {});
+assert.ok(sourced.sourceUrl.includes("landing=%2Flocal-seo%2Ftoronto-on"));
+assert.ok(sourced.sourceUrl.includes("ref=www.google.com"));
+assert.ok(sourced.sourceUrl.includes("from=%2Flocal-seo%2Ftoronto-on"));
+
 const noPage = buildCrmPayload({ page_url: "javascript:alert(1)", fields: { email: "a@example.com" } }, {});
 assert.equal(noPage.sourceUrl, null);
 assert.deepEqual(noPage.utm, {});
