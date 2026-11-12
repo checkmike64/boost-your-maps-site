@@ -88,9 +88,19 @@
 .gbill .total b small{font-size:1.05rem;font-weight:600;color:var(--muted);margin-left:4px;}
 .gbill .terms{margin-top:14px;color:var(--muted);font-size:.9rem;}
 
+/* 7. Demand bars: one row per trade; ink marks the rows the chart's title is about */
+.gbars ol{list-style:none;border-top:1px solid var(--hairline);}
+.gbars li{display:grid;grid-template-columns:190px minmax(0,1fr);gap:4px 22px;align-items:center;padding:11px 0;border-bottom:1px solid var(--hairline);}
+.gbars .t{font-family:'Gabarito',sans-serif;font-weight:700;font-size:1.05rem;line-height:1.25;}
+.gbars .t small{display:block;margin-top:2px;font-family:'Hanken Grotesk',sans-serif;font-weight:400;font-size:.9rem;color:var(--muted);}
+.gbars .meter{display:flex;align-items:center;gap:12px;min-width:0;}
+.gbars .bar{display:block;height:20px;border-radius:6px;background:var(--chart);width:calc((100% - 80px) * var(--s));min-width:6px;flex:0 0 auto;transform-origin:left center;}
+.gbars .top .bar{background:var(--ink);}
+.gbars .n{font-family:'Gabarito',sans-serif;font-weight:800;font-size:1.2rem;white-space:nowrap;}
+
 /* Motion: only when JS is on and the visitor allows it. Bars grow, squares fill, the pin drops once. */
-.ganim .proute .bar,.ganim .gpack .track i{transform:scaleX(0);}
-.ganim .proute.in .bar,.ganim .gpack.in .track i{transform:scaleX(1);transition:transform .75s cubic-bezier(.32,.72,0,1) calc(var(--i,0) * 90ms);}
+.ganim .proute .bar,.ganim .gpack .track i,.ganim .gbars .bar{transform:scaleX(0);}
+.ganim .proute.in .bar,.ganim .gpack.in .track i,.ganim .gbars.in .bar{transform:scaleX(1);transition:transform .75s cubic-bezier(.32,.72,0,1) calc(var(--i,0) * 90ms);}
 .ganim .proute .pin,.ganim .proute .gbubble{opacity:0;transform:translateY(-34px);}
 .ganim .proute.in .pin{animation:gdrop .7s cubic-bezier(.32,.72,0,1) .5s forwards;}
 .ganim .proute.in .gbubble{animation:gpop .35s cubic-bezier(.32,.72,0,1) 1.05s forwards;}
@@ -99,7 +109,7 @@
 .ganim .gclicks .units i{opacity:0;transform:scale(.4);}
 .ganim .gclicks.in .units i{opacity:1;transform:none;transition:opacity .3s ease calc(var(--i,0) * 45ms),transform .4s cubic-bezier(.32,.72,0,1) calc(var(--i,0) * 45ms);}
 @media(prefers-reduced-motion:reduce){
-  .ganim .proute .bar,.ganim .gpack .track i,.ganim .gclicks .units i{transform:none;opacity:1;transition:none;}
+  .ganim .proute .bar,.ganim .gpack .track i,.ganim .gclicks .units i,.ganim .gbars .bar{transform:none;opacity:1;transition:none;}
   .ganim .proute .pin,.ganim .proute .gbubble{opacity:1;transform:none;animation:none;}
 }
 
@@ -113,6 +123,8 @@
   .gtags li+li{border-top:1px solid var(--hairline);}
   .gtags .ct{margin-top:0;text-align:right;}
   .gtags small{grid-column:1 / -1;}
+  .gtags.gproof li,.gtags.gproof li+li{display:block;}
+  .gtags.gproof .ct{margin-top:6px;text-align:left;}
 }
 @media(max-width:560px){
   .proute ol::before{left:27px;top:36px;}
@@ -126,6 +138,7 @@
   .gclicks .units i{width:19px;height:19px;border-radius:5px;}
   .gclicks .n{font-size:1.6rem;}
   .gtags b{font-size:1.6rem;}
+  .gbars li{grid-template-columns:minmax(0,1fr);gap:6px;}
   .gcalc{padding:22px 18px;}
   .gcalc .say{font-size:1.05rem;line-height:1.9;}
   .gcalc input{font-size:1.05rem;}
