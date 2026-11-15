@@ -82,16 +82,26 @@
 
   // The first-touch attribution tracking.js keeps for 90 days: where this
   // browser first came from. It goes along so a paid signup keeps its source.
-  // null when there is none, it has run out, or storage is blocked; the page
-  // works the same.
+  // null when there is none, it has run out or is dated in the future, or
+  // storage is blocked; the page works the same.
   function firstTouch() {
     try {
       var saved = JSON.parse(window.localStorage.getItem("bym_first_touch") || "null");
-      var seen = saved && typeof saved === "object" ? Date.parse(saved.first_seen_at) : NaN;
-      return Date.now() - seen < FIRST_TOUCH_MS ? saved : null;
+      var age = saved && typeof saved === "object" ? Date.now() - Date.parse(saved.first_seen_at) : NaN;
+      return age >= 0 && age < FIRST_TOUCH_MS ? saved : null;
     } catch (e) {
       return null;
     }
+  }
+
+  // This browser is sending its buyer to Stripe: remembered, as the time and
+  // nothing else, so the purchase event is pushed here and not in another
+  // browser that opens the welcome link later. Without storage there is no
+  // purchase event.
+  function markCheckoutStarted() {
+    try {
+      window.localStorage.setItem("bym_checkout_started", String(Date.now()));
+    } catch (e) { /* no purchase event then */ }
   }
 
   function loaded(result) {
@@ -538,6 +548,7 @@
     var url = result.status === 200 && result.data.ok === true ? result.data.checkoutUrl : null;
     if (typeof url !== "string" || url.indexOf(CHECKOUT_PREFIX) !== 0) return false;
     button.textContent = "Opening payment…";
+    markCheckoutStarted();
     pushEvent({ event: "agreement_step", agreement_step: step });
     window.location.assign(url);
     return true;

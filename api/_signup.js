@@ -108,8 +108,9 @@ function invalid(field) {
 
 // POST {CRM}/api/signup, from the body the signup pages post (assets/signup.js)
 // and the request headers. Returns { payload } or { error } with the field the
-// page should point at (named as the CRM names it).
-function buildStartPayload(body, headers) {
+// page should point at (named as the CRM names it). `now` is the time the
+// first touch is checked against (the checks set it; the functions do not).
+function buildStartPayload(body, headers, now = Date.now()) {
   if (!body) return invalid(null);
   // The honeypot: a person never fills it. Refused quietly, nothing sent.
   if (text(body.hp_field_2026)) return invalid(null);
@@ -162,7 +163,7 @@ function buildStartPayload(body, headers) {
   if (pageUrl) pageUrl.hash = "";
   // Where the buyer's browser first came from (assets/tracking.js), when the
   // page sent it and it is well formed. Otherwise the signup goes without it.
-  const attribution = attributionFrom(body.attribution);
+  const attribution = attributionFrom(body.attribution, now);
   return {
     payload: {
       plan,
@@ -318,7 +319,23 @@ function shapePortal(portal) {
 // One call to the CRM. Resolves { status, data } and never throws. `op` names
 // the call in the logs ("start", "status", ...); the path, which can hold a
 // token, is never logged.
-async function crmCall(op, method, path, { body, clientIp } = {}) {
+//
+// Attribution must never cost a signup. When the CRM answers 400 to a body
+// that carried `attribution` (a CRM that does not know the key yet refuses
+// the whole body), the call is made once more without it, and that second
+// answer is the one used: a body that is wrong for another reason is refused
+// again and the refusal goes back to the page as before.
+async function crmCall(op, method, path, options = {}) {
+  const first = await crmCallOnce(op, method, path, options);
+  const sent = options.body;
+  if (first.status !== 400 || !sent || !("attribution" in sent)) return first;
+  const body = { ...sent };
+  delete body.attribution;
+  console.error("BYM signup", op, "sent again without attribution");
+  return crmCallOnce(op, method, path, { ...options, body });
+}
+
+async function crmCallOnce(op, method, path, { body, clientIp } = {}) {
   try {
     const response = await fetch(`${crmUrl()}${path}`, {
       method,
