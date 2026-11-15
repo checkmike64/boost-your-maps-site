@@ -11,6 +11,8 @@
   var TEAM_EMAIL = "team@boostyourmaps.com";
   var TIMEOUT_MS = 15000;
   var FIRST_TOUCH_MS = 90 * 24 * 60 * 60 * 1000;
+  // A checkout this browser started counts toward its purchase event for 7 days.
+  var CHECKOUT_MS = 7 * 24 * 60 * 60 * 1000;
 
   window.dataLayer = window.dataLayer || [];
 
@@ -50,16 +52,26 @@
 
   // The first-touch attribution tracking.js keeps for 90 days: where this
   // browser first came from. It goes along so a paid signup keeps its source.
-  // null when there is none, it has run out, or storage is blocked; the page
-  // works the same.
+  // null when there is none, it has run out or is dated in the future, or
+  // storage is blocked; the page works the same.
   function firstTouch() {
     try {
       var saved = JSON.parse(window.localStorage.getItem("bym_first_touch") || "null");
-      var seen = saved && typeof saved === "object" ? Date.parse(saved.first_seen_at) : NaN;
-      return Date.now() - seen < FIRST_TOUCH_MS ? saved : null;
+      var age = saved && typeof saved === "object" ? Date.now() - Date.parse(saved.first_seen_at) : NaN;
+      return age >= 0 && age < FIRST_TOUCH_MS ? saved : null;
     } catch (e) {
       return null;
     }
+  }
+
+  // This browser is sending its buyer to Stripe: remembered, as the time and
+  // nothing else, so the purchase event is pushed here and not in another
+  // browser that opens the welcome link later. Without storage there is no
+  // purchase event.
+  function markCheckoutStarted() {
+    try {
+      window.localStorage.setItem("bym_checkout_started", String(Date.now()));
+    } catch (e) { /* no purchase event then */ }
   }
 
   // Puts a message into an element, turning the team address into a link.
@@ -335,6 +347,7 @@
       });
 
       if (result.status === 200 && result.data.ok === true && isHttpUrl(result.data.checkoutUrl)) {
+        markCheckoutStarted();
         pushEvent({ event: "begin_checkout", signup_plan: plan, quantity: Number(select.value) || 1 });
         window.location.assign(result.data.checkoutUrl);
         return;
@@ -510,21 +523,28 @@
       return hex;
     }
 
-    // One purchase event per signup per browser, the first time this browser
-    // sees it paid (while it waits here, or on a later visit). It is for the
-    // funnels in Google Analytics; the CRM's own server-side conversion stays
-    // the one the ad platforms count. The amount is the checkout total from
-    // the CRM, and without one nothing is pushed. A localStorage key made from
-    // the start of the hash remembers the push, so a reload never repeats it.
-    // No crypto.subtle or no storage: no event.
+    // One purchase event per signup, in the browser that started the checkout,
+    // the first time it sees the signup paid (while it waits here, or on a
+    // later visit). It is for the funnels in Google Analytics; the CRM's own
+    // server-side conversion stays the one the ad platforms count. Another
+    // browser that opens the same welcome link (the welcome email on a phone,
+    // the team checking a client's page) started no checkout, has no marker,
+    // and pushes nothing. The marker is good for 7 days and is used up by the
+    // push. The amount is the checkout total from the CRM, and without one
+    // nothing is pushed. A localStorage key made from the start of the hash
+    // remembers the push, so a reload never repeats it. No crypto.subtle or
+    // no storage: no event.
     async function trackPurchase() {
       var paid = signup;
       if (preview || !paid || !paid.paid || !paid.amountCents) return;
       try {
+        var age = Date.now() - Number(window.localStorage.getItem("bym_checkout_started") || NaN);
+        if (!(age >= 0 && age < CHECKOUT_MS)) return;
         var id = await tokenHash();
         var key = "bym_purchase_" + id.slice(0, 16);
         if (window.localStorage.getItem(key)) return;
         window.localStorage.setItem(key, "1");
+        window.localStorage.removeItem("bym_checkout_started");
         pushEvent({
           event: "purchase",
           transaction_id: id,

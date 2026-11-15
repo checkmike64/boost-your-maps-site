@@ -216,6 +216,7 @@ function browser({ start = START, blocked = false, subtle = true } = {}) {
     local,
     session,
     open,
+    now: () => now,
     advance(ms) {
       now += ms;
     },
@@ -271,14 +272,32 @@ function agreementPage() {
   };
 }
 
+// The buyer fills in the checkout form on /get-started and is sent to Stripe.
+// Returns the page; its one post is what the form sent.
+async function startCheckout(buyer, { url = `${SITE}/get-started`, scripts = ["tracking.js", "signup.js"] } = {}) {
+  const start = startPage();
+  const page = await buyer.open(url, {
+    referrer: `${SITE}/pricing`,
+    scripts,
+    selectors: start.selectors,
+    answer: () => ({ status: 200, data: { ok: true, checkoutUrl: CHECKOUT } }),
+  });
+  await page.send(start.form, "submit");
+  assert.equal(page.posts.length, 1);
+  assert.equal(page.posts[0].to, "/api/signup/start");
+  assert.equal(page.window.location.assigned, CHECKOUT);
+  return page;
+}
+
 // ---- The first page view: a campaign link with every value ------------------
 
-const FIRST_URL =
-  `${SITE}/google-maps-marketing/pest-control?utm_source=google&utm_medium=cpc&utm_campaign=pest-phoenix&utm_term=pest+control+seo` +
-  "&utm_content=ad-2&gclid=Cj0KCQjw-gclid&gbraid=0AAAAAo4m-gbraid&wbraid=CjkKCQjw-wbraid&fbclid=IwAR0-fbclid#pricing";
+const CAMPAIGN_QUERY =
+  "utm_source=google&utm_medium=cpc&utm_campaign=pest-phoenix&utm_term=pest+control+seo" +
+  "&utm_content=ad-2&gclid=Cj0KCQjw-gclid&gbraid=0AAAAAo4m-gbraid&wbraid=CjkKCQjw-wbraid&fbclid=IwAR0-fbclid";
+const FIRST_URL = `${SITE}/google-maps-marketing/pest-control?${CAMPAIGN_QUERY}#pricing`;
 const FIRST_REFERRER = "https://www.google.com/search?q=pest+control+marketing#top";
 const FIRST_TOUCH = {
-  landing: FIRST_URL.split("#")[0],
+  landing: `${SITE}/google-maps-marketing/pest-control?${CAMPAIGN_QUERY}`,
   referrer: "https://www.google.com/search",
   utm_source: "google",
   utm_medium: "cpc",
@@ -292,12 +311,12 @@ const FIRST_TOUCH = {
   first_seen_at: START,
 };
 
-// Every first touch the checks below see kept, to send through the site's
-// functions at the end.
+// Every first touch the checks below see kept, with the time it was kept at,
+// to send through the site's functions at the end.
 const keptTouches = [];
 function kept(visitor) {
   const touch = visitor.firstTouch();
-  keptTouches.push(touch);
+  keptTouches.push({ touch, now: visitor.now() });
   return touch;
 }
 
@@ -354,7 +373,10 @@ async function checkFirstTouch() {
   }
 
   // Something unreadable under the key is not a first touch: it is replaced.
-  for (const junk of ["not json", "null", "[]", "{}", "7", '"text"', '{"first_seen_at":"soon"}', '{"landing":"https://example.com/"}']) {
+  // So is one dated in the future (a clock that was wrong when it was kept).
+  const tomorrow = JSON.stringify({ ...FIRST_TOUCH, utm_source: "old", first_seen_at: new Date(Date.parse(START) + DAY).toISOString() });
+  const nextMoment = JSON.stringify({ ...FIRST_TOUCH, utm_source: "old", first_seen_at: new Date(Date.parse(START) + 1).toISOString() });
+  for (const junk of ["not json", "null", "[]", "{}", "7", '"text"', '{"first_seen_at":"soon"}', '{"landing":"https://example.com/"}', tomorrow, nextMoment]) {
     const odd = browser();
     odd.local.setItem("bym_first_touch", junk);
     await odd.open(FIRST_URL, { referrer: FIRST_REFERRER });
@@ -373,35 +395,122 @@ async function checkFirstTouch() {
     gclid: "y".repeat(500),
     first_seen_at: START,
   });
+
+  // A value that starts the way a spreadsheet formula does (= + - @) is not
+  // kept as a value. Google's own "+pest +control" keywords are an example.
+  const formula = browser();
+  await formula.open(`${SITE}/?utm_source=google&utm_term=%2Bpest+%2Bcontrol&utm_content=%3D1%2B1&utm_campaign=-sale&utm_medium=%40cpc&gclid=a%3Db`);
+  assert.deepEqual(kept(formula), {
+    landing: `${SITE}/?utm_source=google&utm_term=%2Bpest+%2Bcontrol&utm_content=%3D1%2B1&utm_campaign=-sale&utm_medium=%40cpc&gclid=a%3Db`,
+    utm_source: "google",
+    gclid: "a=b",
+    first_seen_at: START,
+  });
+}
+
+// ---- The landing keeps only campaign values ---------------------------------
+
+async function checkLandingQuery() {
+  // A first page view of a link with an email and a phone number in it: the
+  // landing is the page and the campaign values, nothing else.
+  const visitor = browser();
+  await visitor.open(`${SITE}/get-started?email=ana%40example.com&utm_source=email&phone=5125550100&name=Ana+Ruiz&utm_id=7&gclid=G-1&service=pest+control#form`);
+  assert.deepEqual(kept(visitor), {
+    landing: `${SITE}/get-started?utm_source=email&gclid=G-1`,
+    utm_source: "email",
+    gclid: "G-1",
+    first_seen_at: START,
+  });
+  const stored = JSON.stringify([...visitor.local.items]);
+  for (const personal of ["ana", "example.com", "5125550100", "Ruiz", "pest"]) assert.ok(!stored.includes(personal), `${personal} is kept`);
+
+  // And nothing of it is sent: the same browser signs up three days later.
+  visitor.advance(3 * DAY);
+  const page = await startCheckout(visitor);
+  const { body } = page.posts[0];
+  assert.deepEqual(body.attribution, { landing: `${SITE}/get-started?utm_source=email&gclid=G-1`, utm_source: "email", gclid: "G-1", first_seen_at: START });
+  const { payload } = buildStartPayload(body, HEADERS, visitor.now());
+  assert.deepEqual(payload.attribution, body.attribution);
+  for (const personal of ["example.com", "5125550100"]) assert.ok(!JSON.stringify(payload.attribution).includes(personal), `${personal} is sent`);
+
+  // With no campaign value in the link, the landing is the page alone.
+  const plain = browser();
+  await plain.open(`${SITE}/get-started?email=ana%40example.com&phone=5125550100`);
+  assert.deepEqual(kept(plain), { landing: `${SITE}/get-started`, first_seen_at: START });
+}
+
+// ---- The whole record fits what the site's functions pass on ----------------
+
+async function checkSize() {
+  const bytes = (touch) => Buffer.byteLength(JSON.stringify(touch), "utf8");
+  const open = async (values) => {
+    const visitor = browser();
+    await visitor.open(`${SITE}/pricing?${new URLSearchParams(values)}`, { referrer: "https://www.google.com/" });
+    return kept(visitor);
+  };
+
+  // Each value is within 500 characters, but together they are over 3,000
+  // bytes as JSON: the largest campaign value is left out, whole, and the
+  // rest is kept as it was.
+  const values = {
+    utm_source: "google",
+    utm_medium: "cpc",
+    utm_campaign: "p".repeat(450),
+    utm_term: "t".repeat(470),
+    utm_content: "x".repeat(500),
+    gclid: "g".repeat(400),
+    gbraid: "h".repeat(300),
+    wbraid: "w".repeat(300),
+    fbclid: "z".repeat(480),
+  };
+  const everything = { landing: `${SITE}/pricing`, referrer: "https://www.google.com/", ...values, first_seen_at: START };
+  assert.ok(bytes(everything) > 3000);
+  const { utm_content: dropped, ...rest } = everything;
+  assert.equal(dropped.length, 500);
+  const fitted = await open(values);
+  assert.deepEqual(fitted, rest);
+  assert.ok(bytes(fitted) <= 3000);
+
+  // "Largest" is counted in bytes, and values go one at a time until it fits.
+  const wide = { utm_campaign: "é".repeat(450), utm_term: "é".repeat(440), utm_content: "x".repeat(500), gclid: "y".repeat(500), fbclid: "z".repeat(500), gbraid: "h".repeat(500) };
+  const fittedWide = await open(wide);
+  assert.deepEqual(fittedWide, { landing: `${SITE}/pricing`, referrer: "https://www.google.com/", utm_content: wide.utm_content, gclid: wide.gclid, gbraid: wide.gbraid, fbclid: wide.fbclid, first_seen_at: START });
+  assert.ok(bytes(fittedWide) <= 3000);
+
+  // The largest record that fits is kept whole.
+  const snug = { utm_campaign: "p".repeat(500), utm_term: "t".repeat(500), utm_content: "x".repeat(500), gclid: "g".repeat(500), fbclid: "z".repeat(500), utm_source: "s".repeat(250) };
+  const fittedSnug = await open(snug);
+  assert.deepEqual(fittedSnug, { landing: `${SITE}/pricing`, referrer: "https://www.google.com/", ...snug, first_seen_at: START });
+  assert.ok(bytes(fittedSnug) > 2800 && bytes(fittedSnug) <= 3000);
 }
 
 // ---- Private links: a token or a key is never kept --------------------------
 
 async function checkPrivateLinks() {
-  const BOOKED = `${SITE}/booked?type=review-call&name=Review+call&at=2026-11-20T18%3A00%3A00.000Z`;
   const cases = [
     // [what, the address, the referrer, the first touch without its time]
     ["a welcome link before its token moves to the hash", `${SITE}/welcome?t=${TOKEN}`, CHECKOUT, { landing: `${SITE}/welcome`, referrer: "https://checkout.stripe.com/c/pay/cs_test_a1b2c3" }],
     ["a welcome link", `${SITE}/welcome#t=${TOKEN}`, "", { landing: `${SITE}/welcome` }],
-    ["an agreement link back from Stripe", `${SITE}/agreement?paid=1&t=${TOKEN}`, "", { landing: `${SITE}/agreement?paid=1` }],
+    ["an agreement link back from Stripe", `${SITE}/agreement?paid=1&t=${TOKEN}`, "", { landing: `${SITE}/agreement` }],
     ["an agreement link", `${SITE}/agreement#t=${TOKEN}`, "https://mail.example.com/", { landing: `${SITE}/agreement`, referrer: "https://mail.example.com/" }],
     [
       "a partner signup link before its key moves to the hash",
       `${SITE}/partners/signup?partner=keepers-digital&k=${PORTAL_KEY}&utm_source=portal`,
       "",
-      { landing: `${SITE}/partners/signup?partner=keepers-digital&utm_source=portal`, utm_source: "portal" },
+      { landing: `${SITE}/partners/signup?utm_source=portal`, utm_source: "portal" },
     ],
     ["a partner signup link", `${SITE}/partners/signup?utm_source=portal#k=${PORTAL_KEY}`, "", { landing: `${SITE}/partners/signup?utm_source=portal`, utm_source: "portal" }],
     ["a portal link", `${SITE}/partners/portal#k=${PORTAL_KEY}`, "", { landing: `${SITE}/partners/portal` }],
     [
       "the booked page before its ids leave the address",
-      `${BOOKED}&id=${MEETING_ID}&crm_vid=${VISITOR_KEY}&m=${BOOKING_TOKEN}`,
+      `${SITE}/booked?type=review-call&name=Review+call&at=2026-11-20T18%3A00%3A00.000Z&id=${MEETING_ID}&crm_vid=${VISITOR_KEY}&m=${BOOKING_TOKEN}`,
       "https://crm.boostyourmaps.com/book/review-call",
-      { landing: BOOKED, referrer: "https://crm.boostyourmaps.com/book/review-call" },
+      { landing: `${SITE}/booked`, referrer: "https://crm.boostyourmaps.com/book/review-call" },
     ],
-    // t and k go whatever they hold, not only when they look like a token.
+    // t, k, id, m and crm_vid go whatever they hold, not only when they look like a token.
     ["a welcome link with a short t", `${SITE}/welcome?t=abc123&utm_source=email`, "", { landing: `${SITE}/welcome?utm_source=email`, utm_source: "email" }],
     ["a portal link with a short k", `${SITE}/partners/portal?utm_source=email&k=abc123`, "", { landing: `${SITE}/partners/portal?utm_source=email`, utm_source: "email" }],
+    ["short ids on any page", `${SITE}/pricing?id=7&m=abc&crm_vid=v1&gclid=G-1`, "", { landing: `${SITE}/pricing?gclid=G-1`, gclid: "G-1" }],
     ["a token under another name", `${SITE}/pricing?utm_source=email&key=${TOKEN}`, "", { landing: `${SITE}/pricing?utm_source=email`, utm_source: "email" }],
     ["a token in capitals", `${SITE}/pricing?utm_source=email&key=${TOKEN.toUpperCase()}`, "", { landing: `${SITE}/pricing?utm_source=email`, utm_source: "email" }],
     ["a token as a campaign value", `${SITE}/?utm_source=email&utm_content=${TOKEN}`, "", { landing: `${SITE}/?utm_source=email`, utm_source: "email" }],
@@ -411,6 +520,7 @@ async function checkPrivateLinks() {
     ["a welcome link on this site as the referrer", `${SITE}/pricing`, `${SITE}/welcome?t=${TOKEN}`, { landing: `${SITE}/pricing` }],
     ["a key in an outside referrer's query and hash", `${SITE}/pricing`, `https://mail.example.com/open?session=${OTHER_TOKEN}#${TOKEN}`, { landing: `${SITE}/pricing`, referrer: "https://mail.example.com/open" }],
     ["a key in an outside referrer's path", `${SITE}/pricing`, `https://links.example.com/r/${OTHER_TOKEN}`, { landing: `${SITE}/pricing` }],
+    ["a login in an outside referrer", `${SITE}/pricing`, "https://ana:secret@mail.example.com/inbox", { landing: `${SITE}/pricing`, referrer: "https://mail.example.com/inbox" }],
   ];
   for (const [what, url, referrer, expected] of cases) {
     const visitor = browser();
@@ -432,17 +542,10 @@ async function checkBlockedStorage() {
   assert.equal(page.events("generate_lead").length, 1);
 
   // The checkout form still opens checkout, without attribution.
-  const start = startPage();
-  const checkout = await visitor.open(`${SITE}/get-started`, {
-    scripts: ["tracking.js", "signup.js"],
-    selectors: start.selectors,
-    answer: () => ({ status: 200, data: { ok: true, checkoutUrl: CHECKOUT } }),
-  });
-  await checkout.send(start.form, "submit");
-  assert.equal(checkout.posts.length, 1);
+  const checkout = await startCheckout(visitor);
   assert.equal(checkout.posts[0].body.attribution, null);
-  assert.equal(checkout.window.location.assigned, CHECKOUT);
-  const built = buildStartPayload(checkout.posts[0].body, HEADERS);
+  assert.equal(checkout.events("begin_checkout").length, 1);
+  const built = buildStartPayload(checkout.posts[0].body, HEADERS, visitor.now());
   assert.equal(built.error, undefined);
   assert.equal("attribution" in built.payload, false);
 
@@ -458,10 +561,20 @@ async function checkBlockedStorage() {
   const signed = signing.posts.find((post) => post.to === "/api/agreement/sign");
   assert.equal(signed.body.attribution, null);
   assert.equal(signing.window.location.assigned, CHECKOUT);
-  assert.equal("attribution" in buildSignPayload(signed.body, HEADERS).payload, false);
+  assert.equal("attribution" in buildSignPayload(signed.body, HEADERS, visitor.now()).payload, false);
+  assert.equal(visitor.local.items.size, 0);
 }
 
 // ---- The signup start sends the first touch ---------------------------------
+
+// A first touch a reader must not send: one that ran out, one dated in the
+// future, or something unreadable.
+const STALE = [
+  ["nothing kept", () => {}],
+  ["a first touch 90 days old", (visitor) => visitor.local.setItem("bym_first_touch", JSON.stringify({ ...FIRST_TOUCH, first_seen_at: new Date(Date.parse(START) - 90 * DAY).toISOString() }))],
+  ["a first touch dated in the future", (visitor) => visitor.local.setItem("bym_first_touch", JSON.stringify({ ...FIRST_TOUCH, first_seen_at: new Date(Date.parse(START) + 1).toISOString() }))],
+  ["something unreadable", (visitor) => visitor.local.setItem("bym_first_touch", "{not json")],
+];
 
 async function checkSignupStart() {
   // Three days after the campaign link, the buyer is on /get-started with no
@@ -469,62 +582,38 @@ async function checkSignupStart() {
   const buyer = browser();
   await buyer.open(FIRST_URL, { referrer: FIRST_REFERRER });
   buyer.advance(3 * DAY);
-  const start = startPage();
-  const page = await buyer.open(`${SITE}/get-started#top`, {
-    referrer: `${SITE}/pricing`,
-    scripts: ["tracking.js", "signup.js"],
-    selectors: start.selectors,
-    answer: () => ({ status: 200, data: { ok: true, checkoutUrl: CHECKOUT } }),
-  });
-  await page.send(start.form, "submit");
-
-  assert.equal(page.posts.length, 1);
-  const { to, body } = page.posts[0];
-  assert.equal(to, "/api/signup/start");
+  const page = await startCheckout(buyer, { url: `${SITE}/get-started#top` });
+  const { body } = page.posts[0];
   assert.deepEqual(body.attribution, FIRST_TOUCH);
   assert.equal(body.page_url, `${SITE}/get-started`);
-  assert.equal(page.window.location.assigned, CHECKOUT);
   assert.equal(page.events("begin_checkout").length, 1);
 
   // Through the site's function: the CRM gets the first touch as `attribution`,
   // and the page's own sourceUrl and utm are what they were.
-  const { payload } = buildStartPayload(body, HEADERS);
+  const { payload } = buildStartPayload(body, HEADERS, buyer.now());
   assert.deepEqual(payload.attribution, FIRST_TOUCH);
   assert.equal(payload.sourceUrl, `${SITE}/get-started`);
   assert.deepEqual(payload.utm, {});
 
   // signup.js does not need tracking.js (an ad blocker can stop it): with
-  // nothing kept, or a first touch that ran out, the form still opens checkout.
-  for (const [what, setUp] of [
-    ["nothing kept", () => {}],
-    ["a first touch 90 days old", (visitor) => visitor.local.setItem("bym_first_touch", JSON.stringify({ ...FIRST_TOUCH, first_seen_at: new Date(Date.parse(START) - 90 * DAY).toISOString() }))],
-    ["something unreadable", (visitor) => visitor.local.setItem("bym_first_touch", "{not json")],
-  ]) {
+  // nothing to send, the form still opens checkout.
+  for (const [what, setUp] of STALE) {
     const visitor = browser();
     setUp(visitor);
-    const form = startPage();
-    const alone = await visitor.open(`${SITE}/get-started`, {
-      scripts: ["signup.js"],
-      selectors: form.selectors,
-      answer: () => ({ status: 200, data: { ok: true, checkoutUrl: CHECKOUT } }),
-    });
-    await alone.send(form.form, "submit");
+    const alone = await startCheckout(visitor, { scripts: ["signup.js"] });
     assert.equal(alone.posts[0].body.attribution, null, what);
-    assert.equal(alone.window.location.assigned, CHECKOUT, what);
   }
+  // One day short of 90, it still goes.
+  const late = browser();
+  late.local.setItem("bym_first_touch", JSON.stringify({ ...FIRST_TOUCH, first_seen_at: new Date(Date.parse(START) - 89 * DAY).toISOString() }));
+  assert.equal((await startCheckout(late, { scripts: ["signup.js"] })).posts[0].body.attribution.utm_source, "google");
 
   // A record under the key that tracking.js would never write (a welcome link
   // as the landing) is posted as it is, and the site's function drops it.
   const tampered = browser();
   tampered.local.setItem("bym_first_touch", JSON.stringify({ ...FIRST_TOUCH, landing: `${SITE}/welcome?t=${TOKEN}` }));
-  const form = startPage();
-  const odd = await tampered.open(`${SITE}/get-started`, {
-    scripts: ["tracking.js", "signup.js"],
-    selectors: form.selectors,
-    answer: () => ({ status: 200, data: { ok: true, checkoutUrl: CHECKOUT } }),
-  });
-  await odd.send(form.form, "submit");
-  const dropped = buildStartPayload(odd.posts[0].body, HEADERS);
+  const odd = await startCheckout(tampered);
+  const dropped = buildStartPayload(odd.posts[0].body, HEADERS, tampered.now());
   assert.equal(dropped.error, undefined);
   assert.equal("attribution" in dropped.payload, false);
   assert.ok(!JSON.stringify(dropped.payload).includes(TOKEN));
@@ -562,24 +651,27 @@ function agreementAnswers(status) {
   };
 }
 
+// Opens the agreement page for an agreement in `status`.
+async function openAgreement(visitor, status, { referrer = "", scripts = ["tracking.js", "agreement.js"] } = {}) {
+  const agreement = agreementPage();
+  const page = await visitor.open(`${SITE}/agreement#t=${TOKEN}`, { referrer, scripts, selectors: agreement.selectors, ids: agreement.ids, answer: agreementAnswers(status) });
+  page.form = agreement.form;
+  page.root = agreement.root;
+  page.signed = () => page.posts.filter((post) => post.to === "/api/agreement/sign");
+  return page;
+}
+
 async function checkAgreementSign() {
   // The lead first came from the campaign link, and opens the emailed
   // agreement in the same browser ten days later.
   const lead = browser();
   await lead.open(FIRST_URL, { referrer: FIRST_REFERRER });
   lead.advance(10 * DAY);
-  const agreement = agreementPage();
-  const page = await lead.open(`${SITE}/agreement#t=${TOKEN}`, {
-    scripts: ["tracking.js", "agreement.js"],
-    selectors: agreement.selectors,
-    ids: agreement.ids,
-    answer: agreementAnswers("sent"),
-  });
-  await page.send(agreement.form, "submit");
+  const page = await openAgreement(lead, "sent");
+  await page.send(page.form, "submit");
 
-  const signed = page.posts.filter((post) => post.to === "/api/agreement/sign");
-  assert.equal(signed.length, 1);
-  assert.deepEqual(signed[0].body, {
+  assert.equal(page.signed().length, 1);
+  assert.deepEqual(page.signed()[0].body, {
     t: TOKEN,
     legal_name: "Ruiz Pest Control LLC",
     signatory_name: "Ana Ruiz",
@@ -588,7 +680,7 @@ async function checkAgreementSign() {
   });
   assert.equal(page.window.location.assigned, CHECKOUT);
   // Through the site's function: the CRM gets it beside the signature.
-  const { payload } = buildSignPayload(signed[0].body, HEADERS);
+  const { payload } = buildSignPayload(page.signed()[0].body, HEADERS, lead.now());
   assert.deepEqual(payload.attribution, FIRST_TOUCH);
   assert.equal(payload.legalName, "Ruiz Pest Control LLC");
   assertNoSecrets(lead.local, "after signing");
@@ -596,61 +688,37 @@ async function checkAgreementSign() {
   // The agreement link as the very first page view: the first touch is the
   // agreement page without its token, and that is what goes along.
   const fresh = browser();
-  const direct = agreementPage();
-  const first = await fresh.open(`${SITE}/agreement#t=${TOKEN}`, {
-    referrer: "https://mail.example.com/",
-    scripts: ["tracking.js", "agreement.js"],
-    selectors: direct.selectors,
-    ids: direct.ids,
-    answer: agreementAnswers("sent"),
-  });
-  await first.send(direct.form, "submit");
-  const sent = first.posts.find((post) => post.to === "/api/agreement/sign").body;
+  const first = await openAgreement(fresh, "sent", { referrer: "https://mail.example.com/" });
+  await first.send(first.form, "submit");
+  const sent = first.signed()[0].body;
   assert.deepEqual(sent.attribution, { landing: `${SITE}/agreement`, referrer: "https://mail.example.com/", first_seen_at: START });
-  assert.deepEqual(buildSignPayload(sent, HEADERS).payload.attribution, sent.attribution);
+  assert.deepEqual(buildSignPayload(sent, HEADERS, fresh.now()).payload.attribution, sent.attribution);
   assertNoSecrets(fresh.local, "the agreement as the first page");
 
-  // agreement.js does not need tracking.js either: with nothing kept, or a
-  // first touch that ran out, the signature goes without attribution.
-  for (const [what, setUp] of [
-    ["nothing kept", () => {}],
-    ["a first touch 90 days old", (visitor) => visitor.local.setItem("bym_first_touch", JSON.stringify({ ...FIRST_TOUCH, first_seen_at: new Date(Date.parse(START) - 90 * DAY).toISOString() }))],
-    ["something unreadable", (visitor) => visitor.local.setItem("bym_first_touch", "{not json")],
-  ]) {
+  // agreement.js does not need tracking.js either: with nothing to send, the
+  // signature goes without attribution.
+  for (const [what, setUp] of STALE) {
     const visitor = browser();
     setUp(visitor);
-    const alone = agreementPage();
-    const signing = await visitor.open(`${SITE}/agreement#t=${TOKEN}`, {
-      scripts: ["agreement.js"],
-      selectors: alone.selectors,
-      ids: alone.ids,
-      answer: agreementAnswers("sent"),
-    });
-    await signing.send(alone.form, "submit");
-    assert.equal(signing.posts.find((post) => post.to === "/api/agreement/sign").body.attribution, null, what);
-    assert.equal(signing.window.location.assigned, CHECKOUT, what);
+    const alone = await openAgreement(visitor, "sent", { scripts: ["agreement.js"] });
+    await alone.send(alone.form, "submit");
+    assert.equal(alone.signed()[0].body.attribution, null, what);
+    assert.equal(alone.window.location.assigned, CHECKOUT, what);
   }
   // One day short of 90, it still goes.
   const late = browser();
   late.local.setItem("bym_first_touch", JSON.stringify({ ...FIRST_TOUCH, first_seen_at: new Date(Date.parse(START) - 89 * DAY).toISOString() }));
-  const lateForm = agreementPage();
-  const latePage = await late.open(`${SITE}/agreement#t=${TOKEN}`, { scripts: ["agreement.js"], selectors: lateForm.selectors, ids: lateForm.ids, answer: agreementAnswers("sent") });
-  await latePage.send(lateForm.form, "submit");
-  assert.equal(latePage.posts.find((post) => post.to === "/api/agreement/sign").body.attribution.utm_source, "google");
+  const latePage = await openAgreement(late, "sent", { scripts: ["agreement.js"] });
+  await latePage.send(latePage.form, "submit");
+  assert.equal(latePage.signed()[0].body.attribution.utm_source, "google");
 
   // "Continue to payment" on a signed agreement still posts { t } alone.
-  const later = agreementPage();
-  const pay = await lead.open(`${SITE}/agreement#t=${TOKEN}`, {
-    scripts: ["tracking.js", "agreement.js"],
-    selectors: later.selectors,
-    ids: later.ids,
-    answer: agreementAnswers("signed"),
-  });
-  await pay.send(later.root.querySelector("[data-pay]"), "click");
-  assert.deepEqual(pay.posts.find((post) => post.to === "/api/agreement/sign").body, { t: TOKEN });
+  const pay = await openAgreement(lead, "signed");
+  await pay.send(pay.root.querySelector("[data-pay]"), "click");
+  assert.deepEqual(pay.signed()[0].body, { t: TOKEN });
 }
 
-// ---- The welcome page: one purchase event -----------------------------------
+// ---- The welcome page: one purchase event, in the browser that paid ---------
 
 // The signup as the CRM answers it; the site's function shapes it for the page.
 const CRM_SIGNUP = {
@@ -677,6 +745,8 @@ const PURCHASE = {
   page_path: "/welcome",
 };
 const purchaseKey = (token) => `bym_purchase_${sha256(token).slice(0, 16)}`;
+const MARKER = "bym_checkout_started";
+const WEEK = 7 * DAY;
 
 // Opens /welcome for `token`. `answers` are the status answers, in order; the
 // last one repeats.
@@ -699,20 +769,29 @@ async function openWelcome(buyer, answers, { token = TOKEN, hash = `#t=${token}`
 // The token never reaches analytics or storage, in any form but its hash.
 function assertTokenStaysHome(page, buyer, what) {
   assert.ok(!JSON.stringify(page.window.dataLayer).includes(TOKEN), `${what}: the token is in the dataLayer`);
-  assert.ok(!JSON.stringify(Array.from(page.window.fbq.queue || [], (args) => Array.from(args))).includes(TOKEN), `${what}: the token went to the Meta pixel`);
+  if (page.window.fbq) assert.ok(!JSON.stringify(Array.from(page.window.fbq.queue, (args) => Array.from(args))).includes(TOKEN), `${what}: the token went to the Meta pixel`);
   assertNoSecrets(buyer.local, what);
   assertNoSecrets(buyer.session, what);
 }
 
 async function checkPurchase() {
-  // Back from Stripe before the payment is confirmed: the page waits, sees
-  // the signup paid on its next look, and pushes one purchase.
+  // The buyer starts the checkout in this browser. That is remembered as a
+  // time and nothing else.
   const buyer = browser();
+  await startCheckout(buyer);
+  assert.equal(buyer.local.items.get(MARKER), String(buyer.now()));
+  assert.match(buyer.local.items.get(MARKER), /^\d{13}$/);
+
+  // Back from Stripe a few minutes later, before the payment is confirmed:
+  // the page waits, sees the signup paid on its next look, and pushes one
+  // purchase. The marker is used up by it.
+  buyer.advance(4 * 60 * 1000);
   let page = await openWelcome(buyer, [status({}), status({}), status(PAID)]);
   assert.equal(page.drawn(), true);
   assert.equal(page.events("purchase").length, 0);
   await page.tick(3000);
   assert.equal(page.events("purchase").length, 0);
+  assert.equal(buyer.local.items.has(MARKER), true);
   await page.tick(3000);
   assert.deepEqual(page.events("purchase"), [PURCHASE]);
   assert.equal(PURCHASE.transaction_id.length, 64);
@@ -737,48 +816,109 @@ async function checkPurchase() {
   page = await openWelcome(buyer, [status({ ...PAID, accessConfirmed: true })]);
   assert.equal(page.events("purchase").length, 0);
 
-  // Another signup paid in the same browser is its own purchase.
-  page = await openWelcome(buyer, [status({ ...PAID, plan: "partner", partnerName: "Keepers Digital Marketing", quantity: 1, amountCents: 25000 })], { token: OTHER_TOKEN });
+  // Another signup's welcome link in this browser, with no new checkout
+  // started here: no purchase. After a checkout started here: its own purchase.
+  const OTHER_PAID = { ...PAID, plan: "partner", partnerName: "Keepers Digital Marketing", quantity: 1, amountCents: 25000 };
+  page = await openWelcome(buyer, [status(OTHER_PAID)], { token: OTHER_TOKEN });
+  assert.equal(page.events("purchase").length, 0);
+  assert.equal(buyer.local.items.has(purchaseKey(OTHER_TOKEN)), false);
+  await startCheckout(buyer);
+  page = await openWelcome(buyer, [status(OTHER_PAID)], { token: OTHER_TOKEN });
   assert.deepEqual(page.events("purchase"), [
     { event: "purchase", transaction_id: sha256(OTHER_TOKEN), value: 250, currency: "USD", items: [{ item_id: "partner", quantity: 1 }], page_path: "/welcome" },
   ]);
-  page = await openWelcome(buyer, [status({ ...PAID, plan: "partner", quantity: 1, amountCents: 25000 })], { token: OTHER_TOKEN });
+  assert.equal(buyer.local.items.has(MARKER), false);
+  page = await openWelcome(buyer, [status(OTHER_PAID)], { token: OTHER_TOKEN });
   assert.equal(page.events("purchase").length, 0);
+  // A new checkout started here does not bring back a purchase already
+  // pushed, and its marker stays for the signup it belongs to.
+  await startCheckout(buyer);
+  page = await openWelcome(buyer, [status(PAID)]);
+  assert.equal(page.events("purchase").length, 0);
+  assert.equal(buyer.local.items.has(MARKER), true);
 
-  // Already paid when the page first loads in this browser (the buyer opens
-  // the welcome email on another device): one purchase, then none on reload.
-  const phone = browser();
-  page = await openWelcome(phone, [status(PAID)]);
+  // Already paid when the page first loads, in the browser that started the
+  // checkout (Stripe confirmed before sending the buyer back): one purchase.
+  const quick = browser();
+  await startCheckout(quick);
+  page = await openWelcome(quick, [status(PAID)]);
   assert.deepEqual(page.events("purchase"), [PURCHASE]);
   assert.equal(page.events("signup_step").length, 0);
-  assertTokenStaysHome(page, phone, "paid on load");
-  page = await openWelcome(phone, [status(PAID)]);
+  assert.equal(quick.local.items.has(MARKER), false);
+  assertTokenStaysHome(page, quick, "paid on load");
+  page = await openWelcome(quick, [status(PAID)]);
   assert.equal(page.events("purchase").length, 0);
+
+  // Another browser never pushes it: the welcome email opened on a phone, the
+  // team opening a client's link, a browser that cleared its storage. No
+  // checkout was started there, so there is no marker; nothing is pushed and
+  // nothing is remembered, on load or after waiting.
+  const phone = browser();
+  page = await openWelcome(phone, [status(PAID)]);
+  assert.equal(page.drawn(), true);
+  assert.equal(page.events("purchase").length, 0);
+  assert.deepEqual([...phone.local.items.keys()], ["bym_first_touch"]);
+  page = await openWelcome(phone, [status({}), status(PAID)]);
+  await page.tick(3000);
+  assert.equal(page.events("signup_step").length, 1);
+  assert.equal(page.events("purchase").length, 0);
+  assert.deepEqual([...phone.local.items.keys()], ["bym_first_touch"]);
+  assertTokenStaysHome(page, phone, "another browser");
+
+  // The marker is good for 7 days: a millisecond short of that it counts,
+  // at 7 days it does not.
+  const slow = browser();
+  await startCheckout(slow);
+  slow.advance(WEEK - 1);
+  page = await openWelcome(slow, [status(PAID)]);
+  assert.deepEqual(page.events("purchase"), [PURCHASE]);
+  const tooSlow = browser();
+  await startCheckout(tooSlow);
+  tooSlow.advance(WEEK);
+  page = await openWelcome(tooSlow, [status(PAID)]);
+  assert.equal(page.events("purchase").length, 0);
+  assert.equal(tooSlow.local.items.has(purchaseKey(TOKEN)), false);
+  page = await openWelcome(tooSlow, [status({}), status(PAID)]);
+  await page.tick(3000);
+  assert.equal(page.events("purchase").length, 0);
+  // A marker that is not a time, or is dated in the future, does not count.
+  for (const marker of ["", "soon", "0", "-5", "true", String(Date.parse(START) + 1), "2026-11-15T18:00:00.000Z"]) {
+    const odd = browser();
+    odd.local.setItem(MARKER, marker);
+    page = await openWelcome(odd, [status(PAID)]);
+    assert.equal(page.events("purchase").length, 0, `marker ${JSON.stringify(marker)}`);
+    assert.equal(odd.local.items.has(purchaseKey(TOKEN)), false);
+  }
 
   // A welcome link whose token is still in the query (?t=) works the same.
   const query = browser();
+  await startCheckout(query);
   page = await openWelcome(query, [status(PAID)], { hash: `?t=${TOKEN}` });
   assert.deepEqual(page.events("purchase"), [PURCHASE]);
   assertTokenStaysHome(page, query, "token in the query");
 
   // Two tabs waiting on the same payment: one purchase between them.
   const tabs = browser();
+  await startCheckout(tabs);
   const one = await openWelcome(tabs, [status({}), status(PAID)]);
   const two = await openWelcome(tabs, [status({}), status(PAID)]);
   await Promise.all([one.tick(3000), two.tick(3000)]);
   assert.equal(one.events("purchase").length + two.events("purchase").length, 1);
 
   // Only with an amount. Paid, but the CRM sent no checkout total (or one
-  // that is not a whole number of cents above zero): no purchase, and nothing
-  // remembered, so the event still goes once the amount is there.
+  // that is not a whole number of cents above zero): no purchase, nothing
+  // remembered and the marker kept, so the event still goes once the amount
+  // is there.
   for (const amountCents of [undefined, null, 0, -90000, 900.5, "90000"]) {
     const noAmount = browser();
+    await startCheckout(noAmount);
     page = await openWelcome(noAmount, [status({}), status({ paid: true, amountCents })]);
     await page.tick(3000);
     assert.equal(page.drawn(), true);
     assert.equal(page.events("signup_step").length, 1, `amountCents ${amountCents}`);
     assert.equal(page.events("purchase").length, 0, `amountCents ${amountCents}`);
     assert.equal(noAmount.local.items.has(purchaseKey(TOKEN)), false);
+    assert.equal(noAmount.local.items.has(MARKER), true);
     page = await openWelcome(noAmount, [status({ paid: true, amountCents })]);
     assert.equal(page.events("purchase").length, 0, `amountCents ${amountCents} on load`);
     page = await openWelcome(noAmount, [status(PAID)]);
@@ -787,13 +927,16 @@ async function checkPurchase() {
 
   // Not paid: never a purchase, however long the page waits, amount or not.
   const waiting = browser();
+  await startCheckout(waiting);
   page = await openWelcome(waiting, [status({ amountCents: 90000 })]);
   for (let i = 0; i < 25; i++) await page.tick(3000);
   assert.equal(page.events("purchase").length, 0);
   assert.equal(waiting.local.items.has(purchaseKey(TOKEN)), false);
+  assert.equal(waiting.local.items.has(MARKER), true);
 
   // No crypto.subtle: nothing pushed, nothing remembered, the page still works.
   const old = browser({ subtle: false });
+  await startCheckout(old);
   page = await openWelcome(old, [status({}), status(PAID)]);
   await page.tick(3000);
   assert.equal(page.drawn(), true);
@@ -801,9 +944,10 @@ async function checkPurchase() {
   assert.equal(page.events("purchase").length, 0);
   assert.equal(old.local.items.has(purchaseKey(TOKEN)), false);
 
-  // Storage blocked: a reload could not be told apart, so nothing is pushed.
-  // The page still draws its steps.
+  // Storage blocked: the checkout could not be remembered and a reload could
+  // not be told apart, so nothing is pushed. The page still draws its steps.
   const blocked = browser({ blocked: true });
+  await startCheckout(blocked);
   page = await openWelcome(blocked, [status(PAID)]);
   assert.equal(page.drawn(), true);
   assert.equal(page.events("purchase").length, 0);
@@ -814,6 +958,7 @@ async function checkPurchase() {
 
   // signup.js alone (tracking.js stopped by an ad blocker) still pushes once.
   const alone = browser();
+  await startCheckout(alone, { scripts: ["signup.js"] });
   page = await openWelcome(alone, [status(PAID)], { scripts: ["signup.js"] });
   assert.deepEqual(page.events("purchase"), [PURCHASE]);
   page = await openWelcome(alone, [status(PAID)], { scripts: ["signup.js"] });
@@ -821,44 +966,118 @@ async function checkPurchase() {
 
   // The preview asks for nothing and pushes nothing.
   const preview = browser();
+  await startCheckout(preview);
   page = await openWelcome(preview, [status(PAID)], { hash: "#preview=direct" });
   assert.equal(page.posts.length, 0);
   assert.equal(page.events("purchase").length, 0);
   assert.equal(page.events("signup_step").length, 0);
+  assert.equal(preview.local.items.has(MARKER), true);
 
   // A signup the CRM does not know: no purchase.
   const unknown = browser();
+  await startCheckout(unknown);
   page = await openWelcome(unknown, [{ status: 404, data: { ok: false, error: "signup_not_found", field: null } }]);
   assert.equal(page.events("purchase").length, 0);
   assert.equal(page.drawn(), false);
 }
 
+// ---- A checkout started from the agreement counts too -----------------------
+
+async function checkAgreementCheckout() {
+  // Signing sends the signer to Stripe: this browser started that checkout.
+  const signer = browser();
+  let page = await openAgreement(signer, "sent");
+  assert.equal(signer.local.items.has(MARKER), false);
+  await page.send(page.form, "submit");
+  assert.equal(page.events("agreement_step").length, 1);
+  assert.equal(signer.local.items.get(MARKER), String(signer.now()));
+
+  // The agreement's own paid view pushes no purchase (its answer has no
+  // amount) and leaves the marker for the welcome page.
+  signer.advance(5 * 60 * 1000);
+  page = await openAgreement(signer, "paid");
+  assert.equal(page.events("purchase").length, 0);
+  assert.equal(signer.local.items.has(MARKER), true);
+  // The same buyer's welcome page, in this browser, two days later: one purchase.
+  signer.advance(2 * DAY);
+  let welcome = await openWelcome(signer, [status(PAID)]);
+  assert.deepEqual(welcome.events("purchase"), [PURCHASE]);
+  assert.equal(signer.local.items.has(MARKER), false);
+  welcome = await openWelcome(signer, [status(PAID)]);
+  assert.equal(welcome.events("purchase").length, 0);
+
+  // "Continue to payment" on a signed agreement starts a checkout as well.
+  const payer = browser();
+  page = await openAgreement(payer, "signed");
+  assert.equal(payer.local.items.has(MARKER), false);
+  await page.send(page.root.querySelector("[data-pay]"), "click");
+  assert.equal(page.window.location.assigned, CHECKOUT);
+  assert.match(payer.local.items.get(MARKER), /^\d{13}$/);
+  welcome = await openWelcome(payer, [status(PAID)]);
+  assert.deepEqual(welcome.events("purchase"), [PURCHASE]);
+
+  // A sign that the CRM refuses starts no checkout.
+  const refused = browser();
+  const agreement = agreementPage();
+  page = await refused.open(`${SITE}/agreement#t=${TOKEN}`, {
+    scripts: ["tracking.js", "agreement.js"],
+    selectors: agreement.selectors,
+    ids: agreement.ids,
+    answer: (to) => (to === "/api/agreement/sign" ? { status: 429, data: { ok: false, error: "rate_limited", field: null } } : agreementAnswers("sent")(to)),
+  });
+  await page.send(agreement.form, "submit");
+  assert.equal(page.window.location.assigned, null);
+  assert.equal(refused.local.items.has(MARKER), false);
+}
+
+// A checkout that did not open starts nothing either.
+async function checkFailedStart() {
+  const visitor = browser();
+  const start = startPage();
+  const page = await visitor.open(`${SITE}/get-started`, {
+    scripts: ["tracking.js", "signup.js"],
+    selectors: start.selectors,
+    answer: () => ({ status: 503, data: { ok: false, error: "signup_unavailable", field: null } }),
+  });
+  await page.send(start.form, "submit");
+  assert.equal(page.window.location.assigned, null);
+  assert.equal(page.events("begin_checkout").length, 0);
+  assert.equal(visitor.local.items.has(MARKER), false);
+}
+
 // ---- Every first touch kept above is one the CRM will get -------------------
 
 function checkRoundTrip() {
-  assert.ok(keptTouches.length > 30);
+  assert.ok(keptTouches.length > 40);
   const START_BODY = { plan: "us", first_name: "Ana", email: "ana@example.com", business_name: "Ruiz Pest Control", locations: 1, page_url: `${SITE}/get-started` };
   const SIGN_BODY = { t: TOKEN, legal_name: "Ruiz Pest Control LLC", signatory_name: "Ana Ruiz", consent: true };
-  for (const touch of keptTouches) {
-    // Only the keys the CRM takes, each a string of 500 characters at most.
+  for (const { touch, now } of keptTouches) {
+    // Only the keys the CRM takes, each a string of 500 characters at most,
+    // and 3,000 bytes of JSON in all.
     for (const [key, value] of Object.entries(touch)) {
       assert.ok(["landing", "referrer", "utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content", "gclid", "gbraid", "wbraid", "fbclid", "first_seen_at"].includes(key), `key ${key}`);
       assert.equal(typeof value, "string");
       assert.ok(value.length > 0 && value.length <= 500, `${key} is ${value.length} characters`);
     }
-    // The site's functions pass it on exactly as the browser kept it.
-    assert.deepEqual(buildStartPayload({ ...START_BODY, attribution: touch }, HEADERS).payload.attribution, touch);
-    assert.deepEqual(buildSignPayload({ ...SIGN_BODY, attribution: touch }, HEADERS).payload.attribution, touch);
+    assert.ok(Buffer.byteLength(JSON.stringify(touch), "utf8") <= 3000);
+    // The site's functions pass it on exactly as the browser kept it: nothing
+    // is kept in the browser that they would drop or change.
+    assert.deepEqual(buildStartPayload({ ...START_BODY, attribution: touch }, HEADERS, now).payload.attribution, touch);
+    assert.deepEqual(buildSignPayload({ ...SIGN_BODY, attribution: touch }, HEADERS, now).payload.attribution, touch);
   }
 }
 
 (async () => {
   await checkFirstTouch();
+  await checkLandingQuery();
+  await checkSize();
   await checkPrivateLinks();
   await checkBlockedStorage();
   await checkSignupStart();
   await checkAgreementSign();
   await checkPurchase();
+  await checkAgreementCheckout();
+  await checkFailedStart();
   checkRoundTrip();
   console.log("First touch, attribution and purchase event checks passed.");
 })().catch((err) => {

@@ -196,7 +196,9 @@ assert.equal(buildStartPayload({ ...PORTAL_BODY, partner_token: "", partner: "ke
 // ---- First-touch attribution on the signup start ---------------------------
 
 // Shaped as assets/tracking.js keeps it and assets/signup.js posts it: where
-// the buyer's browser first came from, often days before the signup page.
+// the buyer's browser first came from, often days before the signup page
+// (here, 13 days before these checks run).
+const DAY = 24 * 60 * 60 * 1000;
 const ATTRIBUTION = {
   landing: "https://www.boostyourmaps.com/google-maps-marketing/pest-control?utm_source=google&utm_medium=cpc&utm_campaign=pest-phoenix&gclid=Cj0KCQjw-first_touch",
   referrer: "https://www.google.com/",
@@ -204,7 +206,7 @@ const ATTRIBUTION = {
   utm_medium: "cpc",
   utm_campaign: "pest-phoenix",
   gclid: "Cj0KCQjw-first_touch",
-  first_seen_at: "2026-11-02T15:04:05.678Z",
+  first_seen_at: new Date(Date.now() - 13 * DAY).toISOString(),
 };
 const NO_ATTRIBUTION = buildStartPayload(US_BODY, HEADERS).payload;
 const startWith = (attribution, body = US_BODY) => buildStartPayload({ ...body, attribution }, HEADERS);
@@ -273,6 +275,24 @@ const dropped = {
   "a first-seen time in words": { ...ATTRIBUTION, first_seen_at: "yesterday" },
   "a first-seen date without a time": { ...ATTRIBUTION, first_seen_at: "2026-11-02" },
   "a first-seen time that does not exist": { ...ATTRIBUTION, first_seen_at: "2026-13-45T99:99:99.000Z" },
+  "a first touch from last year": { ...ATTRIBUTION, first_seen_at: new Date(Date.now() - 400 * DAY).toISOString() },
+  "a first touch from next week": { ...ATTRIBUTION, first_seen_at: new Date(Date.now() + 7 * DAY).toISOString() },
+  // The landing is a page of this site, with nobody's login in it.
+  "a landing on another site": { ...ATTRIBUTION, landing: "https://example.com/pricing?utm_source=google" },
+  "a landing on a lookalike host": { ...ATTRIBUTION, landing: "https://www.boostyourmaps.com.evil.example/pricing" },
+  "a landing with the site's name in its path": { ...ATTRIBUTION, landing: "https://evil.example/www.boostyourmaps.com" },
+  "a landing on another host that ends the same": { ...ATTRIBUTION, landing: "https://notboostyourmaps.com/" },
+  "a landing on the CRM": { ...ATTRIBUTION, landing: "https://crm.boostyourmaps.com/book/review-call" },
+  "a landing on the live site without https": { ...ATTRIBUTION, landing: "http://www.boostyourmaps.com/pricing" },
+  "a landing on another port": { ...ATTRIBUTION, landing: "https://www.boostyourmaps.com:8443/pricing" },
+  "a landing on someone else's preview": { ...ATTRIBUTION, landing: "https://someone-else-mike-8166s-projects.vercel.app/" },
+  "a landing with a login in it": { ...ATTRIBUTION, landing: "https://ana:secret@www.boostyourmaps.com/pricing" },
+  "a landing with a user name in it": { ...ATTRIBUTION, landing: "https://ana@www.boostyourmaps.com/pricing" },
+  // The referrer is an origin and a path, nothing more.
+  "a referrer with a query": { ...ATTRIBUTION, referrer: "https://www.google.com/search?q=pest+control" },
+  "a referrer with a fragment": { ...ATTRIBUTION, referrer: "https://www.google.com/#top" },
+  "a referrer with a login in it": { ...ATTRIBUTION, referrer: "https://ana:secret@mail.example.com/" },
+  "a referrer that is a file server": { ...ATTRIBUTION, referrer: "ftp://files.example.com/" },
   // Never a private link: 64 hex characters in a row is the shape of a token.
   "a welcome link as the landing": { ...ATTRIBUTION, landing: TOKEN_IN_LINK },
   "a portal key in the referrer": { ...ATTRIBUTION, referrer: `https://www.boostyourmaps.com/partners/portal?k=${PORTAL_TOKEN}` },
@@ -282,13 +302,76 @@ const dropped = {
   "a value of 501 characters": { ...ATTRIBUTION, utm_campaign: "z".repeat(501) },
   "a landing of 501 characters": { ...ATTRIBUTION, landing: `https://www.boostyourmaps.com/?q=${"x".repeat(468)}` },
   "an object over the column size": Object.fromEntries(["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"].map((key) => [key, "é".repeat(500)])),
+  "an object just over 3,000 bytes": Object.fromEntries(["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"].map((key) => [key, "é".repeat(300)])),
+  // 500 characters as sent, but longer once its query is written out again.
+  "a landing that grows past 500 characters": { ...ATTRIBUTION, landing: `https://www.boostyourmaps.com/?utm_source=${"'".repeat(458)}` },
 };
+assert.equal(dropped["a landing that grows past 500 characters"].landing.length, 500);
+assert.equal(Buffer.byteLength(JSON.stringify(dropped["an object just over 3,000 bytes"]), "utf8"), 3082);
 assert.equal(dropped["a landing of 501 characters"].landing.length, 501);
 for (const [what, attribution] of Object.entries(dropped)) {
   const built = startWith(attribution);
   assert.equal(built.error, undefined, `the signup is never refused over ${what}`);
   assert.deepEqual(built.payload, NO_ATTRIBUTION, `dropped whole: ${what}`);
 }
+// The landing may be on the live site, one of this project's previews, or a
+// local run; those go as they are.
+for (const landing of [
+  "https://www.boostyourmaps.com/pricing?utm_source=google",
+  "https://boostyourmaps.com/",
+  "https://boostyourmaps-git-crm-int-w1-mike-8166s-projects.vercel.app/get-started",
+  "http://localhost:3000/pricing?gclid=abc",
+  "http://127.0.0.1:8765/",
+]) {
+  assert.equal(startWith({ ...ATTRIBUTION, landing }).payload.attribution.landing, landing, landing);
+}
+// Only the campaign values stay in the landing's query (the five utm_* and
+// the four click ids). An email, a phone number or anything else a link
+// carried is never stored: the first page view of /get-started?email=... is
+// sent as /get-started.
+assert.equal(
+  startWith({ ...ATTRIBUTION, landing: "https://www.boostyourmaps.com/get-started?email=ana%40example.com&utm_source=email&phone=5125550100&ref=partner&gclid=G-1&utm_id=7" }).payload.attribution.landing,
+  "https://www.boostyourmaps.com/get-started?utm_source=email&gclid=G-1"
+);
+const personal = startWith({ ...ATTRIBUTION, landing: "https://www.boostyourmaps.com/get-started?email=ana%40example.com&phone=5125550100" }).payload.attribution;
+assert.equal(personal.landing, "https://www.boostyourmaps.com/get-started");
+assert.ok(!/ana|example\.com|5125550100/.test(JSON.stringify(personal)));
+const EVERY_PARAM = "https://www.boostyourmaps.com/?utm_source=a&utm_medium=b&utm_campaign=c&utm_term=d+e&utm_content=f&gclid=g&gbraid=h&wbraid=i&fbclid=j";
+assert.equal(startWith({ ...ATTRIBUTION, landing: EVERY_PARAM }).payload.attribution.landing, EVERY_PARAM);
+assert.equal(startWith({ ...ATTRIBUTION, landing: "https://www.boostyourmaps.com/welcome?t=abc123&k=def456&id=1&m=2&crm_vid=3" }).payload.attribution.landing, "https://www.boostyourmaps.com/welcome");
+// The referrer as origin and path goes as it is.
+for (const referrer of ["https://www.google.com/", "https://www.google.com/search", "http://old.example.com/page", "android-app://com.google.android.gm/"]) {
+  assert.equal(startWith({ ...ATTRIBUTION, referrer }).payload.attribution.referrer, referrer, referrer);
+}
+
+// The first-seen time: up to 90 days old, with a day of slack either way for
+// a clock that is off. (The third argument is the time it is checked against.)
+const AT = Date.parse("2026-11-15T18:00:00.000Z");
+const seenAt = (ms) => buildStartPayload({ ...US_BODY, attribution: { ...ATTRIBUTION, first_seen_at: new Date(ms).toISOString() } }, HEADERS, AT).payload.attribution;
+assert.equal(seenAt(AT).first_seen_at, "2026-11-15T18:00:00.000Z");
+assert.ok(seenAt(AT - 90 * DAY));
+assert.ok(seenAt(AT - 91 * DAY));
+assert.equal(seenAt(AT - 91 * DAY - 1), undefined);
+assert.ok(seenAt(AT + DAY));
+assert.equal(seenAt(AT + DAY + 1), undefined);
+
+// A value that starts the way a spreadsheet formula does (= + - @) is left
+// out; the rest still goes.
+assert.deepEqual(
+  startWith({
+    ...ATTRIBUTION,
+    utm_source: '=HYPERLINK("https://evil.example","click")',
+    utm_medium: "+1+1",
+    utm_campaign: "-2+3",
+    utm_term: "@SUM(A1:A9)",
+    utm_content: "  =cmd|' /C calc'!A0",
+    gclid: "ok=fine",
+    fbclid: "a+b-c@d",
+  }).payload.attribution,
+  { landing: ATTRIBUTION.landing, referrer: ATTRIBUTION.referrer, gclid: "ok=fine", fbclid: "a+b-c@d", first_seen_at: ATTRIBUTION.first_seen_at }
+);
+assert.deepEqual(startWith({ utm_source: "=1+1", utm_term: "+pest +control" }).payload, NO_ATTRIBUTION);
+
 // A large one that still fits is kept: what the CRM receives is never over
 // 3,000 bytes as JSON, well inside its 4,096-byte column.
 const LARGE_ATTRIBUTION = Object.fromEntries(["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"].map((key) => [key, "é".repeat(290)]));
@@ -457,18 +540,21 @@ assert.deepEqual(errorFrom({ ok: false, error: "<script>", field: "a b" }), { ok
 const CRM_HOST = "https://crm.example.test";
 let reply = null;
 let calls = [];
+// `reply` is the CRM's answer, or a list of answers given out in order (the
+// last one repeats).
 global.fetch = async (url, init) => {
   calls.push({ url: String(url), init });
-  if (reply instanceof Error) throw reply;
-  const body = typeof reply.body === "string" ? reply.body : JSON.stringify(reply.body);
-  return new Response(body, { status: reply.status });
+  const answer = Array.isArray(reply) ? (reply.length > 1 ? reply.shift() : reply[0]) : reply;
+  if (answer instanceof Error) throw answer;
+  const body = typeof answer.body === "string" ? answer.body : JSON.stringify(answer.body);
+  return new Response(body, { status: answer.status });
 };
 
 const allLogs = [];
 async function run(fn, { env = { CRM_URL: `${CRM_HOST}/` }, crm = null, method = "POST", body = {}, headers = HEADERS } = {}) {
   delete process.env.CRM_URL;
   Object.assign(process.env, env);
-  reply = crm;
+  reply = Array.isArray(crm) ? [...crm] : crm;
   calls = [];
   const res = { statusCode: 0, body: null, headers: {} };
   res.status = (code) => ((res.statusCode = code), res);
@@ -481,7 +567,7 @@ async function run(fn, { env = { CRM_URL: `${CRM_HOST}/` }, crm = null, method =
   } finally {
     console.error = consoleError;
   }
-  return { status: res.statusCode, body: res.body, cache: res.headers["Cache-Control"], call: calls[0], sent: calls.length };
+  return { status: res.statusCode, body: res.body, cache: res.headers["Cache-Control"], call: calls[0], calls, sent: calls.length };
 }
 
 const OK_SIGNUP = {
@@ -674,11 +760,54 @@ const OK_SIGNUP = {
     assert.deepEqual(JSON.parse(r.call.init.body), NO_ATTRIBUTION);
     assert.ok(!r.call.init.body.includes(TOKEN));
   }
-  // A refusal with attribution on board is logged like any other: no value of it.
-  r = await run(startFn, { body: { ...US_BODY, attribution: ATTRIBUTION }, crm: { status: 429, body: { ok: false, error: "rate_limited", field: null } } });
-  assert.equal(r.status, 429);
-  r = await run(startFn, { body: { ...US_BODY, attribution: ATTRIBUTION }, crm: new TypeError("fetch failed") });
+  // Checkout never breaks on attribution. A CRM that does not take the key
+  // yet answers 400 to the whole body: the site asks once more without it,
+  // and the buyer gets the checkout link.
+  const REFUSED = { status: 400, body: { ok: false, error: "invalid_input", field: null } };
+  r = await run(startFn, { body: { ...US_BODY, attribution: ATTRIBUTION }, crm: [REFUSED, OK_CHECKOUT] });
+  assert.equal(r.status, 200);
+  assert.deepEqual(r.body, { ok: true, checkoutUrl: "https://checkout.stripe.com/c/pay/cs_test_789" });
+  assert.equal(r.sent, 2);
+  assert.deepEqual(JSON.parse(r.calls[0].init.body), { ...NO_ATTRIBUTION, attribution: ATTRIBUTION });
+  assert.deepEqual(JSON.parse(r.calls[1].init.body), NO_ATTRIBUTION);
+  for (const call of r.calls) {
+    assert.equal(call.url, `${CRM_HOST}/api/signup`);
+    assert.equal(call.init.method, "POST");
+    assert.equal(call.init.headers["X-Forwarded-For"], "198.51.100.23");
+  }
+  // A 400 that stays is the form's own: it goes back to the page as before.
+  // The second answer is the one used, and there is never a third call.
+  const BAD_EMAIL = { status: 400, body: { ok: false, error: "invalid_input", field: "email" } };
+  r = await run(startFn, { body: { ...US_BODY, attribution: ATTRIBUTION }, crm: [BAD_EMAIL, BAD_EMAIL, OK_CHECKOUT] });
+  assert.equal(r.status, 400);
+  assert.deepEqual(r.body, { ok: false, error: "invalid_input", field: "email" });
+  assert.equal(r.sent, 2);
+  assert.equal("attribution" in JSON.parse(r.calls[1].init.body), false);
+  r = await run(startFn, { body: { ...US_BODY, attribution: ATTRIBUTION }, crm: [REFUSED, { status: 400, body: { ok: false, error: "partner_unknown", field: null } }] });
+  assert.deepEqual(r.body, { ok: false, error: "partner_unknown", field: null });
+  r = await run(startFn, { body: { ...US_BODY, attribution: ATTRIBUTION }, crm: [REFUSED, new TypeError("fetch failed")] });
   assert.equal(r.status, 503);
+  assert.equal(r.sent, 2);
+  // Only a 400, and only when attribution went along: nothing else is sent twice.
+  for (const crm of [
+    { status: 429, body: { ok: false, error: "rate_limited", field: null } },
+    { status: 503, body: { ok: false, error: "signup_unavailable", field: null } },
+    { status: 500, body: "Server error" },
+    new TypeError("fetch failed"),
+  ]) {
+    r = await run(startFn, { body: { ...US_BODY, attribution: ATTRIBUTION }, crm: [crm, OK_CHECKOUT] });
+    assert.notEqual(r.status, 200);
+    assert.equal(r.sent, 1);
+  }
+  r = await run(startFn, { body: US_BODY, crm: [BAD_EMAIL, OK_CHECKOUT] });
+  assert.equal(r.status, 400);
+  assert.equal(r.sent, 1);
+  r = await run(startFn, { body: { ...US_BODY, attribution: "utm_source=google" }, crm: [BAD_EMAIL, OK_CHECKOUT] });
+  assert.equal(r.status, 400);
+  assert.equal(r.sent, 1);
+  r = await run(intakeFn, { body: INTAKE_BODY, crm: [{ status: 400, body: { ok: false, error: "invalid_input", field: "profileLinks" } }, { status: 200, body: { ok: true } }] });
+  assert.equal(r.status, 400);
+  assert.equal(r.sent, 1);
 
   // Nothing submitted and no token ever reaches the logs.
   assert.ok(allLogs.length > 0, "failures should be logged");
