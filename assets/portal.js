@@ -316,7 +316,7 @@
       places = null;
     }
     if (places === null) return rSay("error", "Search isn't working right now. Please try again in a minute.");
-    if (!places.length) return rSay("error", "No match. Try the name the way it shows on Google, plus the town.");
+    if (!places.length) return rSay("error", "We found no match. Try the name as it shows on Google, plus the town.");
     rClear();
     places.forEach(function (place) {
       var li = document.createElement("li");
@@ -375,7 +375,7 @@
       status = 0;
     }
     if (status === 200 && data.ok === true && data.report === "queued") {
-      rSay("success", "Got it. We are building your report. It will show in your list below when it is ready.");
+      rSay("success", "We are building your report. It will show in your list below when it is ready.");
       picked = null;
       $("[data-r-picked]").hidden = true;
       $("[data-r-q]").value = "";

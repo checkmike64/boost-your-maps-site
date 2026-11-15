@@ -7,7 +7,7 @@
 
   // The one answer. api/_partner.js keeps the same text, and the site checks
   // that the two match.
-  var NEUTRAL = "If that email belongs to a partner, we sent a sign-in link.";
+  var NEUTRAL = "If that email is on file for a partner, we sent your portal link. Check your spam folder if it has not come in a few minutes.";
   var TEAM_EMAIL = "team@boostyourmaps.com";
   var MESSAGES = {
     email: "Please check the email address.",
