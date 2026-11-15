@@ -21,6 +21,7 @@
   // After Stripe: look again every 3 seconds for up to 30 seconds.
   var POLL_MS = 3000;
   var POLL_FOR_MS = 30000;
+  var FIRST_TOUCH_MS = 90 * 24 * 60 * 60 * 1000;
 
   var root = document.querySelector("[data-agreement]");
   if (!root) return;
@@ -76,6 +77,20 @@
       return { status: error && error.name === "AbortError" ? -1 : 0, data: {} };
     } finally {
       window.clearTimeout(timer);
+    }
+  }
+
+  // The first-touch attribution tracking.js keeps for 90 days: where this
+  // browser first came from. It goes along so a paid signup keeps its source.
+  // null when there is none, it has run out, or storage is blocked; the page
+  // works the same.
+  function firstTouch() {
+    try {
+      var saved = JSON.parse(window.localStorage.getItem("bym_first_touch") || "null");
+      var seen = saved && typeof saved === "object" ? Date.parse(saved.first_seen_at) : NaN;
+      return Date.now() - seen < FIRST_TOUCH_MS ? saved : null;
+    } catch (e) {
+      return null;
     }
   }
 
@@ -591,7 +606,8 @@
       t: token,
       legal_name: legalName,
       signatory_name: signatoryName,
-      consent: true
+      consent: true,
+      attribution: firstTouch()
     }, SIGN_TIMEOUT_MS);
     if (goToCheckout(result, "signed", signButton)) return;
     resetButtons();

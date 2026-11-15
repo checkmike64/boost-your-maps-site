@@ -193,6 +193,111 @@ assert.equal(direct.firstName, "Ana");
 // Without a key the name and email are still required on every plan.
 assert.equal(buildStartPayload({ ...PORTAL_BODY, partner_token: "", partner: "keepers-digital" }, {}).error.field, "firstName");
 
+// ---- First-touch attribution on the signup start ---------------------------
+
+// Shaped as assets/tracking.js keeps it and assets/signup.js posts it: where
+// the buyer's browser first came from, often days before the signup page.
+const ATTRIBUTION = {
+  landing: "https://www.boostyourmaps.com/google-maps-marketing/pest-control?utm_source=google&utm_medium=cpc&utm_campaign=pest-phoenix&gclid=Cj0KCQjw-first_touch",
+  referrer: "https://www.google.com/",
+  utm_source: "google",
+  utm_medium: "cpc",
+  utm_campaign: "pest-phoenix",
+  gclid: "Cj0KCQjw-first_touch",
+  first_seen_at: "2026-11-02T15:04:05.678Z",
+};
+const NO_ATTRIBUTION = buildStartPayload(US_BODY, HEADERS).payload;
+const startWith = (attribution, body = US_BODY) => buildStartPayload({ ...body, attribution }, HEADERS);
+
+// Present: the CRM gets it as `attribution`. The page's own utm and sourceUrl
+// stay as they were.
+assert.deepEqual(startWith(ATTRIBUTION).payload, { ...NO_ATTRIBUTION, attribution: ATTRIBUTION });
+assert.deepEqual(startWith(ATTRIBUTION).payload.utm, { utm_source: "google", utm_medium: "cpc" });
+assert.equal(startWith(ATTRIBUTION).payload.sourceUrl, US_BODY.page_url);
+// Every key the CRM takes, and nothing renamed.
+const FULL_ATTRIBUTION = {
+  ...ATTRIBUTION,
+  utm_term: "pest control seo",
+  utm_content: "ad-2",
+  gbraid: "0AAAAAo4mICH-gbraid",
+  wbraid: "CjkKCQjw-wbraid",
+  fbclid: "IwAR0-fbclid",
+};
+assert.deepEqual(startWith(FULL_ATTRIBUTION).payload.attribution, FULL_ATTRIBUTION);
+assert.deepEqual(Object.keys(FULL_ATTRIBUTION).sort(), [
+  "fbclid", "first_seen_at", "gbraid", "gclid", "landing", "referrer", "utm_campaign", "utm_content", "utm_medium", "utm_source", "utm_term", "wbraid",
+]);
+// It goes with a portal signup too, and a phone app as the referrer is kept.
+assert.deepEqual(startWith(ATTRIBUTION, PORTAL_BODY).payload.attribution, ATTRIBUTION);
+assert.equal(startWith({ ...ATTRIBUTION, referrer: "android-app://com.google.android.gm/" }).payload.attribution.referrer, "android-app://com.google.android.gm/");
+// Values are trimmed, a blank one is left out, 500 characters is the most.
+assert.deepEqual(startWith({ utm_source: " google ", utm_medium: "  ", gclid: "" }).payload.attribution, { utm_source: "google" });
+assert.equal(startWith({ utm_campaign: "z".repeat(500) }).payload.attribution.utm_campaign.length, 500);
+
+// Absent, or nothing in it: the payload is exactly what it was before, with no
+// `attribution` key at all.
+for (const none of [undefined, null, {}, { utm_source: "   " }]) {
+  assert.deepEqual(startWith(none).payload, NO_ATTRIBUTION, `attribution ${JSON.stringify(none)}`);
+  assert.equal("attribution" in startWith(none).payload, false);
+}
+
+// Unknown keys are left out; the keys the CRM knows still go.
+assert.deepEqual(
+  startWith({ ...ATTRIBUTION, msclkid: "abc", email: "ana@example.com", visitor: { id: 7 }, expires_at: "2027-01-31T00:00:00.000Z" }).payload.attribution,
+  ATTRIBUTION
+);
+assert.deepEqual(startWith({ msclkid: "abc", note: "x".repeat(9000) }).payload, NO_ATTRIBUTION);
+assert.deepEqual(startWith(JSON.parse('{"__proto__": {"utm_source": "google"}, "constructor": "x"}')).payload, NO_ATTRIBUTION);
+
+// Malformed or oversized: dropped whole, never repaired, and the signup still
+// goes exactly as it would without it.
+const TOKEN_IN_LINK = `https://www.boostyourmaps.com/welcome?t=${TOKEN}`;
+const dropped = {
+  "not an object: a string": "utm_source=google",
+  "not an object: a number": 42,
+  "not an object: true": true,
+  "a list": [ATTRIBUTION],
+  "an empty list": [],
+  "a number as a value": { ...ATTRIBUTION, utm_source: 7 },
+  "null as a value": { ...ATTRIBUTION, gclid: null },
+  "a list as a value": { ...ATTRIBUTION, utm_campaign: ["pest-phoenix"] },
+  "an object as a value": { ...ATTRIBUTION, landing: { href: ATTRIBUTION.landing } },
+  "a control character": { ...ATTRIBUTION, utm_campaign: "pest\u0000phoenix" },
+  "a line break": { ...ATTRIBUTION, utm_term: "pest\ncontrol" },
+  "half an emoji": { ...ATTRIBUTION, utm_content: "ad-\ud83d" },
+  "a landing that is not a web address": { ...ATTRIBUTION, landing: "javascript:alert(1)" },
+  "a landing that is only a path": { ...ATTRIBUTION, landing: "/pricing?utm_source=google" },
+  "a landing with its fragment": { ...ATTRIBUTION, landing: "https://www.boostyourmaps.com/pricing#faq" },
+  "a referrer that is not an address": { ...ATTRIBUTION, referrer: "google" },
+  "a referrer that is a script": { ...ATTRIBUTION, referrer: "javascript:alert(1)" },
+  "a first-seen time in words": { ...ATTRIBUTION, first_seen_at: "yesterday" },
+  "a first-seen date without a time": { ...ATTRIBUTION, first_seen_at: "2026-11-02" },
+  "a first-seen time that does not exist": { ...ATTRIBUTION, first_seen_at: "2026-13-45T99:99:99.000Z" },
+  // Never a private link: 64 hex characters in a row is the shape of a token.
+  "a welcome link as the landing": { ...ATTRIBUTION, landing: TOKEN_IN_LINK },
+  "a portal key in the referrer": { ...ATTRIBUTION, referrer: `https://www.boostyourmaps.com/partners/portal?k=${PORTAL_TOKEN}` },
+  "a token as a campaign value": { ...ATTRIBUTION, utm_content: TOKEN.toUpperCase() },
+  // Oversized: one value over 500 characters, or the whole object over what
+  // the CRM's column takes (each value here is within 500 characters).
+  "a value of 501 characters": { ...ATTRIBUTION, utm_campaign: "z".repeat(501) },
+  "a landing of 501 characters": { ...ATTRIBUTION, landing: `https://www.boostyourmaps.com/?q=${"x".repeat(468)}` },
+  "an object over the column size": Object.fromEntries(["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"].map((key) => [key, "é".repeat(500)])),
+};
+assert.equal(dropped["a landing of 501 characters"].landing.length, 501);
+for (const [what, attribution] of Object.entries(dropped)) {
+  const built = startWith(attribution);
+  assert.equal(built.error, undefined, `the signup is never refused over ${what}`);
+  assert.deepEqual(built.payload, NO_ATTRIBUTION, `dropped whole: ${what}`);
+}
+// A large one that still fits is kept: what the CRM receives is never over
+// 3,000 bytes as JSON, well inside its 4,096-byte column.
+const LARGE_ATTRIBUTION = Object.fromEntries(["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"].map((key) => [key, "é".repeat(290)]));
+for (const attribution of [ATTRIBUTION, FULL_ATTRIBUTION, LARGE_ATTRIBUTION]) {
+  const kept = startWith(attribution).payload.attribution;
+  assert.deepEqual(kept, attribution);
+  assert.ok(Buffer.byteLength(JSON.stringify(kept), "utf8") <= 3000);
+}
+
 // ---- POST /api/signup/{token}/intake ---------------------------------------
 
 const INTAKE_BODY = {
@@ -294,6 +399,17 @@ assert.equal(odd.paid, false);
 assert.equal(odd.accessEmail, null);
 assert.equal(odd.bookingUrl, null);
 assert.deepEqual(odd.prefill, { websiteUrl: null, profileLinks: [], mainService: null, leadPreference: null, targetArea: null, notes: null, photosUrl: null, approval: null });
+
+// The checkout total, for the welcome page's one purchase event: it goes along
+// when the CRM sends a whole number of cents above zero. Otherwise the key is
+// not there at all, and the page pushes no purchase event.
+assert.equal(shapeSignup({ plan: "us", quantity: 2, paid: true, amountCents: 90000 }).amountCents, 90000);
+assert.equal(shapeSignup({ plan: "partner", paid: true, amountCents: 1 }).amountCents, 1);
+assert.equal(shapeSignup({ plan: "us", paid: false, amountCents: 45000 }).amountCents, 45000);
+for (const amountCents of [undefined, null, 0, -45000, 450.5, "90000", NaN, Infinity, 100000001, [90000], { cents: 90000 }, true]) {
+  assert.equal("amountCents" in shapeSignup({ plan: "us", paid: true, amountCents }), false, `amountCents ${String(amountCents)}`);
+}
+assert.equal("amountCents" in odd, false);
 
 assert.deepEqual(
   shapePortal({
@@ -475,9 +591,16 @@ const OK_SIGNUP = {
   assert.equal(r.call.url, `${CRM_HOST}/api/signup/${TOKEN}`);
   assert.equal(r.call.init.method, "GET");
   assert.equal(r.cache, "no-store");
+  assert.equal("amountCents" in r.body.signup, false); // the CRM sent none
   r = await run(statusFn, { body: { t: TOKEN }, crm: { status: 404, body: { ok: false, error: "signup_not_found", field: null } } });
   assert.equal(r.status, 404);
   assert.deepEqual(r.body, { ok: false, error: "signup_not_found", field: null });
+  // Paid, with the checkout total: the page gets amountCents for its purchase event.
+  r = await run(statusFn, { body: { t: TOKEN }, crm: { status: 200, body: { ok: true, signup: { ...OK_SIGNUP.signup, quantity: 2, paid: true, amountCents: 90000 } } } });
+  assert.equal(r.status, 200);
+  assert.deepEqual(r.body.signup, { ...shapeSignup(OK_SIGNUP.signup), quantity: 2, paid: true, amountCents: 90000 });
+  r = await run(statusFn, { body: { t: TOKEN }, crm: { status: 200, body: { ok: true, signup: { ...OK_SIGNUP.signup, paid: true, amountCents: "90000" } } } });
+  assert.equal("amountCents" in r.body.signup, false);
 
   // Access: POST /api/signup/{t}/access with an empty object.
   r = await run(accessFn, { body: { t: TOKEN }, crm: { status: 200, body: { ok: true } } });
@@ -535,9 +658,31 @@ const OK_SIGNUP = {
   r = await run(startFn, { body: PORTAL_BODY, crm: new TypeError(`fetch failed for ${CRM_HOST}/api/signup ${PORTAL_TOKEN}`) });
   assert.equal(r.status, 503);
 
+  // Start with attribution: the CRM gets it in the same body, without the
+  // keys it does not know. A malformed one is left out and the signup goes
+  // through all the same.
+  const OK_CHECKOUT = { status: 200, body: { ok: true, checkoutUrl: "https://checkout.stripe.com/c/pay/cs_test_789" } };
+  r = await run(startFn, { body: { ...US_BODY, attribution: { ...ATTRIBUTION, msclkid: "abc" } }, crm: OK_CHECKOUT });
+  assert.equal(r.status, 200);
+  assert.deepEqual(r.body, { ok: true, checkoutUrl: "https://checkout.stripe.com/c/pay/cs_test_789" });
+  assert.deepEqual(JSON.parse(r.call.init.body), { ...NO_ATTRIBUTION, attribution: ATTRIBUTION });
+  r = await run(startFn, { body: { ...US_BODY, attribution: null }, crm: OK_CHECKOUT });
+  assert.deepEqual(JSON.parse(r.call.init.body), NO_ATTRIBUTION);
+  for (const attribution of [{ ...ATTRIBUTION, landing: TOKEN_IN_LINK }, { ...ATTRIBUTION, utm_source: 7 }, "utm_source=google", { ...ATTRIBUTION, utm_campaign: "z".repeat(501) }]) {
+    r = await run(startFn, { body: { ...US_BODY, attribution }, crm: OK_CHECKOUT });
+    assert.equal(r.status, 200);
+    assert.deepEqual(JSON.parse(r.call.init.body), NO_ATTRIBUTION);
+    assert.ok(!r.call.init.body.includes(TOKEN));
+  }
+  // A refusal with attribution on board is logged like any other: no value of it.
+  r = await run(startFn, { body: { ...US_BODY, attribution: ATTRIBUTION }, crm: { status: 429, body: { ok: false, error: "rate_limited", field: null } } });
+  assert.equal(r.status, 429);
+  r = await run(startFn, { body: { ...US_BODY, attribution: ATTRIBUTION }, crm: new TypeError("fetch failed") });
+  assert.equal(r.status, 503);
+
   // Nothing submitted and no token ever reaches the logs.
   assert.ok(allLogs.length > 0, "failures should be logged");
-  const secrets = [TOKEN, PORTAL_TOKEN, "ana@example.com", "Ruiz", "+15125550100", "555-0100", "termite", "secret detail", "maps.app.goo.gl", "198.51.100.23"];
+  const secrets = [TOKEN, PORTAL_TOKEN, "ana@example.com", "Ruiz", "+15125550100", "555-0100", "termite", "secret detail", "maps.app.goo.gl", "198.51.100.23", "pest-phoenix", "first_touch", "google.com"];
   for (const line of allLogs) {
     for (const secret of secrets) assert.ok(!line.includes(secret), `log line leaks ${secret}: ${line}`);
   }

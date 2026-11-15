@@ -60,6 +60,82 @@
     }
   } catch (e) {}
 
+  // First touch (2026-11-15): where this browser first came from, kept in localStorage for 90 days and sent
+  // with a signup start and an agreement signature (signup.js, agreement.js), so a paid signup keeps its
+  // source. Written on the first page view and never overwritten while it is under 90 days old. It holds the
+  // landing address, the site that sent the visitor, the utm_* values, the ad click ids and the time: nothing
+  // the person typed. A private link never gets in: the landing goes without its hash and without t, k, id, m
+  // and crm_vid (what the private pages take out of the address in <head>), and no value shaped like a key
+  // (64 hex characters in a row) is kept. With storage blocked nothing is kept and every form still works.
+  var FIRST_TOUCH_KEY = "bym_first_touch";
+  var FIRST_TOUCH_MS = 90 * 24 * 60 * 60 * 1000;
+  var FIRST_TOUCH_MAX = 500; // the CRM keeps 500 characters per value
+  var PRIVATE_PARAMS = ["t", "k", "id", "m", "crm_vid"];
+  var CAMPAIGN_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content", "gclid", "gbraid", "wbraid", "fbclid"];
+  var KEY_SHAPED = /[0-9a-f]{64}/i;
+
+  // The saved first touch while it is under 90 days old; null when there is none or it cannot be read.
+  function savedFirstTouch() {
+    try {
+      var saved = JSON.parse(window.localStorage.getItem(FIRST_TOUCH_KEY) || "null");
+      var seen = saved && typeof saved === "object" ? Date.parse(saved.first_seen_at) : NaN;
+      return Date.now() - seen < FIRST_TOUCH_MS ? saved : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // One value to keep: trimmed, without control characters. "" when it is too long or shaped like a key.
+  function touchValue(value) {
+    var kept = String(value || "").replace(/[\u0000-\u001F\u007F-\u009F\u2028\u2029]/g, "").trim();
+    return kept.length > FIRST_TOUCH_MAX || KEY_SHAPED.test(kept) ? "" : kept;
+  }
+
+  // This page's address without its hash and private parameters. When that is still too long it goes
+  // without its query: the utm_* values and click ids are kept on their own.
+  function landingAddress() {
+    var url = new URL(window.location.href);
+    url.hash = "";
+    url.username = "";
+    url.password = "";
+    var drop = PRIVATE_PARAMS.slice();
+    url.searchParams.forEach(function (value, name) {
+      if (KEY_SHAPED.test(value)) drop.push(name);
+    });
+    drop.forEach(function (name) {
+      if (url.searchParams.has(name)) url.searchParams.delete(name);
+    });
+    return url.href.length > FIRST_TOUCH_MAX ? url.origin + url.pathname : url.href;
+  }
+
+  // The site that sent the visitor: its address without query or hash, which can hold someone else's
+  // keys. This site itself is not a source.
+  function referrerAddress() {
+    try {
+      var ref = new URL(document.referrer);
+      if (!/^(https?|android-app):$/.test(ref.protocol) || ref.hostname === window.location.hostname) return "";
+      return ref.protocol + "//" + ref.host + ref.pathname;
+    } catch (e) {
+      return "";
+    }
+  }
+
+  try {
+    if (!savedFirstTouch()) {
+      var touch = {};
+      var query = new URL(window.location.href).searchParams;
+      var keep = function (key, value) {
+        value = touchValue(value);
+        if (value) touch[key] = value;
+      };
+      keep("landing", landingAddress());
+      keep("referrer", referrerAddress());
+      CAMPAIGN_KEYS.forEach(function (key) { keep(key, query.get(key)); });
+      touch.first_seen_at = new Date().toISOString();
+      window.localStorage.setItem(FIRST_TOUCH_KEY, JSON.stringify(touch));
+    }
+  } catch (e) {}
+
   function ctaLocation(el) {
     if (el.closest("nav")) return "nav";
     if (el.closest(".page-hero")) return "hero";

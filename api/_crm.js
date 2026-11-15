@@ -94,6 +94,59 @@ function utmFrom(url) {
   return utm;
 }
 
+// First-touch attribution: where the visitor's browser first came from.
+// assets/tracking.js keeps it in the browser for 90 days, and the signup start
+// and the agreement signature send it along. The CRM takes these keys only,
+// each a string of at most 500 characters, in a 4,096-byte column.
+const ATTRIBUTION_KEYS = ["landing", "referrer", ...UTM_KEYS, "gclid", "gbraid", "wbraid", "fbclid", "first_seen_at"];
+const ATTRIBUTION_VALUE_MAX = 500;
+// The whole object as JSON, in bytes: well inside the CRM's column.
+const ATTRIBUTION_BYTES_MAX = 3000;
+// Control characters, the line and paragraph separators, and half an emoji:
+// the CRM's database refuses some of them.
+const UNSAFE_TEXT_PATTERN = /[\u0000-\u001F\u007F-\u009F\u2028\u2029]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/;
+// The shape of the welcome, agreement and portal tokens, anywhere in a value.
+const KEY_SHAPED_PATTERN = /[0-9a-f]{64}/i;
+// A time as the browser writes it: "2026-11-15T18:00:00.000Z".
+const FIRST_SEEN_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
+
+function addressWith(value, protocols) {
+  try {
+    return protocols.includes(new URL(value).protocol);
+  } catch {
+    return false;
+  }
+}
+
+// The `attribution` object a page posted, as the CRM receives it, or null for
+// none. It is sent as it is or not at all, never repaired, so attribution can
+// never be why the CRM refuses a signup or a signature. The whole object is
+// dropped when it is not a plain object, or when a value under a key the CRM
+// knows is not a string, is over 500 characters, holds a control character or
+// half an emoji, or is shaped like a key (64 hex characters in a row: a
+// private link must never be stored). So is a landing that is not an http(s)
+// address or still has its fragment, a referrer that is not an address, a
+// first-seen time in another shape, and an object too large for the CRM's
+// column. Keys the CRM does not know are left out, and so are blank values.
+function attributionFrom(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const attribution = {};
+  for (const key of ATTRIBUTION_KEYS) {
+    if (!Object.prototype.hasOwnProperty.call(value, key)) continue;
+    if (typeof value[key] !== "string") return null;
+    const typed = value[key].trim();
+    if (!typed) continue;
+    if (typed.length > ATTRIBUTION_VALUE_MAX || UNSAFE_TEXT_PATTERN.test(typed) || KEY_SHAPED_PATTERN.test(typed)) return null;
+    attribution[key] = typed;
+  }
+  const { landing, referrer, first_seen_at: firstSeen } = attribution;
+  if (landing && (landing.includes("#") || !addressWith(landing, ["https:", "http:"]))) return null;
+  if (referrer && !addressWith(referrer, ["https:", "http:", "android-app:"])) return null;
+  if (firstSeen && (!FIRST_SEEN_PATTERN.test(firstSeen) || Number.isNaN(Date.parse(firstSeen)))) return null;
+  if (!Object.keys(attribution).length) return null;
+  return Buffer.byteLength(JSON.stringify(attribution), "utf8") <= ATTRIBUTION_BYTES_MAX ? attribution : null;
+}
+
 function answersFrom(fields) {
   const answers = {};
   for (const [key, max] of Object.entries(ANSWER_LIMITS)) {
@@ -192,4 +245,6 @@ module.exports = {
   utmFrom,
   clientIpFrom,
   userAgentFrom,
+  // Shared by the signup start and the agreement signature.
+  attributionFrom,
 };

@@ -60,6 +60,57 @@ assert.equal(buildSignPayload(SIGN_BODY, { "x-forwarded-for": "not an ip" }).pay
 assert.deepEqual(buildSignPayload({ t: TOKEN }, HEADERS), { payload: {} });
 assert.deepEqual(buildSignPayload({ t: TOKEN, legal_name: null, signatory_name: null, consent: null }, HEADERS), { payload: {} });
 
+// ---- First-touch attribution with the signature ------------------------------
+
+// Shaped as assets/tracking.js keeps it and assets/agreement.js posts it with
+// the sign form: where the signer's browser first came from. The rules are the
+// signup start's (api/_crm.js; scripts/check_signup_payload.js has every case).
+const ATTRIBUTION = {
+  landing: "https://www.boostyourmaps.com/pricing?utm_source=newsletter&utm_medium=email&fbclid=IwAR0-first_touch",
+  referrer: "https://mail.example.com/",
+  utm_source: "newsletter",
+  utm_medium: "email",
+  fbclid: "IwAR0-first_touch",
+  first_seen_at: "2026-10-20T09:30:00.000Z",
+};
+const NO_ATTRIBUTION = buildSignPayload(SIGN_BODY, HEADERS).payload;
+const signWith = (attribution) => buildSignPayload({ ...SIGN_BODY, attribution }, HEADERS);
+
+// Present: the CRM gets it as `attribution`, beside the signature.
+assert.deepEqual(signWith(ATTRIBUTION).payload, { ...NO_ATTRIBUTION, attribution: ATTRIBUTION });
+// Absent, or nothing in it: the payload is exactly what it was, with no key.
+for (const none of [undefined, null, {}, { utm_source: " " }]) {
+  assert.deepEqual(signWith(none).payload, NO_ATTRIBUTION, `attribution ${JSON.stringify(none)}`);
+  assert.equal("attribution" in signWith(none).payload, false);
+}
+// Unknown keys are left out; the keys the CRM knows still go.
+assert.deepEqual(signWith({ ...ATTRIBUTION, msclkid: "abc", signer: { ip: "203.0.113.9" } }).payload.attribution, ATTRIBUTION);
+assert.deepEqual(signWith({ msclkid: "abc" }).payload, NO_ATTRIBUTION);
+// Malformed or oversized: dropped whole, and the signature still goes. A
+// signature is never refused over its attribution.
+for (const [what, attribution] of Object.entries({
+  "a string": "utm_source=newsletter",
+  "a list": [ATTRIBUTION],
+  "a number as a value": { ...ATTRIBUTION, utm_source: 7 },
+  "null as a value": { ...ATTRIBUTION, fbclid: null },
+  "a control character": { ...ATTRIBUTION, utm_medium: "e\u0007mail" },
+  "a landing that is not a web address": { ...ATTRIBUTION, landing: "javascript:alert(1)" },
+  "a landing with its fragment": { ...ATTRIBUTION, landing: `https://www.boostyourmaps.com/agreement#t=${TOKEN}` },
+  "the agreement link as the landing": { ...ATTRIBUTION, landing: `https://www.boostyourmaps.com/agreement?t=${TOKEN}` },
+  "a first-seen time in another shape": { ...ATTRIBUTION, first_seen_at: "October 20, 2026" },
+  "a value of 501 characters": { ...ATTRIBUTION, utm_source: "z".repeat(501) },
+  "an object over the column size": Object.fromEntries(["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"].map((key) => [key, "é".repeat(500)])),
+})) {
+  const built = signWith(attribution);
+  assert.equal(built.error, undefined, `the signature is never refused over ${what}`);
+  assert.deepEqual(built.payload, NO_ATTRIBUTION, `dropped whole: ${what}`);
+}
+// The signature's own checks are unchanged with attribution on board.
+assert.equal(buildSignPayload({ ...SIGN_BODY, legal_name: "", attribution: ATTRIBUTION }, {}).error.field, "legalName");
+assert.equal(buildSignPayload({ ...SIGN_BODY, consent: false, attribution: ATTRIBUTION }, {}).error.field, "consent");
+// It goes with a signature only: asking for the way to pay still sends {}.
+assert.deepEqual(buildSignPayload({ t: TOKEN, attribution: ATTRIBUTION }, HEADERS), { payload: {} });
+
 // Names: trimmed, 200 characters at most, never cut, no control characters.
 assert.equal(signedName("  Ana Ruiz  "), "Ana Ruiz");
 assert.equal(signedName("José Núñez-O'Brien"), "José Núñez-O'Brien");
@@ -414,6 +465,23 @@ const NOT_FOUND = { ok: false, error: "agreement_not_found", field: null };
   r = await run(signFn, { body: { t: TOKEN }, crm: { status: 200, body: { ok: true, checkoutUrl: CHECKOUT } } });
   assert.equal(r.status, 200);
   assert.equal(r.call.init.body, "{}");
+  // With attribution: the CRM gets it in the same body, without the keys it
+  // does not know. A malformed one is left out and the signature goes through.
+  r = await run(signFn, { body: { ...SIGN_BODY, attribution: { ...ATTRIBUTION, msclkid: "abc" } }, crm: { status: 200, body: { ok: true, checkoutUrl: CHECKOUT } } });
+  assert.equal(r.status, 200);
+  assert.deepEqual(r.body, { ok: true, checkoutUrl: CHECKOUT });
+  assert.deepEqual(JSON.parse(r.call.init.body), { ...NO_ATTRIBUTION, attribution: ATTRIBUTION });
+  for (const attribution of [null, "utm_source=newsletter", { ...ATTRIBUTION, landing: `https://www.boostyourmaps.com/agreement?t=${TOKEN}` }, { ...ATTRIBUTION, utm_source: "z".repeat(501) }]) {
+    r = await run(signFn, { body: { ...SIGN_BODY, attribution }, crm: { status: 200, body: { ok: true, checkoutUrl: CHECKOUT } } });
+    assert.equal(r.status, 200);
+    assert.deepEqual(JSON.parse(r.call.init.body), NO_ATTRIBUTION);
+    assert.ok(!r.call.init.body.includes(TOKEN));
+  }
+  r = await run(signFn, { body: { t: TOKEN, attribution: ATTRIBUTION }, crm: { status: 200, body: { ok: true, checkoutUrl: CHECKOUT } } });
+  assert.equal(r.call.init.body, "{}");
+  // A refusal with attribution on board is logged like any other: no value of it.
+  r = await run(signFn, { body: { ...SIGN_BODY, attribution: ATTRIBUTION }, crm: { status: 409, body: { ok: false, error: "agreement_expired", field: null } } });
+  assert.equal(r.status, 409);
   // Site-side refusals: 400 naming the field, nothing sent.
   for (const [body, field] of [
     [{ ...SIGN_BODY, legal_name: " " }, "legalName"],
@@ -445,7 +513,7 @@ const NOT_FOUND = { ok: false, error: "agreement_not_found", field: null };
 
   // Nothing submitted, no token, IP, email or browser ever reaches the logs.
   assert.ok(allLogs.length > 0, "failures should be logged");
-  const secrets = [TOKEN, "Ana", "Ruiz", "ana@ruizpest.com", "198.51.100.23", "iPhone", "cs_test", "cus_secret"];
+  const secrets = [TOKEN, "Ana", "Ruiz", "ana@ruizpest.com", "198.51.100.23", "iPhone", "cs_test", "cus_secret", "newsletter", "first_touch", "mail.example.com"];
   for (const line of allLogs) {
     for (const secret of secrets) assert.ok(!line.includes(secret), `log line leaks ${secret}: ${line}`);
   }
