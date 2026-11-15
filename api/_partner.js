@@ -16,7 +16,7 @@ const SITE_ORIGINS = [
 // The one answer the Agency Partners page gives for every email. The page
 // (assets/agency-partners.js) shows this exact text, so nothing the page says
 // can tell a partner's email from any other.
-const NEUTRAL_MESSAGE = "If that email belongs to a partner, we sent a sign-in link.";
+const NEUTRAL_MESSAGE = "If that email is on file for a partner, we sent your portal link. Check your spam folder if it has not come in a few minutes.";
 
 // The request came from one of this site's own pages. A form posted from
 // another site carries another Origin (or none, and no Referer), so it is

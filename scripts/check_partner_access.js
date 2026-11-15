@@ -189,7 +189,7 @@ const as = (extra = {}) => ({ ...HEADERS, "x-forwarded-for": `203.0.113.${++visi
   const page = fs.readFileSync(path.join(ROOT, "agency-partners.html"), "utf8");
   const script = fs.readFileSync(path.join(ROOT, "assets/agency-partners.js"), "utf8");
   // The page script shows the very words the function keeps.
-  assert.equal(NEUTRAL_MESSAGE, "If that email belongs to a partner, we sent a sign-in link.");
+  assert.equal(NEUTRAL_MESSAGE, "If that email is on file for a partner, we sent your portal link. Check your spam folder if it has not come in a few minutes.");
   assert.ok(script.includes(JSON.stringify(NEUTRAL_MESSAGE)), "the page script shows the fixed answer");
   assert.match(page, /<meta name="robots" content="noindex, nofollow">/);
   assert.match(page, /data-endpoint="\/api\/partner-access"/);
