@@ -14,7 +14,7 @@
 // agreement has its own error code (agreement_unavailable), log label and
 // timeouts.
 
-const { crmUrl, crmConfigured, text, cut, clientIpFrom, userAgentFrom } = require("./_crm");
+const { crmUrl, crmConfigured, text, cut, clientIpFrom, userAgentFrom, attributionFrom } = require("./_crm");
 
 const TIMEOUT_MS = 8000;
 // Signing makes the PDF and the Stripe checkout session, so it gets longer.
@@ -97,9 +97,12 @@ function signedName(value) {
 
 // POST {CRM}/api/agreements/{token}/sign, from the body the page posts
 // (assets/agreement.js) and the request headers. The sign form sends
-// { t, legal_name, signatory_name, consent }; an agreement that is already
-// signed only needs the way to pay, so the page sends { t } alone and the CRM
-// gets {}. Returns { payload } or { error } naming the field as the CRM does.
+// { t, legal_name, signatory_name, consent, attribution }; an agreement that
+// is already signed only needs the way to pay, so the page sends { t } alone
+// and the CRM gets {}. Returns { payload } or { error } naming the field as
+// the CRM does. The attribution (where the signer's browser first came from,
+// assets/tracking.js) goes with a signature only, and only when it is well
+// formed; a signature is never refused over it.
 function buildSignPayload(body, headers) {
   if (!body) return { error: fail("invalid_input") };
   const sent = ["legal_name", "signatory_name", "consent"].some((key) => body[key] !== undefined && body[key] !== null);
@@ -111,11 +114,13 @@ function buildSignPayload(body, headers) {
   if (!signatoryName) return { error: fail("invalid_input", "signatoryName") };
   if (body.consent !== true) return { error: fail("invalid_input", "consent") };
 
+  const attribution = attributionFrom(body.attribution);
   return {
     payload: {
       legalName,
       signatoryName,
       consent: true,
+      ...(attribution ? { attribution } : {}),
       clientIp: clientIpFrom(headers || {}),
       userAgent: userAgentFrom(headers || {}),
     },

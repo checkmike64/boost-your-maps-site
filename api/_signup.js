@@ -16,6 +16,7 @@ const {
   pageUrlFrom,
   sourceUrlFrom,
   utmFrom,
+  attributionFrom,
   clientIpFrom,
   userAgentFrom,
 } = require("./_crm");
@@ -27,6 +28,8 @@ const LEAD_PREFERENCES = ["calls", "forms", "bookings", "orders"];
 const APPROVALS = ["email", "call"];
 const STAGES = ["waiting_for_payment", "setting_up", "live", "payment_issue", "paused", "canceled"];
 const MAX_LOCATIONS = 20;
+// A checkout total in cents is a whole number up to a million dollars.
+const MAX_AMOUNT_CENTS = 100000000;
 
 // Signup tokens (the welcome link) and partner portal tokens are 64
 // lowercase hex characters.
@@ -157,6 +160,9 @@ function buildStartPayload(body, headers) {
   // where the portal key lives (#k=), and it must never be stored.
   const pageUrl = pageUrlFrom(body.page_url);
   if (pageUrl) pageUrl.hash = "";
+  // Where the buyer's browser first came from (assets/tracking.js), when the
+  // page sent it and it is well formed. Otherwise the signup goes without it.
+  const attribution = attributionFrom(body.attribution);
   return {
     payload: {
       plan,
@@ -168,6 +174,7 @@ function buildStartPayload(body, headers) {
       quantity,
       sourceUrl: sourceUrlFrom(pageUrl),
       utm: utmFrom(pageUrl),
+      ...(attribution ? { attribution } : {}),
       clientIp: clientIpFrom(headers || {}),
       userAgent: userAgentFrom(headers || {}),
     },
@@ -251,9 +258,12 @@ function shapePrefill(prefill) {
   };
 }
 
+// amountCents is the checkout total, for the welcome page's one purchase event.
+// It goes along only when the CRM sends a whole number of cents above zero.
 function shapeSignup(signup) {
   const s = signup && typeof signup === "object" ? signup : {};
   const quantity = Number.isInteger(s.quantity) && s.quantity >= 1 && s.quantity <= MAX_LOCATIONS ? s.quantity : 1;
+  const amountCents = Number.isInteger(s.amountCents) && s.amountCents > 0 && s.amountCents <= MAX_AMOUNT_CENTS ? s.amountCents : null;
   return {
     plan: PLANS.includes(s.plan) ? s.plan : "us",
     businessName: optionalText(s.businessName, 200),
@@ -266,6 +276,7 @@ function shapeSignup(signup) {
     intakeDone: s.intakeDone === true,
     bookingUrl: httpUrl(s.bookingUrl),
     prefill: shapePrefill(s.prefill),
+    ...(amountCents ? { amountCents } : {}),
   };
 }
 

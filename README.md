@@ -86,6 +86,21 @@ analytics loads and only travel inside POST bodies. `node scripts/check_signup_p
 `node scripts/check_agreement_payload.js` check what the CRM receives without touching the
 network; CI runs both.
 
+**Where a paid signup came from.** `assets/tracking.js` keeps a first touch in the browser
+(`localStorage` key `bym_first_touch`, for 90 days): the landing address without its hash, the
+site that sent the visitor, the `utm_*` values, the ad click ids (`gclid`, `gbraid`, `wbraid`,
+`fbclid`) and the time. It is written on the first page view and not overwritten, and it never
+holds a welcome, agreement or portal key. The signup start and the agreement signature send it
+as `attribution`. `attributionFrom` in `api/_crm.js` passes it to the CRM only when it is well
+formed and drops it whole otherwise, so it can never be why a signup fails; the `utm` and
+`sourceUrl` of the signup page itself go as before. The welcome page pushes one `purchase`
+event to Tag Manager the first time a browser sees the signup paid: `transaction_id` is the
+SHA-256 of the welcome token (never the token), and `value` is the checkout total the CRM
+sends as `amountCents`. Without an amount it pushes nothing, and it sends nothing to the Meta
+pixel (the CRM's server-side conversion is the one ad platforms count).
+`node scripts/check_tracking.js` runs the three page scripts against a stand-in browser and
+follows a first touch to the body the CRM receives; CI runs it.
+
 ## Deploy (Vercel)
 
 The canonical repository is `https://github.com/checkmike64/boost-your-maps-site`.
