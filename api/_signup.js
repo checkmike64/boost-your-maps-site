@@ -26,6 +26,8 @@ const TIMEOUT_MS = 8000;
 const PLANS = ["us", "canada", "partner"];
 const LEAD_PREFERENCES = ["calls", "forms", "bookings", "orders"];
 const APPROVALS = ["email", "call"];
+const REPORT_LINK_STATES = ["link_published", "sent", "expired"];
+const REQUESTED_STATES = ["building", "being_reviewed", "ready", "declined", "expired", "unavailable"];
 const STAGES = ["waiting_for_payment", "setting_up", "live", "payment_issue", "paused", "canceled"];
 const MAX_LOCATIONS = 20;
 // A checkout total in cents is a whole number up to a million dollars.
@@ -309,9 +311,48 @@ function shapePortal(portal) {
             photos: httpUrl(links.photos),
             dashboard: httpUrl(links.dashboard),
           },
+          reports: shapeReports(c.reports),
         };
       }),
+    requestedReports: shapeRequestedReports(p.requestedReports),
   };
+}
+
+// A day as the CRM writes it ("2026-11-15" or a full time), cut to the day.
+function dayOf(value) {
+  return typeof value === "string" && /^\d{4}-\d{2}-\d{2}/.test(value) ? value.slice(0, 10) : null;
+}
+
+// A client's monthly report links. Only a month, a link, an expiry day and a
+// state ever reach the browser, never a score or a finding. An expired report
+// has no link.
+function shapeReports(list) {
+  const reports = Array.isArray(list) ? list : [];
+  return reports
+    .filter((r) => r && typeof r === "object" && typeof r.month === "string" && /^\d{4}-\d{2}$/.test(r.month) && REPORT_LINK_STATES.includes(r.state))
+    .slice(0, 24)
+    .map((r) => ({
+      month: r.month,
+      state: r.state,
+      url: r.state === "expired" ? null : httpUrl(r.url),
+      expiresAt: dayOf(r.expiresAt),
+    }));
+}
+
+// The reports the agency asked for from its portal: the business as typed, the
+// day, the state, and the link once it is ready.
+function shapeRequestedReports(list) {
+  const reports = Array.isArray(list) ? list : [];
+  return reports
+    .filter((r) => r && typeof r === "object" && REQUESTED_STATES.includes(r.state))
+    .slice(0, 50)
+    .map((r) => ({
+      business: optionalText(r.business, 200),
+      requestedAt: dayOf(r.requestedAt),
+      state: r.state,
+      url: r.state === "ready" ? httpUrl(r.url) : null,
+      expiresAt: dayOf(r.expiresAt),
+    }));
 }
 
 // ---- talking to the CRM ----------------------------------------------------
@@ -397,7 +438,9 @@ module.exports = {
   TOKEN_PATTERN,
   fail,
   isToken,
+  isEmail,
   typedUrl,
+  optionalText,
   buildStartPayload,
   buildIntakePayload,
   shapePartners,

@@ -295,4 +295,6 @@ module.exports = {
   userAgentFrom,
   // Shared by the signup start and the agreement signature.
   attributionFrom,
+  // The site's own origins, for the functions that refuse other sites.
+  SITE_ORIGINS,
 };
