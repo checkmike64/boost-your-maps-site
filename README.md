@@ -66,7 +66,12 @@ the nav or footer.
   and its contact come from the CRM, so only the client's details are asked.
 - `/welcome`: where Stripe sends the buyer. Payment, Google Business Profile access,
   a few questions, launch call.
-- `/partners/portal#k=<token>`: an agency's clients and links.
+- `/partners/portal#k=<token>`: an agency's clients, their monthly report links, the reports it ran,
+  and a "Run a report" form (business search, service, area) that posts to `api/partner-report.js`.
+- `/agency-partners`: where the footer's "Agency Partners" link goes (`/partners` redirects to it). One
+  email field. `api/partner-access.js` asks the CRM to email that agency its portal link and gives the
+  same answer for every email, so the page never shows or hints at which agencies exist. noindex, not in the
+  sitemap. `/partners/signup` leads with a link here and keeps its agency dropdown as the fallback.
 - `/booked`: where the CRM's booking pages send someone who booked a call. Shows the call and
   its time, pushes `book_appointment` to Tag Manager once per meeting id, and takes the
   meeting id, token and visitor key out of the address before Tag Manager loads.
@@ -84,7 +89,8 @@ site's functions (`api/signup/*.js`, `api/partner-portal.js`, `api/agreement/*.j
 The welcome, portal and agreement tokens move from `?t=` / `?k=` into the URL hash before
 analytics loads and only travel inside POST bodies. `node scripts/check_signup_payload.js` and
 `node scripts/check_agreement_payload.js` check what the CRM receives without touching the
-network; CI runs both.
+network; CI runs both, plus `check_partner_access.js`, `check_partner_report.js`, `check_footer.js`
+and `check_csp.js` for the agency partner pages.
 
 ## Deploy (Vercel)
 

@@ -185,6 +185,10 @@
     var partnerField = form.querySelector("[data-partner-field]");
     var partnerNote = form.querySelector("[data-partner-note]");
     var personFields = form.querySelectorAll("[data-person-field]");
+    // "Open your partner portal", shown above the form unless the agency came
+    // from its portal. The dropdown below it is the fallback.
+    var portalFirst = document.querySelector("[data-portal-first]");
+    function showPortalFirst(show) { if (portalFirst) portalFirst.hidden = !show; }
     var portalKey = null;
     var portalAgency = null;
     var contactKnown = false;
@@ -214,6 +218,7 @@
       portalKey = key;
       portalAgency = portal;
       contactKnown = Boolean(portal.contact);
+      showPortalFirst(false);
       partnerField.hidden = true;
       partnerSelect.required = false;
       partnerNote.hidden = true;
@@ -235,6 +240,7 @@
       portalAgency = null;
       contactKnown = false;
       if (clearKey) clearKeyFromUrl();
+      showPortalFirst(true);
       agencyKnown.hidden = true;
       partnerField.hidden = false;
       partnerSelect.required = true;
@@ -246,6 +252,7 @@
     }
 
     async function startFromPortal(key) {
+      showPortalFirst(false);
       partnerField.hidden = true;
       showPerson(false);
       agencyLine.textContent = "Loading your agency…";
@@ -270,7 +277,11 @@
         if (!partnerSelect.disabled) partnerSelect.focus();
       });
       var startKey = keyFromUrl();
-      if (startKey) startFromPortal(startKey); else loadPartners(form, partnerSelect, button);
+      if (startKey) startFromPortal(startKey);
+      else {
+        showPortalFirst(true);
+        loadPartners(form, partnerSelect, button);
+      }
     }
 
     form.addEventListener("submit", async function (event) {

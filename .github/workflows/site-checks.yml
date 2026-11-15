@@ -26,3 +26,11 @@ jobs:
         run: node scripts/check_agreement_payload.js
       - name: Check the review link tool (parsing, QR code, places route)
         run: node scripts/check_review_link.js
+      - name: Check the Agency Partners email function and page
+        run: node scripts/check_partner_access.js
+      - name: Check "Run a report" and the portal page
+        run: node scripts/check_partner_report.js
+      - name: Check the footer link, the agency list and the signup page
+        run: node scripts/check_footer.js
+      - name: Check the Content-Security-Policy
+        run: node scripts/check_csp.js
