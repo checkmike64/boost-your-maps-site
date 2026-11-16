@@ -1,0 +1,564 @@
+{
+ "schema": "local-page-data/1",
+ "site_key": "bym",
+ "slug": "/local-seo/dallas-fort-worth-tx",
+ "page_type": "hub",
+ "profile": "owner-report",
+ "city": "Dallas",
+ "region": "TX",
+ "country": "US",
+ "service": "local seo",
+ "parent_hub": "/google-maps-marketing",
+ "built_on": "2026-11-16",
+ "published": "2026-11-16",
+ "modified": "2026-11-16",
+ "_note": "City hub for the Dallas-Fort Worth metro (queue 35), one hub for both cities. Not a sales asset: a ranking hub (national_service plan, Check 1 readiness 16). KP numbers pulled 2026-11-16 (period Nov 2025 to Oct 2026), re-verified against the stale queue module.",
+ "build_check": {
+  "demand_core_monthly": 110,
+  "parent_hub_live": true,
+  "proof_match_level": 3,
+  "serves_area": true,
+  "nearest_page_km": null,
+  "publishing_paused": false,
+  "sales_asset": {
+   "kind": "campaign",
+   "target": "Dallas-Fort Worth local SEO hub (ranking hub, not a sales asset)"
+  }
+ },
+ "modules": {
+  "demand": {
+   "included": true,
+   "reason": "Keyword Planner, 11 trades x Dallas and Fort Worth",
+   "meta": {
+    "source": "Google Ads Keyword Planner (historical metrics)",
+    "geo": "Dallas,Texas,United States (City, geoTargetConstants/1026339) and Fort Worth,Texas,United States (City, geoTargetConstants/1026411)",
+    "period": "Nov 2025 to Oct 2026",
+    "pulled_on": "2026-11-16",
+    "core_avg_monthly": 6600,
+    "terms_with_data": 11,
+    "core_keywords": [
+     "dentist"
+    ],
+    "info_gain": "Dallas and Fort Worth side by side by trade, which no top-10 agency page shows"
+   },
+   "facts": [
+    {
+     "id": "demand.dal.dentist",
+     "text": "About 6,600 searches a month for 'dentist' by people in Dallas, Nov 2025 to Oct 2026",
+     "value": 6600,
+     "unit": "searches/month",
+     "source": "Google Ads Keyword Planner (historical metrics)",
+     "retrieved_on": "2026-11-16",
+     "source_url": "https://ads.google.com/aw/keywordplanner/home",
+     "location": "Dallas,Texas,United States (City, geoTargetConstants/1026339)"
+    },
+    {
+     "id": "demand.fw.dentist",
+     "text": "About 4,400 searches a month for 'dentist' by people in Fort Worth, Nov 2025 to Oct 2026",
+     "value": 4400,
+     "unit": "searches/month",
+     "source": "Google Ads Keyword Planner (historical metrics)",
+     "retrieved_on": "2026-11-16",
+     "source_url": "https://ads.google.com/aw/keywordplanner/home",
+     "location": "Fort Worth,Texas,United States (City, geoTargetConstants/1026411)"
+    },
+    {
+     "id": "demand.dal.hair_salon",
+     "text": "About 4,400 searches a month for 'hair salon' by people in Dallas, Nov 2025 to Oct 2026",
+     "value": 4400,
+     "unit": "searches/month",
+     "source": "Google Ads Keyword Planner (historical metrics)",
+     "retrieved_on": "2026-11-16",
+     "source_url": "https://ads.google.com/aw/keywordplanner/home",
+     "location": "Dallas,Texas,United States (City, geoTargetConstants/1026339)"
+    },
+    {
+     "id": "demand.fw.hair_salon",
+     "text": "About 2,400 searches a month for 'hair salon' by people in Fort Worth, Nov 2025 to Oct 2026",
+     "value": 2400,
+     "unit": "searches/month",
+     "source": "Google Ads Keyword Planner (historical metrics)",
+     "retrieved_on": "2026-11-16",
+     "source_url": "https://ads.google.com/aw/keywordplanner/home",
+     "location": "Fort Worth,Texas,United States (City, geoTargetConstants/1026411)"
+    },
+    {
+     "id": "demand.dal.plumber",
+     "text": "About 4,400 searches a month for 'plumber' by people in Dallas, Nov 2025 to Oct 2026",
+     "value": 4400,
+     "unit": "searches/month",
+     "source": "Google Ads Keyword Planner (historical metrics)",
+     "retrieved_on": "2026-11-16",
+     "source_url": "https://ads.google.com/aw/keywordplanner/home",
+     "location": "Dallas,Texas,United States (City, geoTargetConstants/1026339)"
+    },
+    {
+     "id": "demand.fw.plumber",
+     "text": "About 2,900 searches a month for 'plumber' by people in Fort Worth, Nov 2025 to Oct 2026",
+     "value": 2900,
+     "unit": "searches/month",
+     "source": "Google Ads Keyword Planner (historical metrics)",
+     "retrieved_on": "2026-11-16",
+     "source_url": "https://ads.google.com/aw/keywordplanner/home",
+     "location": "Fort Worth,Texas,United States (City, geoTargetConstants/1026411)"
+    },
+    {
+     "id": "demand.dal.HVAC",
+     "text": "About 2,900 searches a month for 'HVAC' by people in Dallas, Nov 2025 to Oct 2026",
+     "value": 2900,
+     "unit": "searches/month",
+     "source": "Google Ads Keyword Planner (historical metrics)",
+     "retrieved_on": "2026-11-16",
+     "source_url": "https://ads.google.com/aw/keywordplanner/home",
+     "location": "Dallas,Texas,United States (City, geoTargetConstants/1026339)"
+    },
+    {
+     "id": "demand.fw.HVAC",
+     "text": "About 2,900 searches a month for 'HVAC' by people in Fort Worth, Nov 2025 to Oct 2026",
+     "value": 2900,
+     "unit": "searches/month",
+     "source": "Google Ads Keyword Planner (historical metrics)",
+     "retrieved_on": "2026-11-16",
+     "source_url": "https://ads.google.com/aw/keywordplanner/home",
+     "location": "Fort Worth,Texas,United States (City, geoTargetConstants/1026411)"
+    },
+    {
+     "id": "demand.dal.chiropractor",
+     "text": "About 2,900 searches a month for 'chiropractor' by people in Dallas, Nov 2025 to Oct 2026",
+     "value": 2900,
+     "unit": "searches/month",
+     "source": "Google Ads Keyword Planner (historical metrics)",
+     "retrieved_on": "2026-11-16",
+     "source_url": "https://ads.google.com/aw/keywordplanner/home",
+     "location": "Dallas,Texas,United States (City, geoTargetConstants/1026339)"
+    },
+    {
+     "id": "demand.fw.chiropractor",
+     "text": "About 1,900 searches a month for 'chiropractor' by people in Fort Worth, Nov 2025 to Oct 2026",
+     "value": 1900,
+     "unit": "searches/month",
+     "source": "Google Ads Keyword Planner (historical metrics)",
+     "retrieved_on": "2026-11-16",
+     "source_url": "https://ads.google.com/aw/keywordplanner/home",
+     "location": "Fort Worth,Texas,United States (City, geoTargetConstants/1026411)"
+    },
+    {
+     "id": "demand.dal.locksmith",
+     "text": "About 2,900 searches a month for 'locksmith' by people in Dallas, Nov 2025 to Oct 2026",
+     "value": 2900,
+     "unit": "searches/month",
+     "source": "Google Ads Keyword Planner (historical metrics)",
+     "retrieved_on": "2026-11-16",
+     "source_url": "https://ads.google.com/aw/keywordplanner/home",
+     "location": "Dallas,Texas,United States (City, geoTargetConstants/1026339)"
+    },
+    {
+     "id": "demand.fw.locksmith",
+     "text": "About 1,600 searches a month for 'locksmith' by people in Fort Worth, Nov 2025 to Oct 2026",
+     "value": 1600,
+     "unit": "searches/month",
+     "source": "Google Ads Keyword Planner (historical metrics)",
+     "retrieved_on": "2026-11-16",
+     "source_url": "https://ads.google.com/aw/keywordplanner/home",
+     "location": "Fort Worth,Texas,United States (City, geoTargetConstants/1026411)"
+    },
+    {
+     "id": "demand.dal.physical_therapist",
+     "text": "About 2,400 searches a month for 'physical therapist' by people in Dallas, Nov 2025 to Oct 2026",
+     "value": 2400,
+     "unit": "searches/month",
+     "source": "Google Ads Keyword Planner (historical metrics)",
+     "retrieved_on": "2026-11-16",
+     "source_url": "https://ads.google.com/aw/keywordplanner/home",
+     "location": "Dallas,Texas,United States (City, geoTargetConstants/1026339)"
+    },
+    {
+     "id": "demand.fw.physical_therapist",
+     "text": "About 1,900 searches a month for 'physical therapist' by people in Fort Worth, Nov 2025 to Oct 2026",
+     "value": 1900,
+     "unit": "searches/month",
+     "source": "Google Ads Keyword Planner (historical metrics)",
+     "retrieved_on": "2026-11-16",
+     "source_url": "https://ads.google.com/aw/keywordplanner/home",
+     "location": "Fort Worth,Texas,United States (City, geoTargetConstants/1026411)"
+    },
+    {
+     "id": "demand.dal.electrician",
+     "text": "About 2,400 searches a month for 'electrician' by people in Dallas, Nov 2025 to Oct 2026",
+     "value": 2400,
+     "unit": "searches/month",
+     "source": "Google Ads Keyword Planner (historical metrics)",
+     "retrieved_on": "2026-11-16",
+     "source_url": "https://ads.google.com/aw/keywordplanner/home",
+     "location": "Dallas,Texas,United States (City, geoTargetConstants/1026339)"
+    },
+    {
+     "id": "demand.fw.electrician",
+     "text": "About 1,900 searches a month for 'electrician' by people in Fort Worth, Nov 2025 to Oct 2026",
+     "value": 1900,
+     "unit": "searches/month",
+     "source": "Google Ads Keyword Planner (historical metrics)",
+     "retrieved_on": "2026-11-16",
+     "source_url": "https://ads.google.com/aw/keywordplanner/home",
+     "location": "Fort Worth,Texas,United States (City, geoTargetConstants/1026411)"
+    },
+    {
+     "id": "demand.dal.pest_control",
+     "text": "About 1,600 searches a month for 'pest control' by people in Dallas, Nov 2025 to Oct 2026",
+     "value": 1600,
+     "unit": "searches/month",
+     "source": "Google Ads Keyword Planner (historical metrics)",
+     "retrieved_on": "2026-11-16",
+     "source_url": "https://ads.google.com/aw/keywordplanner/home",
+     "location": "Dallas,Texas,United States (City, geoTargetConstants/1026339)"
+    },
+    {
+     "id": "demand.fw.pest_control",
+     "text": "About 1,000 searches a month for 'pest control' by people in Fort Worth, Nov 2025 to Oct 2026",
+     "value": 1000,
+     "unit": "searches/month",
+     "source": "Google Ads Keyword Planner (historical metrics)",
+     "retrieved_on": "2026-11-16",
+     "source_url": "https://ads.google.com/aw/keywordplanner/home",
+     "location": "Fort Worth,Texas,United States (City, geoTargetConstants/1026411)"
+    },
+    {
+     "id": "demand.dal.roofing",
+     "text": "About 1,300 searches a month for 'roofing' by people in Dallas, Nov 2025 to Oct 2026",
+     "value": 1300,
+     "unit": "searches/month",
+     "source": "Google Ads Keyword Planner (historical metrics)",
+     "retrieved_on": "2026-11-16",
+     "source_url": "https://ads.google.com/aw/keywordplanner/home",
+     "location": "Dallas,Texas,United States (City, geoTargetConstants/1026339)"
+    },
+    {
+     "id": "demand.fw.roofing",
+     "text": "About 1,600 searches a month for 'roofing' by people in Fort Worth, Nov 2025 to Oct 2026",
+     "value": 1600,
+     "unit": "searches/month",
+     "source": "Google Ads Keyword Planner (historical metrics)",
+     "retrieved_on": "2026-11-16",
+     "source_url": "https://ads.google.com/aw/keywordplanner/home",
+     "location": "Fort Worth,Texas,United States (City, geoTargetConstants/1026411)"
+    },
+    {
+     "id": "demand.dal.landscaping",
+     "text": "About 880 searches a month for 'landscaping' by people in Dallas, Nov 2025 to Oct 2026",
+     "value": 880,
+     "unit": "searches/month",
+     "source": "Google Ads Keyword Planner (historical metrics)",
+     "retrieved_on": "2026-11-16",
+     "source_url": "https://ads.google.com/aw/keywordplanner/home",
+     "location": "Dallas,Texas,United States (City, geoTargetConstants/1026339)"
+    },
+    {
+     "id": "demand.fw.landscaping",
+     "text": "About 880 searches a month for 'landscaping' by people in Fort Worth, Nov 2025 to Oct 2026",
+     "value": 880,
+     "unit": "searches/month",
+     "source": "Google Ads Keyword Planner (historical metrics)",
+     "retrieved_on": "2026-11-16",
+     "source_url": "https://ads.google.com/aw/keywordplanner/home",
+     "location": "Fort Worth,Texas,United States (City, geoTargetConstants/1026411)"
+    },
+    {
+     "id": "demand.window",
+     "text": "12-month average, November 2025 to October 2026, pulled November 16, 2026",
+     "value": "12 months",
+     "unit": "text",
+     "source": "Google Ads Keyword Planner (historical metrics)",
+     "retrieved_on": "2026-11-16",
+     "source_url": "https://ads.google.com/aw/keywordplanner/home",
+     "location": "Dallas,Texas,United States (City, geoTargetConstants/1026339)"
+    },
+    {
+     "id": "season.plumber",
+     "text": "Plumber searches in Dallas: 2,900 in January 2026, 8,100 in July 2026",
+     "value": 8100,
+     "unit": "searches/month",
+     "source": "Google Ads Keyword Planner (historical metrics)",
+     "retrieved_on": "2026-11-16",
+     "source_url": "https://ads.google.com/aw/keywordplanner/home",
+     "location": "Dallas,Texas,United States (City, geoTargetConstants/1026339)"
+    },
+    {
+     "id": "season.plumber_low",
+     "text": "Plumber searches in Dallas: 2,900 in January 2026",
+     "value": 2900,
+     "unit": "searches/month",
+     "source": "Google Ads Keyword Planner (historical metrics)",
+     "retrieved_on": "2026-11-16",
+     "source_url": "https://ads.google.com/aw/keywordplanner/home",
+     "location": "Dallas,Texas,United States (City, geoTargetConstants/1026339)"
+    },
+    {
+     "id": "season.elec_low",
+     "text": "Electrician searches in Dallas: 1,300 in November 2025",
+     "value": 1300,
+     "unit": "searches/month",
+     "source": "Google Ads Keyword Planner (historical metrics)",
+     "retrieved_on": "2026-11-16",
+     "source_url": "https://ads.google.com/aw/keywordplanner/home",
+     "location": "Dallas,Texas,United States (City, geoTargetConstants/1026339)"
+    },
+    {
+     "id": "season.elec_high",
+     "text": "Electrician searches in Dallas: 4,400 in August 2026",
+     "value": 4400,
+     "unit": "searches/month",
+     "source": "Google Ads Keyword Planner (historical metrics)",
+     "retrieved_on": "2026-11-16",
+     "source_url": "https://ads.google.com/aw/keywordplanner/home",
+     "location": "Dallas,Texas,United States (City, geoTargetConstants/1026339)"
+    },
+    {
+     "id": "season.pest_low",
+     "text": "Pest control searches in Dallas: 720 in December 2025",
+     "value": 720,
+     "unit": "searches/month",
+     "source": "Google Ads Keyword Planner (historical metrics)",
+     "retrieved_on": "2026-11-16",
+     "source_url": "https://ads.google.com/aw/keywordplanner/home",
+     "location": "Dallas,Texas,United States (City, geoTargetConstants/1026339)"
+    },
+    {
+     "id": "season.pest_high",
+     "text": "Pest control searches in Dallas: 2,900 in September 2026",
+     "value": 2900,
+     "unit": "searches/month",
+     "source": "Google Ads Keyword Planner (historical metrics)",
+     "retrieved_on": "2026-11-16",
+     "source_url": "https://ads.google.com/aw/keywordplanner/home",
+     "location": "Dallas,Texas,United States (City, geoTargetConstants/1026339)"
+    },
+    {
+     "id": "cpc.plumber_lo",
+     "text": "Keyword Planner low top-of-page bid for 'plumber' in Dallas: $28",
+     "value": 28,
+     "unit": "USD",
+     "source": "Google Ads Keyword Planner (historical metrics)",
+     "retrieved_on": "2026-11-16",
+     "source_url": "https://ads.google.com/aw/keywordplanner/home",
+     "location": "Dallas,Texas,United States (City, geoTargetConstants/1026339)"
+    },
+    {
+     "id": "cpc.plumber_hi",
+     "text": "Keyword Planner high top-of-page bid for 'plumber' in Dallas: $74",
+     "value": 74,
+     "unit": "USD",
+     "source": "Google Ads Keyword Planner (historical metrics)",
+     "retrieved_on": "2026-11-16",
+     "source_url": "https://ads.google.com/aw/keywordplanner/home",
+     "location": "Dallas,Texas,United States (City, geoTargetConstants/1026339)"
+    },
+    {
+     "id": "cpc.elec_lo",
+     "text": "Keyword Planner low top-of-page bid for 'electrician' in Dallas: $18",
+     "value": 18,
+     "unit": "USD",
+     "source": "Google Ads Keyword Planner (historical metrics)",
+     "retrieved_on": "2026-11-16",
+     "source_url": "https://ads.google.com/aw/keywordplanner/home",
+     "location": "Dallas,Texas,United States (City, geoTargetConstants/1026339)"
+    },
+    {
+     "id": "cpc.elec_hi",
+     "text": "Keyword Planner high top-of-page bid for 'electrician' in Dallas: $71",
+     "value": 71,
+     "unit": "USD",
+     "source": "Google Ads Keyword Planner (historical metrics)",
+     "retrieved_on": "2026-11-16",
+     "source_url": "https://ads.google.com/aw/keywordplanner/home",
+     "location": "Dallas,Texas,United States (City, geoTargetConstants/1026339)"
+    },
+    {
+     "id": "cpc.roof_lo",
+     "text": "Keyword Planner low top-of-page bid for 'roofing' in Fort Worth: $12",
+     "value": 12,
+     "unit": "USD",
+     "source": "Google Ads Keyword Planner (historical metrics)",
+     "retrieved_on": "2026-11-16",
+     "source_url": "https://ads.google.com/aw/keywordplanner/home",
+     "location": "Fort Worth,Texas,United States (City, geoTargetConstants/1026411)"
+    },
+    {
+     "id": "cpc.roof_hi",
+     "text": "Keyword Planner high top-of-page bid for 'roofing' in Fort Worth: $64",
+     "value": 64,
+     "unit": "USD",
+     "source": "Google Ads Keyword Planner (historical metrics)",
+     "retrieved_on": "2026-11-16",
+     "source_url": "https://ads.google.com/aw/keywordplanner/home",
+     "location": "Fort Worth,Texas,United States (City, geoTargetConstants/1026411)"
+    }
+   ]
+  },
+  "price": {
+   "included": false,
+   "reason": "CPC facts sit in the demand module"
+  },
+  "proof": {
+   "included": true,
+   "reason": "borrowed proof, anonymous, labeled; no result for the Fort Worth dental practice (held)",
+   "meta": {
+    "match_level": 3,
+    "approved": true,
+    "page_name": "a dental practice in Fort Worth",
+    "label_text": "these results come from other states"
+   },
+   "facts": [
+    {
+     "id": "proof.plumb_calls",
+     "text": "Plumbing and septic company, Grand Haven, Michigan: calls up 18%; 328 calls August to November 2025, up from 277 a year earlier",
+     "value": 328,
+     "unit": "calls",
+     "source": "brain.bym_proof (approved_for_pages; anonymous) 6d9a4217 result_line",
+     "retrieved_on": "2026-11-10",
+     "first_party": true
+    },
+    {
+     "id": "proof.plumb_prior",
+     "text": "277 calls August to November 2024",
+     "value": 277,
+     "unit": "calls",
+     "source": "brain.bym_proof (approved_for_pages; anonymous) 6d9a4217 result_line",
+     "retrieved_on": "2026-11-10",
+     "first_party": true
+    },
+    {
+     "id": "proof.plumb_pct",
+     "text": "Calls up 18% on the same months a year earlier",
+     "value": 18,
+     "unit": "percent",
+     "source": "brain.bym_proof (approved_for_pages; anonymous) 6d9a4217 result_line",
+     "retrieved_on": "2026-11-10",
+     "first_party": true
+    },
+    {
+     "id": "proof.pest_views",
+     "text": "Pest control company, Mesa, Arizona: views up 5% while pest control searches fell by a third (417 a month to 281)",
+     "value": 5,
+     "unit": "percent",
+     "source": "brain.bym_proof (approved_for_pages; anonymous) 44c9c740 result_line",
+     "retrieved_on": "2026-11-10",
+     "first_party": true
+    },
+    {
+     "id": "proof.car_clicks",
+     "text": "Car wash, Phoenix, Arizona: website clicks up from 24 to 31 a month",
+     "value": 31,
+     "unit": "clicks/month",
+     "source": "brain.bym_proof (approved_for_pages; anonymous) 1901a4ec result_line",
+     "retrieved_on": "2026-11-10",
+     "first_party": true
+    },
+    {
+     "id": "proof.car_clicks_before",
+     "text": "Car wash, Phoenix: 24 website clicks a month before",
+     "value": 24,
+     "unit": "clicks/month",
+     "source": "brain.bym_proof (approved_for_pages; anonymous) 1901a4ec result_line",
+     "retrieved_on": "2026-11-10",
+     "first_party": true
+    },
+    {
+     "id": "proof.car_searches",
+     "text": "Car wash searches in Phoenix fell 21%",
+     "value": 21,
+     "unit": "percent",
+     "source": "brain.bym_proof (approved_for_pages; anonymous) 1901a4ec result_line",
+     "retrieved_on": "2026-11-10",
+     "first_party": true
+    },
+    {
+     "id": "proof.fw_dental",
+     "text": "Dental practice in Fort Worth: BYM started managing its Google profile September 2026 (subscription 2026-09-16); result held, too early (bym-case-studies/_data/held.json)",
+     "value": "September 2026",
+     "unit": "text",
+     "source": "BYM client roster (Custom Plugin/bym-case-studies/ROSTER.md, clear-fork-dental/internal-notes.md); no result claimed",
+     "retrieved_on": "2026-11-10",
+     "first_party": true
+    }
+   ]
+  },
+  "offer": {
+   "included": true,
+   "reason": "fixed offer text",
+   "facts": [
+    {
+     "id": "offer.price",
+     "text": "$450 a month per location (US)",
+     "value": 450,
+     "unit": "USD",
+     "source": "brain.web_claims 29 (verified, approved_public); pricing.txt",
+     "retrieved_on": "2026-11-10",
+     "first_party": true
+    },
+    {
+     "id": "offer.notice",
+     "text": "7 days' written notice",
+     "value": 7,
+     "unit": "days",
+     "source": "pricing.txt",
+     "retrieved_on": "2026-11-10",
+     "source_url": "https://www.boostyourmaps.com/pricing.txt"
+    },
+    {
+     "id": "offer.posts",
+     "text": "6 posts a month",
+     "value": 6,
+     "unit": "posts",
+     "source": "/pricing",
+     "retrieved_on": "2026-11-10",
+     "source_url": "https://www.boostyourmaps.com/pricing"
+    },
+    {
+     "id": "offer.photos",
+     "text": "4 fresh photos a month",
+     "value": 4,
+     "unit": "photos",
+     "source": "/pricing",
+     "retrieved_on": "2026-11-10",
+     "source_url": "https://www.boostyourmaps.com/pricing"
+    },
+    {
+     "id": "offer.citations",
+     "text": "30 local map listings a month",
+     "value": 30,
+     "unit": "listings",
+     "source": "/pricing",
+     "retrieved_on": "2026-11-10",
+     "source_url": "https://www.boostyourmaps.com/pricing"
+    },
+    {
+     "id": "offer.timeline",
+     "text": "60 to 90 days before results begin (site-wide timeline claim; llms.txt, /pricing)",
+     "value": "60 to 90",
+     "unit": "days",
+     "source": "/pricing; CLAUDE.md copy rule",
+     "retrieved_on": "2026-11-10",
+     "source_url": "https://www.boostyourmaps.com/pricing"
+    },
+    {
+     "id": "offer.hours",
+     "text": "Free report by email within 24 hours",
+     "value": 24,
+     "unit": "hours",
+     "source": "/visibility-report",
+     "retrieved_on": "2026-11-10",
+     "source_url": "https://www.boostyourmaps.com/visibility-report"
+    },
+    {
+     "id": "offer.top3",
+     "text": "Three businesses shown on top of the map",
+     "value": "three",
+     "unit": "text",
+     "source": "Google local pack (site-wide copy)",
+     "retrieved_on": "2026-11-10",
+     "source_url": "https://www.boostyourmaps.com/"
+    }
+   ]
+  }
+ }
+}
