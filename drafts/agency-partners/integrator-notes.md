@@ -4,7 +4,7 @@
    approves and the merge deploys: the `live` update, a `published`-style `web_index_events` row is NOT needed
    (noindex, not in the sitemap) but the queue row still goes to `live` with `live_url`.
 2. Review record: `review-record.md`, after the critic pass and Mike's yes.
-3. Open the PR on branch `crm-int-w1` (or its successor) from the pushed branch. W2 merges after b21 and b23 are live.
+3. Branch `crm-w2-agency-partners`, based on main, independent of W1 (no W1 file is needed). W2 merges after b21 and b23 are live.
 4. No new environment variable and no new host. Needs the existing `CRM_URL`, and `GOOGLE_PLACES_API_KEY` for the
    portal's business search (without it the portal's run form shows a way to email the team).
 5. CRM endpoints used: `POST /api/partners/access` ({email, clientIp, userAgent}, always `{ok:true}`),

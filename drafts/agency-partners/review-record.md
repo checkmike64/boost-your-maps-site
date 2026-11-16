@@ -20,7 +20,7 @@ Gates: seo_audit 0 new findings (30 findings, all on HEAD already; none on /agen
 Cadence: n/a (noindex utility page, no index event)
 Repo checks: validate_site.py pass; check_local_pages.py PASS; check_partner_access, check_partner_report,
        check_footer, check_csp, check_signup_payload, check_crm_payload, check_agreement_payload,
-       check_tracking, check_review_link all pass
+       check_review_link all pass (check_tracking belongs to W1, not in this branch)
 ```
 
 ## Copy gate (anti-ai-writing)
