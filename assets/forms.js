@@ -20,6 +20,26 @@
     status.focus();
   }
 
+  // The page URL the CRM stores, plus where the lead came from (2026-11-11): landing = first page of the
+  // visit and ref = the site that sent the visitor (both from tracking.js), from = the page just before
+  // this form. Existing values in the URL win; nothing is added when storage is blocked.
+  function pageUrlWithSource() {
+    var url;
+    try { url = new URL(window.location.href); } catch (e) { return window.location.href; }
+    function add(key, value) {
+      if (value && !url.searchParams.has(key)) url.searchParams.set(key, String(value).slice(0, 200));
+    }
+    try {
+      add("landing", window.sessionStorage.getItem("bym_landing"));
+      add("ref", window.sessionStorage.getItem("bym_landing_ref"));
+    } catch (e) {}
+    try {
+      var prev = document.referrer ? new URL(document.referrer) : null;
+      if (prev && prev.hostname === url.hostname && prev.pathname !== url.pathname) add("from", prev.pathname);
+    } catch (e) {}
+    return url.toString();
+  }
+
   function formPayload(form) {
     var fields = {};
     var data = new FormData(form);
@@ -38,7 +58,7 @@
     return {
       form_type: form.dataset.formType,
       submitted_at: new Date().toISOString(),
-      page_url: window.location.href,
+      page_url: pageUrlWithSource(),
       fields: fields
     };
   }
