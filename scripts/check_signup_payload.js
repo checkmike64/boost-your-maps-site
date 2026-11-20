@@ -513,11 +513,49 @@ assert.deepEqual(
     bookingUrl: "https://crm.boostyourmaps.com/book/partner-call",
     contact: null,
     clients: [
-      { name: "Ruiz Pest Control", city: "Austin, TX", locations: 1, stage: "live", since: "2026-10-09", links: { deliverables: "https://docs.google.com/x", photos: null, dashboard: null } },
-      { name: "Odd", city: null, locations: null, stage: null, since: null, links: { deliverables: null, photos: null, dashboard: null } },
+      { name: "Ruiz Pest Control", city: "Austin, TX", locations: 1, stage: "live", since: "2026-10-09", links: { deliverables: "https://docs.google.com/x", photos: null, dashboard: null }, reports: [] },
+      { name: "Odd", city: null, locations: null, stage: null, since: null, links: { deliverables: null, photos: null, dashboard: null }, reports: [] },
     ],
+    requestedReports: [],
   }
 );
+
+// The portal's report links (b23): published months and the agency's own
+// requests, narrowed to a month, a state, a link and a day. Never a score.
+const shaped = shapePortal({
+  partnerName: "Keepers Digital Marketing",
+  clients: [
+    {
+      name: "Ruiz Pest Control",
+      reports: [
+        { month: "2026-10", url: "https://reports.example.test/r/abc", expiresAt: "2026-12-01T00:00:00Z", state: "link_published", score: 91 },
+        { month: "2026-09", url: "https://reports.example.test/r/old", expiresAt: "2026-10-01", state: "expired" },
+        { month: "2026-08", url: "javascript:alert(1)", state: "sent" },
+        { month: "Oct", url: "https://reports.example.test/r/x", state: "sent" },
+        { month: "2026-07", url: "https://reports.example.test/r/y", state: "draft" },
+        null,
+      ],
+    },
+  ],
+  requestedReports: [
+    { business: "Maple Dental", requestedAt: "2026-11-15T10:00:00Z", state: "ready", url: "https://reports.example.test/r/m", expiresAt: "2026-12-15", findings: "x" },
+    { business: "Oak Dental", requestedAt: "2026-11-15", state: "building", url: "https://reports.example.test/r/leak" },
+    { business: "Pine Dental", requestedAt: "2026-11-14", state: "unavailable" },
+    { business: "Elm Dental", state: "mystery" },
+  ],
+});
+assert.deepEqual(shaped.clients[0].reports, [
+  { month: "2026-10", state: "link_published", url: "https://reports.example.test/r/abc", expiresAt: "2026-12-01" },
+  { month: "2026-09", state: "expired", url: null, expiresAt: "2026-10-01" },
+  { month: "2026-08", state: "sent", url: null, expiresAt: null },
+]);
+assert.deepEqual(shaped.requestedReports, [
+  { business: "Maple Dental", requestedAt: "2026-11-15", state: "ready", url: "https://reports.example.test/r/m", expiresAt: "2026-12-15" },
+  { business: "Oak Dental", requestedAt: "2026-11-15", state: "building", url: null, expiresAt: null },
+  { business: "Pine Dental", requestedAt: "2026-11-14", state: "unavailable", url: null, expiresAt: null },
+]);
+assert.equal(JSON.stringify(shaped).includes("score"), false);
+assert.deepEqual(shapePortal(null).requestedReports, []);
 
 // The agency's primary contact: { name, email } with a real email, else null.
 const contactOf = (contact) => shapePortal({ partnerName: "Keepers Digital Marketing", contact }).contact;
@@ -715,7 +753,7 @@ const OK_SIGNUP = {
   // Portal: POST { k } -> GET /api/partners/portal/{k}.
   r = await run(portalFn, { body: { k: PORTAL_TOKEN }, crm: { status: 200, body: { ok: true, portal: { partnerName: "Keepers Digital Marketing", partnerSlug: "keepers-digital", reportingDashboardUrl: null, bookingUrl: null, contact: { name: "Sean Grabowski", email: "sean@keepers.example" }, clients: [] } } } });
   assert.equal(r.status, 200);
-  assert.deepEqual(r.body, { ok: true, portal: { partnerName: "Keepers Digital Marketing", partnerSlug: "keepers-digital", reportingDashboardUrl: null, bookingUrl: null, contact: { name: "Sean Grabowski", email: "sean@keepers.example" }, clients: [] } });
+  assert.deepEqual(r.body, { ok: true, portal: { partnerName: "Keepers Digital Marketing", partnerSlug: "keepers-digital", reportingDashboardUrl: null, bookingUrl: null, contact: { name: "Sean Grabowski", email: "sean@keepers.example" }, clients: [], requestedReports: [] } });
   assert.equal(r.call.url, `${CRM_HOST}/api/partners/portal/${PORTAL_TOKEN}`);
   assert.equal(r.call.init.method, "GET");
   r = await run(portalFn, { body: { k: "short" } });
