@@ -14,7 +14,7 @@
 // agreement has its own error code (agreement_unavailable), log label and
 // timeouts.
 
-const { crmUrl, crmConfigured, text, cut, clientIpFrom, userAgentFrom } = require("./_crm");
+const { crmUrl, crmConfigured, text, cut, clientIpFrom, userAgentFrom, attributionFrom } = require("./_crm");
 
 const TIMEOUT_MS = 8000;
 // Signing makes the PDF and the Stripe checkout session, so it gets longer.
@@ -97,10 +97,14 @@ function signedName(value) {
 
 // POST {CRM}/api/agreements/{token}/sign, from the body the page posts
 // (assets/agreement.js) and the request headers. The sign form sends
-// { t, legal_name, signatory_name, consent }; an agreement that is already
-// signed only needs the way to pay, so the page sends { t } alone and the CRM
-// gets {}. Returns { payload } or { error } naming the field as the CRM does.
-function buildSignPayload(body, headers) {
+// { t, legal_name, signatory_name, consent, attribution }; an agreement that
+// is already signed only needs the way to pay, so the page sends { t } alone
+// and the CRM gets {}. Returns { payload } or { error } naming the field as
+// the CRM does. The attribution (where the signer's browser first came from,
+// assets/tracking.js) goes with a signature only, and only when it is well
+// formed; a signature is never refused over it. `now` is the time the first
+// touch is checked against (the checks set it; the functions do not).
+function buildSignPayload(body, headers, now = Date.now()) {
   if (!body) return { error: fail("invalid_input") };
   const sent = ["legal_name", "signatory_name", "consent"].some((key) => body[key] !== undefined && body[key] !== null);
   if (!sent) return { payload: {} };
@@ -111,11 +115,13 @@ function buildSignPayload(body, headers) {
   if (!signatoryName) return { error: fail("invalid_input", "signatoryName") };
   if (body.consent !== true) return { error: fail("invalid_input", "consent") };
 
+  const attribution = attributionFrom(body.attribution, now);
   return {
     payload: {
       legalName,
       signatoryName,
       consent: true,
+      ...(attribution ? { attribution } : {}),
       clientIp: clientIpFrom(headers || {}),
       userAgent: userAgentFrom(headers || {}),
     },
@@ -221,7 +227,21 @@ function shapeAgreement(agreement) {
 // One call to the CRM. Resolves { status, data } and never throws. `op` names
 // the call in the logs ("load", "view", "sign"); the path, which holds the
 // token, is never logged.
-async function agreementCall(op, method, path, { body, clientIp, timeoutMs = TIMEOUT_MS } = {}) {
+//
+// Attribution must never cost a signature. When the CRM answers 400 to a body
+// that carried `attribution`, the call is made once more without it, and that
+// second answer is the one used (as api/_signup.js does for the signup start).
+async function agreementCall(op, method, path, options = {}) {
+  const first = await agreementCallOnce(op, method, path, options);
+  const sent = options.body;
+  if (first.status !== 400 || !sent || !("attribution" in sent)) return first;
+  const body = { ...sent };
+  delete body.attribution;
+  console.error("BYM agreement", op, "sent again without attribution");
+  return agreementCallOnce(op, method, path, { ...options, body });
+}
+
+async function agreementCallOnce(op, method, path, { body, clientIp, timeoutMs = TIMEOUT_MS } = {}) {
   try {
     const response = await fetch(`${crmUrl()}${path}`, {
       method,

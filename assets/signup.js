@@ -10,6 +10,9 @@
   var TOKEN = /^[0-9a-f]{64}$/;
   var TEAM_EMAIL = "team@boostyourmaps.com";
   var TIMEOUT_MS = 15000;
+  var FIRST_TOUCH_MS = 90 * 24 * 60 * 60 * 1000;
+  // A checkout this browser started counts toward its purchase event for 7 days.
+  var CHECKOUT_MS = 7 * 24 * 60 * 60 * 1000;
 
   window.dataLayer = window.dataLayer || [];
 
@@ -45,6 +48,30 @@
 
   function isHttpUrl(value) {
     return typeof value === "string" && /^https?:\/\//i.test(value);
+  }
+
+  // The first-touch attribution tracking.js keeps for 90 days: where this
+  // browser first came from. It goes along so a paid signup keeps its source.
+  // null when there is none, it has run out or is dated in the future, or
+  // storage is blocked; the page works the same.
+  function firstTouch() {
+    try {
+      var saved = JSON.parse(window.localStorage.getItem("bym_first_touch") || "null");
+      var age = saved && typeof saved === "object" ? Date.now() - Date.parse(saved.first_seen_at) : NaN;
+      return age >= 0 && age < FIRST_TOUCH_MS ? saved : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // This browser is sending its buyer to Stripe: remembered, as the time and
+  // nothing else, so the purchase event is pushed here and not in another
+  // browser that opens the welcome link later. Without storage there is no
+  // purchase event.
+  function markCheckoutStarted() {
+    try {
+      window.localStorage.setItem("bym_checkout_started", String(Date.now()));
+    } catch (e) { /* no purchase event then */ }
   }
 
   // Puts a message into an element, turning the team address into a link.
@@ -315,10 +342,12 @@
         locations: Number(select.value) || 1,
         // Never the hash: on this page it can hold the portal key.
         page_url: window.location.href.split("#")[0],
+        attribution: firstTouch(),
         hp_field_2026: value(form, "hp_field_2026")
       });
 
       if (result.status === 200 && result.data.ok === true && isHttpUrl(result.data.checkoutUrl)) {
+        markCheckoutStarted();
         pushEvent({ event: "begin_checkout", signup_plan: plan, quantity: Number(select.value) || 1 });
         window.location.assign(result.data.checkoutUrl);
         return;
@@ -484,6 +513,48 @@
     function track(data) {
       if (!preview) pushEvent(data);
     }
+
+    // sha256 of the token, as 64 hex characters: what analytics gets instead
+    // of the token.
+    async function tokenHash() {
+      var bytes = new Uint8Array(await window.crypto.subtle.digest("SHA-256", new TextEncoder().encode(token)));
+      var hex = "";
+      for (var i = 0; i < bytes.length; i++) hex += ("0" + bytes[i].toString(16)).slice(-2);
+      return hex;
+    }
+
+    // One purchase event per signup, in the browser that started the checkout,
+    // the first time it sees the signup paid (while it waits here, or on a
+    // later visit). It is for the funnels in Google Analytics; the CRM's own
+    // server-side conversion stays the one the ad platforms count. Another
+    // browser that opens the same welcome link (the welcome email on a phone,
+    // the team checking a client's page) started no checkout, has no marker,
+    // and pushes nothing. The marker is good for 7 days and is used up by the
+    // push. The amount is the checkout total from the CRM, and without one
+    // nothing is pushed. A localStorage key made from the start of the hash
+    // remembers the push, so a reload never repeats it. No crypto.subtle or
+    // no storage: no event.
+    async function trackPurchase() {
+      var paid = signup;
+      if (preview || !paid || !paid.paid || !paid.amountCents) return;
+      try {
+        var age = Date.now() - Number(window.localStorage.getItem("bym_checkout_started") || NaN);
+        if (!(age >= 0 && age < CHECKOUT_MS)) return;
+        var id = await tokenHash();
+        var key = "bym_purchase_" + id.slice(0, 16);
+        if (window.localStorage.getItem(key)) return;
+        window.localStorage.setItem(key, "1");
+        window.localStorage.removeItem("bym_checkout_started");
+        pushEvent({
+          event: "purchase",
+          transaction_id: id,
+          value: paid.amountCents / 100,
+          currency: "USD",
+          items: [{ item_id: paid.plan, quantity: paid.quantity }]
+        });
+      } catch (e) { /* nothing pushed */ }
+    }
+
     var pollDeadline = 0;
     var pollTimer = null;
 
@@ -524,7 +595,7 @@
       loading.hidden = true;
       if (result.status === 200 && result.data.ok === true && result.data.signup) {
         signup = result.data.signup;
-        if (!signup.paid) startPolling();
+        if (signup.paid) trackPurchase(); else startPolling();
         render();
       } else {
         problemFor(result);
@@ -549,6 +620,7 @@
         signup = result.data.signup;
         if (signup.paid) {
           pushEvent({ event: "signup_step", signup_step: "payment_received", signup_plan: signup.plan });
+          trackPurchase();
           render();
           var accessTitle = root.querySelector('[data-step="access"] .su-step-title');
           if (accessTitle) { accessTitle.setAttribute("tabindex", "-1"); accessTitle.focus(); }

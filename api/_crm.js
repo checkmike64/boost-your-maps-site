@@ -94,6 +94,107 @@ function utmFrom(url) {
   return utm;
 }
 
+// First-touch attribution: where the visitor's browser first came from.
+// assets/tracking.js keeps it in the browser for 90 days, and the signup start
+// and the agreement signature send it along. The CRM takes these keys only,
+// each a string of at most 500 characters, in a 4,096-byte column.
+const CAMPAIGN_PARAMS = [...UTM_KEYS, "gclid", "gbraid", "wbraid", "fbclid"];
+const ATTRIBUTION_KEYS = ["landing", "referrer", ...CAMPAIGN_PARAMS, "first_seen_at"];
+const ATTRIBUTION_VALUE_MAX = 500;
+// The whole object as JSON, in bytes: well inside the CRM's column.
+const ATTRIBUTION_BYTES_MAX = 3000;
+// Control characters, the line and paragraph separators, and half an emoji:
+// the CRM's database refuses some of them.
+const UNSAFE_TEXT_PATTERN = /[\u0000-\u001F\u007F-\u009F\u2028\u2029]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/;
+// The shape of the welcome, agreement and portal tokens, anywhere in a value.
+const KEY_SHAPED_PATTERN = /[0-9a-f]{64}/i;
+// A time as the browser writes it: "2026-11-15T18:00:00.000Z".
+const FIRST_SEEN_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
+// The browser keeps a first touch for 90 days. A day either way is allowed for
+// a clock that is off.
+const DAY_MS = 24 * 60 * 60 * 1000;
+const FIRST_SEEN_MAX_AGE_MS = 91 * DAY_MS;
+// How a spreadsheet formula starts. A value like that is left out, so an
+// export of the CRM opened in a spreadsheet never runs one.
+const FORMULA_PATTERN = /^[=+\-@]/;
+// Where the site is served: the live site, this project's Vercel previews and
+// a local run (the same origins api/places.js takes requests from).
+const SITE_ORIGINS = [
+  /^https:\/\/(www\.)?boostyourmaps\.com$/,
+  /^https:\/\/boostyourmaps-[a-z0-9-]+-mike-8166s-projects\.vercel\.app$/,
+  /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/,
+];
+
+// The landing address as the CRM gets it, or null when it is not one of the
+// site's own pages. Only the campaign values stay in its query (the five
+// utm_* and the four click ids), so whatever else a link carried, such as an
+// email or a phone number, is never stored.
+function landingFrom(value) {
+  let url;
+  try {
+    url = new URL(value);
+  } catch {
+    return null;
+  }
+  if (value.includes("#") || url.username || url.password) return null;
+  if (!SITE_ORIGINS.some((origin) => origin.test(url.origin))) return null;
+  const query = new URLSearchParams();
+  for (const [name, item] of url.searchParams) {
+    if (CAMPAIGN_PARAMS.includes(name)) query.append(name, item);
+  }
+  const landing = url.origin + url.pathname + (query.toString() ? `?${query}` : "");
+  return landing.length <= ATTRIBUTION_VALUE_MAX ? landing : null;
+}
+
+// The site that sent the visitor: an http(s) address, or a phone app's
+// (android-app://...), as origin and path only. A query or a fragment can
+// hold someone else's keys, so a referrer with either is not taken.
+function isReferrer(value) {
+  try {
+    const url = new URL(value);
+    return ["https:", "http:", "android-app:"].includes(url.protocol) && !url.username && !url.password && !value.includes("?") && !value.includes("#");
+  } catch {
+    return false;
+  }
+}
+
+// The `attribution` object a page posted, as the CRM receives it, or null for
+// none. Attribution must never be why the CRM refuses a signup or a signature,
+// and must never carry a private link, so anything odd drops the whole object:
+// not a plain object; a value under a key the CRM knows that is not a string,
+// is over 500 characters, holds a control character or half an emoji, or is
+// shaped like a key (64 hex characters in a row); a landing that is not a page
+// of this site, has a login in it or still has its fragment; a referrer that
+// is not a plain address; a first-seen time in another shape, over 90 days
+// old or in the future (a day of slack either way); an object too large for
+// the CRM's column. Left out, with the rest still sent: keys the CRM does not
+// know, blank values, values that start like a spreadsheet formula, and
+// everything in the landing's query but the campaign values.
+function attributionFrom(value, now = Date.now()) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const attribution = {};
+  for (const key of ATTRIBUTION_KEYS) {
+    if (!Object.prototype.hasOwnProperty.call(value, key)) continue;
+    if (typeof value[key] !== "string") return null;
+    const typed = value[key].trim();
+    if (!typed) continue;
+    if (typed.length > ATTRIBUTION_VALUE_MAX || UNSAFE_TEXT_PATTERN.test(typed) || KEY_SHAPED_PATTERN.test(typed)) return null;
+    if (FORMULA_PATTERN.test(typed)) continue;
+    attribution[key] = typed;
+  }
+  if (attribution.landing) {
+    attribution.landing = landingFrom(attribution.landing);
+    if (!attribution.landing) return null;
+  }
+  if (attribution.referrer && !isReferrer(attribution.referrer)) return null;
+  if (attribution.first_seen_at) {
+    const seen = FIRST_SEEN_PATTERN.test(attribution.first_seen_at) ? Date.parse(attribution.first_seen_at) : NaN;
+    if (Number.isNaN(seen) || now - seen > FIRST_SEEN_MAX_AGE_MS || seen - now > DAY_MS) return null;
+  }
+  if (!Object.keys(attribution).length) return null;
+  return Buffer.byteLength(JSON.stringify(attribution), "utf8") <= ATTRIBUTION_BYTES_MAX ? attribution : null;
+}
+
 function answersFrom(fields) {
   const answers = {};
   for (const [key, max] of Object.entries(ANSWER_LIMITS)) {
@@ -192,4 +293,6 @@ module.exports = {
   utmFrom,
   clientIpFrom,
   userAgentFrom,
+  // Shared by the signup start and the agreement signature.
+  attributionFrom,
 };

@@ -86,6 +86,33 @@ analytics loads and only travel inside POST bodies. `node scripts/check_signup_p
 `node scripts/check_agreement_payload.js` check what the CRM receives without touching the
 network; CI runs both.
 
+**Where a paid signup came from.** `assets/tracking.js` keeps a first touch in the browser
+(`localStorage` key `bym_first_touch`, for 90 days): the landing address, the site that sent
+the visitor, the `utm_*` values, the ad click ids (`gclid`, `gbraid`, `wbraid`, `fbclid`) and
+the time. It is written on the first page view and not overwritten. The landing has no hash,
+and its query keeps those campaign values and nothing else, so a welcome, agreement or portal
+key, or an email in a link, is never kept. The signup start and the agreement signature send
+it as `attribution`; the `utm` and `sourceUrl` of the signup page itself go as before.
+`attributionFrom` in `api/_crm.js` passes it to the CRM only when it is well formed: known
+keys, strings up to 500 characters, 3,000 bytes in all, a landing on this site, a referrer as
+origin and path, a first-seen time within 90 days. Anything else drops it whole, and the
+browser keeps nothing the function would drop. Attribution can never be why a signup fails:
+when the CRM answers 400 to a body that carried it, the site's function asks once more
+without it and uses that answer.
+
+**The purchase event.** The welcome page pushes one `purchase` event to Tag Manager the first
+time it sees the signup paid, in the browser that started the checkout. That browser is
+marked at `begin_checkout` and when the agreement page sends its signer to Stripe
+(`localStorage` key `bym_checkout_started`, a time and nothing else, good for 7 days and used
+up by the push). Another browser that opens the same welcome link has no marker and pushes
+nothing. `transaction_id` is the SHA-256 of the welcome token (never the token), and `value`
+is the checkout total the CRM sends as `amountCents`; without an amount nothing is pushed. A
+second key made from the start of that hash stops a reload from pushing twice. Nothing goes
+to the Meta pixel: the CRM's server-side conversion is the one ad platforms count.
+
+`node scripts/check_tracking.js` runs the three page scripts against a stand-in browser and
+follows a first touch to the body the CRM receives; CI runs it.
+
 ## Deploy (Vercel)
 
 The canonical repository is `https://github.com/checkmike64/boost-your-maps-site`.

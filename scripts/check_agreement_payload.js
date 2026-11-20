@@ -60,6 +60,76 @@ assert.equal(buildSignPayload(SIGN_BODY, { "x-forwarded-for": "not an ip" }).pay
 assert.deepEqual(buildSignPayload({ t: TOKEN }, HEADERS), { payload: {} });
 assert.deepEqual(buildSignPayload({ t: TOKEN, legal_name: null, signatory_name: null, consent: null }, HEADERS), { payload: {} });
 
+// ---- First-touch attribution with the signature ------------------------------
+
+// Shaped as assets/tracking.js keeps it and assets/agreement.js posts it with
+// the sign form: where the signer's browser first came from. The rules are the
+// signup start's (api/_crm.js; scripts/check_signup_payload.js has every case).
+const DAY = 24 * 60 * 60 * 1000;
+const ATTRIBUTION = {
+  landing: "https://www.boostyourmaps.com/pricing?utm_source=newsletter&utm_medium=email&fbclid=IwAR0-first_touch",
+  referrer: "https://mail.example.com/",
+  utm_source: "newsletter",
+  utm_medium: "email",
+  fbclid: "IwAR0-first_touch",
+  first_seen_at: new Date(Date.now() - 26 * DAY).toISOString(),
+};
+const NO_ATTRIBUTION = buildSignPayload(SIGN_BODY, HEADERS).payload;
+const signWith = (attribution) => buildSignPayload({ ...SIGN_BODY, attribution }, HEADERS);
+
+// Present: the CRM gets it as `attribution`, beside the signature.
+assert.deepEqual(signWith(ATTRIBUTION).payload, { ...NO_ATTRIBUTION, attribution: ATTRIBUTION });
+// Absent, or nothing in it: the payload is exactly what it was, with no key.
+for (const none of [undefined, null, {}, { utm_source: " " }]) {
+  assert.deepEqual(signWith(none).payload, NO_ATTRIBUTION, `attribution ${JSON.stringify(none)}`);
+  assert.equal("attribution" in signWith(none).payload, false);
+}
+// Unknown keys are left out; the keys the CRM knows still go.
+assert.deepEqual(signWith({ ...ATTRIBUTION, msclkid: "abc", signer: { ip: "203.0.113.9" } }).payload.attribution, ATTRIBUTION);
+assert.deepEqual(signWith({ msclkid: "abc" }).payload, NO_ATTRIBUTION);
+// Malformed or oversized: dropped whole, and the signature still goes. A
+// signature is never refused over its attribution.
+for (const [what, attribution] of Object.entries({
+  "a string": "utm_source=newsletter",
+  "a list": [ATTRIBUTION],
+  "a number as a value": { ...ATTRIBUTION, utm_source: 7 },
+  "null as a value": { ...ATTRIBUTION, fbclid: null },
+  "a control character": { ...ATTRIBUTION, utm_medium: "e\u0007mail" },
+  "a landing that is not a web address": { ...ATTRIBUTION, landing: "javascript:alert(1)" },
+  "a landing with its fragment": { ...ATTRIBUTION, landing: `https://www.boostyourmaps.com/agreement#t=${TOKEN}` },
+  "the agreement link as the landing": { ...ATTRIBUTION, landing: `https://www.boostyourmaps.com/agreement?t=${TOKEN}` },
+  "a first-seen time in another shape": { ...ATTRIBUTION, first_seen_at: "October 20, 2026" },
+  "a first touch from last year": { ...ATTRIBUTION, first_seen_at: new Date(Date.now() - 400 * DAY).toISOString() },
+  "a first touch from next week": { ...ATTRIBUTION, first_seen_at: new Date(Date.now() + 7 * DAY).toISOString() },
+  "a landing on another site": { ...ATTRIBUTION, landing: "https://example.com/pricing" },
+  "a landing with a login in it": { ...ATTRIBUTION, landing: "https://ana:secret@www.boostyourmaps.com/pricing" },
+  "a referrer with a query": { ...ATTRIBUTION, referrer: "https://mail.example.com/open?session=abc" },
+  "a value of 501 characters": { ...ATTRIBUTION, utm_source: "z".repeat(501) },
+  "an object over the column size": Object.fromEntries(["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"].map((key) => [key, "é".repeat(500)])),
+})) {
+  const built = signWith(attribution);
+  assert.equal(built.error, undefined, `the signature is never refused over ${what}`);
+  assert.deepEqual(built.payload, NO_ATTRIBUTION, `dropped whole: ${what}`);
+}
+// Left out, with the rest still sent: what is not a campaign value in the
+// landing's query, and a value that starts like a spreadsheet formula.
+assert.deepEqual(
+  signWith({ ...ATTRIBUTION, landing: "https://www.boostyourmaps.com/pricing?email=ana%40ruizpest.com&utm_source=newsletter&phone=5125550100", utm_medium: "=1+1" }).payload.attribution,
+  { landing: "https://www.boostyourmaps.com/pricing?utm_source=newsletter", referrer: ATTRIBUTION.referrer, utm_source: "newsletter", fbclid: ATTRIBUTION.fbclid, first_seen_at: ATTRIBUTION.first_seen_at }
+);
+// The first-seen time is checked against the time given (the third argument).
+const AT = Date.parse("2026-11-15T18:00:00.000Z");
+const seenAt = (ms) => buildSignPayload({ ...SIGN_BODY, attribution: { ...ATTRIBUTION, first_seen_at: new Date(ms).toISOString() } }, HEADERS, AT).payload.attribution;
+assert.ok(seenAt(AT - 91 * DAY));
+assert.equal(seenAt(AT - 91 * DAY - 1), undefined);
+assert.ok(seenAt(AT + DAY));
+assert.equal(seenAt(AT + DAY + 1), undefined);
+// The signature's own checks are unchanged with attribution on board.
+assert.equal(buildSignPayload({ ...SIGN_BODY, legal_name: "", attribution: ATTRIBUTION }, {}).error.field, "legalName");
+assert.equal(buildSignPayload({ ...SIGN_BODY, consent: false, attribution: ATTRIBUTION }, {}).error.field, "consent");
+// It goes with a signature only: asking for the way to pay still sends {}.
+assert.deepEqual(buildSignPayload({ t: TOKEN, attribution: ATTRIBUTION }, HEADERS), { payload: {} });
+
 // Names: trimmed, 200 characters at most, never cut, no control characters.
 assert.equal(signedName("  Ana Ruiz  "), "Ana Ruiz");
 assert.equal(signedName("José Núñez-O'Brien"), "José Núñez-O'Brien");
@@ -272,11 +342,14 @@ for (const bad of [
 const CRM_HOST = "https://crm.example.test";
 let reply = null;
 let calls = [];
+// `reply` is the CRM's answer, or a list of answers given out in order (the
+// last one repeats).
 global.fetch = async (url, init) => {
   calls.push({ url: String(url), init });
-  if (reply instanceof Error) throw reply;
-  const body = typeof reply.body === "string" ? reply.body : JSON.stringify(reply.body);
-  return new Response(body, { status: reply.status });
+  const answer = Array.isArray(reply) ? (reply.length > 1 ? reply.shift() : reply[0]) : reply;
+  if (answer instanceof Error) throw answer;
+  const body = typeof answer.body === "string" ? answer.body : JSON.stringify(answer.body);
+  return new Response(body, { status: answer.status });
 };
 // Records the timeout each call asks for.
 const timeouts = [];
@@ -290,7 +363,7 @@ const allLogs = [];
 async function run(fn, { env = { CRM_URL: `${CRM_HOST}/` }, crm = null, method = "POST", body = { t: TOKEN }, headers = HEADERS } = {}) {
   delete process.env.CRM_URL;
   Object.assign(process.env, env);
-  reply = crm;
+  reply = Array.isArray(crm) ? [...crm] : crm;
   calls = [];
   timeouts.length = 0;
   const res = { statusCode: 0, body: null, headers: {} };
@@ -304,7 +377,7 @@ async function run(fn, { env = { CRM_URL: `${CRM_HOST}/` }, crm = null, method =
   } finally {
     console.error = consoleError;
   }
-  return { status: res.statusCode, body: res.body, cache: res.headers["Cache-Control"], allow: res.headers.Allow, call: calls[0], sent: calls.length, timeout: timeouts[0] };
+  return { status: res.statusCode, body: res.body, cache: res.headers["Cache-Control"], allow: res.headers.Allow, call: calls[0], calls, sent: calls.length, timeout: timeouts[0], timeouts: [...timeouts] };
 }
 
 const UNAVAILABLE = { ok: false, error: "agreement_unavailable", field: null };
@@ -414,6 +487,61 @@ const NOT_FOUND = { ok: false, error: "agreement_not_found", field: null };
   r = await run(signFn, { body: { t: TOKEN }, crm: { status: 200, body: { ok: true, checkoutUrl: CHECKOUT } } });
   assert.equal(r.status, 200);
   assert.equal(r.call.init.body, "{}");
+  // With attribution: the CRM gets it in the same body, without the keys it
+  // does not know. A malformed one is left out and the signature goes through.
+  r = await run(signFn, { body: { ...SIGN_BODY, attribution: { ...ATTRIBUTION, msclkid: "abc" } }, crm: { status: 200, body: { ok: true, checkoutUrl: CHECKOUT } } });
+  assert.equal(r.status, 200);
+  assert.deepEqual(r.body, { ok: true, checkoutUrl: CHECKOUT });
+  assert.deepEqual(JSON.parse(r.call.init.body), { ...NO_ATTRIBUTION, attribution: ATTRIBUTION });
+  for (const attribution of [null, "utm_source=newsletter", { ...ATTRIBUTION, landing: `https://www.boostyourmaps.com/agreement?t=${TOKEN}` }, { ...ATTRIBUTION, utm_source: "z".repeat(501) }]) {
+    r = await run(signFn, { body: { ...SIGN_BODY, attribution }, crm: { status: 200, body: { ok: true, checkoutUrl: CHECKOUT } } });
+    assert.equal(r.status, 200);
+    assert.deepEqual(JSON.parse(r.call.init.body), NO_ATTRIBUTION);
+    assert.ok(!r.call.init.body.includes(TOKEN));
+  }
+  r = await run(signFn, { body: { t: TOKEN, attribution: ATTRIBUTION }, crm: { status: 200, body: { ok: true, checkoutUrl: CHECKOUT } } });
+  assert.equal(r.call.init.body, "{}");
+  // A signature never breaks on attribution. When the CRM answers 400 to a
+  // body that carried it, the site asks once more without it, and the signer
+  // gets the checkout link.
+  const OK_SIGNED = { status: 200, body: { ok: true, checkoutUrl: CHECKOUT } };
+  const REFUSED = { status: 400, body: { ok: false, error: "invalid_input", field: null } };
+  r = await run(signFn, { body: { ...SIGN_BODY, attribution: ATTRIBUTION }, crm: [REFUSED, OK_SIGNED] });
+  assert.equal(r.status, 200);
+  assert.deepEqual(r.body, { ok: true, checkoutUrl: CHECKOUT });
+  assert.equal(r.sent, 2);
+  assert.deepEqual(JSON.parse(r.calls[0].init.body), { ...NO_ATTRIBUTION, attribution: ATTRIBUTION });
+  assert.deepEqual(JSON.parse(r.calls[1].init.body), NO_ATTRIBUTION);
+  assert.deepEqual(r.timeouts, [10000, 10000]);
+  for (const call of r.calls) {
+    assert.equal(call.url, `${CRM_HOST}/api/agreements/${TOKEN}/sign`);
+    assert.equal(call.init.method, "POST");
+    assert.equal(call.init.headers["X-Forwarded-For"], "198.51.100.23");
+  }
+  // A 400 that stays is the form's own: it goes back to the page as before.
+  // The second answer is the one used, and there is never a third call.
+  const BAD_NAME = { status: 400, body: { ok: false, error: "invalid_input", field: "legalName" } };
+  r = await run(signFn, { body: { ...SIGN_BODY, attribution: ATTRIBUTION }, crm: [BAD_NAME, BAD_NAME, OK_SIGNED] });
+  assert.equal(r.status, 400);
+  assert.deepEqual(r.body, { ok: false, error: "invalid_input", field: "legalName" });
+  assert.equal(r.sent, 2);
+  // Only a 400, and only when attribution went along: nothing else is sent twice.
+  for (const crm of [
+    { status: 409, body: { ok: false, error: "agreement_expired", field: null } },
+    { status: 429, body: { ok: false, error: "rate_limited", field: null } },
+    { status: 503, body: { ok: false, error: "agreement_unavailable", field: null } },
+    new TypeError("fetch failed"),
+  ]) {
+    r = await run(signFn, { body: { ...SIGN_BODY, attribution: ATTRIBUTION }, crm: [crm, OK_SIGNED] });
+    assert.notEqual(r.status, 200);
+    assert.equal(r.sent, 1);
+  }
+  r = await run(signFn, { body: SIGN_BODY, crm: [BAD_NAME, OK_SIGNED] });
+  assert.equal(r.status, 400);
+  assert.equal(r.sent, 1);
+  r = await run(signFn, { body: { t: TOKEN, attribution: ATTRIBUTION }, crm: [BAD_NAME, OK_SIGNED] });
+  assert.equal(r.status, 400);
+  assert.equal(r.sent, 1);
   // Site-side refusals: 400 naming the field, nothing sent.
   for (const [body, field] of [
     [{ ...SIGN_BODY, legal_name: " " }, "legalName"],
@@ -445,7 +573,7 @@ const NOT_FOUND = { ok: false, error: "agreement_not_found", field: null };
 
   // Nothing submitted, no token, IP, email or browser ever reaches the logs.
   assert.ok(allLogs.length > 0, "failures should be logged");
-  const secrets = [TOKEN, "Ana", "Ruiz", "ana@ruizpest.com", "198.51.100.23", "iPhone", "cs_test", "cus_secret"];
+  const secrets = [TOKEN, "Ana", "Ruiz", "ana@ruizpest.com", "198.51.100.23", "iPhone", "cs_test", "cus_secret", "newsletter", "first_touch", "mail.example.com"];
   for (const line of allLogs) {
     for (const secret of secrets) assert.ok(!line.includes(secret), `log line leaks ${secret}: ${line}`);
   }
