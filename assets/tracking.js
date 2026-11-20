@@ -60,6 +60,104 @@
     }
   } catch (e) {}
 
+  // First touch (2026-11-15): where this browser first came from, kept in localStorage for 90 days and sent
+  // with a signup start and an agreement signature (signup.js, agreement.js), so a paid signup keeps its
+  // source. Written on the first page view and never overwritten while it is under 90 days old. It holds the
+  // landing address, the site that sent the visitor, the utm_* values, the ad click ids and the time: nothing
+  // the person typed. The landing's query keeps the campaign values and nothing else, so a private link's
+  // t, k, id, m or crm_vid, or an email in a link, never gets in; it has no hash, and no value shaped like
+  // a key (64 hex characters in a row) is kept. The site's functions pass a first touch on to the CRM only
+  // when it is well formed (api/_crm.js), so nothing is kept here that they would drop. With storage blocked
+  // nothing is kept and every form still works.
+  var FIRST_TOUCH_KEY = "bym_first_touch";
+  var FIRST_TOUCH_MS = 90 * 24 * 60 * 60 * 1000;
+  var FIRST_TOUCH_MAX = 500; // the CRM keeps 500 characters per value
+  var FIRST_TOUCH_BYTES = 3000; // and the site's functions pass on 3,000 bytes of JSON in all
+  var CAMPAIGN_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content", "gclid", "gbraid", "wbraid", "fbclid"];
+  var KEY_SHAPED = /[0-9a-f]{64}/i;
+
+  // The saved first touch while it is under 90 days old; null when there is none, it cannot be read, or
+  // it is dated in the future (a clock that was wrong).
+  function savedFirstTouch() {
+    try {
+      var saved = JSON.parse(window.localStorage.getItem(FIRST_TOUCH_KEY) || "null");
+      var age = saved && typeof saved === "object" ? Date.now() - Date.parse(saved.first_seen_at) : NaN;
+      return age >= 0 && age < FIRST_TOUCH_MS ? saved : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // One value to keep: trimmed, without control characters. "" when it is too long, shaped like a key, or
+  // starts the way a spreadsheet formula does (= + - @).
+  function touchValue(value) {
+    var kept = String(value || "").replace(/[\u0000-\u001F\u007F-\u009F\u2028\u2029]/g, "").trim();
+    return kept.length > FIRST_TOUCH_MAX || KEY_SHAPED.test(kept) || /^[=+\-@]/.test(kept) ? "" : kept;
+  }
+
+  // This page's address with only the campaign values in its query: no hash, no login, nothing else a
+  // link carried. When that is still too long it goes without its query; the values are kept on their own.
+  function landingAddress() {
+    var url = new URL(window.location.href);
+    var query = new URLSearchParams();
+    url.searchParams.forEach(function (value, name) {
+      if (CAMPAIGN_KEYS.indexOf(name) !== -1 && !KEY_SHAPED.test(value)) query.append(name, value);
+    });
+    var page = url.origin + url.pathname;
+    var landing = query.toString() ? page + "?" + query.toString() : page;
+    return landing.length > FIRST_TOUCH_MAX ? page : landing;
+  }
+
+  // The site that sent the visitor: its address without query or hash, which can hold someone else's
+  // keys. This site itself is not a source.
+  function referrerAddress() {
+    try {
+      var ref = new URL(document.referrer);
+      if (!/^(https?|android-app):$/.test(ref.protocol) || ref.hostname === window.location.hostname) return "";
+      return ref.protocol + "//" + ref.host + ref.pathname;
+    } catch (e) {
+      return "";
+    }
+  }
+
+  // The size of a text in UTF-8 bytes.
+  function byteLength(text) {
+    return encodeURIComponent(text).replace(/%[0-9A-F]{2}/g, "x").length;
+  }
+
+  // Makes the record fit in 3,000 bytes of JSON. The landing goes without its query first; then the
+  // largest campaign value is left out, one at a time. A value is kept whole or not at all: half a click
+  // id or half a campaign name would be wrong data.
+  function fitFirstTouch(touch) {
+    var tooBig = function () { return byteLength(JSON.stringify(touch)) > FIRST_TOUCH_BYTES; };
+    if (tooBig() && touch.landing) touch.landing = touch.landing.split("?")[0];
+    while (tooBig()) {
+      var largest = "";
+      CAMPAIGN_KEYS.forEach(function (key) {
+        if (touch[key] && (!largest || byteLength(touch[key]) > byteLength(touch[largest]))) largest = key;
+      });
+      if (!largest) break;
+      delete touch[largest];
+    }
+    return touch;
+  }
+
+  try {
+    if (!savedFirstTouch()) {
+      var touch = {};
+      var query = new URL(window.location.href).searchParams;
+      var keep = function (key, value) {
+        value = touchValue(value);
+        if (value) touch[key] = value;
+      };
+      keep("landing", landingAddress());
+      keep("referrer", referrerAddress());
+      CAMPAIGN_KEYS.forEach(function (key) { keep(key, query.get(key)); });
+      touch.first_seen_at = new Date().toISOString();
+      window.localStorage.setItem(FIRST_TOUCH_KEY, JSON.stringify(fitFirstTouch(touch)));
+    }
+  } catch (e) {}
+
   function ctaLocation(el) {
     if (el.closest("nav")) return "nav";
     if (el.closest(".page-hero")) return "hero";

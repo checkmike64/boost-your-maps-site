@@ -16,6 +16,7 @@ const {
   pageUrlFrom,
   sourceUrlFrom,
   utmFrom,
+  attributionFrom,
   clientIpFrom,
   userAgentFrom,
 } = require("./_crm");
@@ -29,6 +30,8 @@ const REPORT_LINK_STATES = ["link_published", "sent", "expired"];
 const REQUESTED_STATES = ["building", "being_reviewed", "ready", "declined", "expired", "unavailable"];
 const STAGES = ["waiting_for_payment", "setting_up", "live", "payment_issue", "paused", "canceled"];
 const MAX_LOCATIONS = 20;
+// A checkout total in cents is a whole number up to a million dollars.
+const MAX_AMOUNT_CENTS = 100000000;
 
 // Signup tokens (the welcome link) and partner portal tokens are 64
 // lowercase hex characters.
@@ -107,8 +110,9 @@ function invalid(field) {
 
 // POST {CRM}/api/signup, from the body the signup pages post (assets/signup.js)
 // and the request headers. Returns { payload } or { error } with the field the
-// page should point at (named as the CRM names it).
-function buildStartPayload(body, headers) {
+// page should point at (named as the CRM names it). `now` is the time the
+// first touch is checked against (the checks set it; the functions do not).
+function buildStartPayload(body, headers, now = Date.now()) {
   if (!body) return invalid(null);
   // The honeypot: a person never fills it. Refused quietly, nothing sent.
   if (text(body.hp_field_2026)) return invalid(null);
@@ -159,6 +163,9 @@ function buildStartPayload(body, headers) {
   // where the portal key lives (#k=), and it must never be stored.
   const pageUrl = pageUrlFrom(body.page_url);
   if (pageUrl) pageUrl.hash = "";
+  // Where the buyer's browser first came from (assets/tracking.js), when the
+  // page sent it and it is well formed. Otherwise the signup goes without it.
+  const attribution = attributionFrom(body.attribution, now);
   return {
     payload: {
       plan,
@@ -170,6 +177,7 @@ function buildStartPayload(body, headers) {
       quantity,
       sourceUrl: sourceUrlFrom(pageUrl),
       utm: utmFrom(pageUrl),
+      ...(attribution ? { attribution } : {}),
       clientIp: clientIpFrom(headers || {}),
       userAgent: userAgentFrom(headers || {}),
     },
@@ -253,9 +261,12 @@ function shapePrefill(prefill) {
   };
 }
 
+// amountCents is the checkout total, for the welcome page's one purchase event.
+// It goes along only when the CRM sends a whole number of cents above zero.
 function shapeSignup(signup) {
   const s = signup && typeof signup === "object" ? signup : {};
   const quantity = Number.isInteger(s.quantity) && s.quantity >= 1 && s.quantity <= MAX_LOCATIONS ? s.quantity : 1;
+  const amountCents = Number.isInteger(s.amountCents) && s.amountCents > 0 && s.amountCents <= MAX_AMOUNT_CENTS ? s.amountCents : null;
   return {
     plan: PLANS.includes(s.plan) ? s.plan : "us",
     businessName: optionalText(s.businessName, 200),
@@ -268,6 +279,7 @@ function shapeSignup(signup) {
     intakeDone: s.intakeDone === true,
     bookingUrl: httpUrl(s.bookingUrl),
     prefill: shapePrefill(s.prefill),
+    ...(amountCents ? { amountCents } : {}),
   };
 }
 
@@ -348,7 +360,23 @@ function shapeRequestedReports(list) {
 // One call to the CRM. Resolves { status, data } and never throws. `op` names
 // the call in the logs ("start", "status", ...); the path, which can hold a
 // token, is never logged.
-async function crmCall(op, method, path, { body, clientIp } = {}) {
+//
+// Attribution must never cost a signup. When the CRM answers 400 to a body
+// that carried `attribution` (a CRM that does not know the key yet refuses
+// the whole body), the call is made once more without it, and that second
+// answer is the one used: a body that is wrong for another reason is refused
+// again and the refusal goes back to the page as before.
+async function crmCall(op, method, path, options = {}) {
+  const first = await crmCallOnce(op, method, path, options);
+  const sent = options.body;
+  if (first.status !== 400 || !sent || !("attribution" in sent)) return first;
+  const body = { ...sent };
+  delete body.attribution;
+  console.error("BYM signup", op, "sent again without attribution");
+  return crmCallOnce(op, method, path, { ...options, body });
+}
+
+async function crmCallOnce(op, method, path, { body, clientIp } = {}) {
   try {
     const response = await fetch(`${crmUrl()}${path}`, {
       method,
