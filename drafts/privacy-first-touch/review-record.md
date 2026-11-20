@@ -6,7 +6,7 @@ Update to a live page (`/privacy`), same chain as a new page. Store in `brain.co
 
 ```
 Researched and drafted with AI assistance.
-Written, fact-checked and edited by Mike Moll, <YYYY-MM-DD>.
+Written, fact-checked and edited by Mike Moll, 2026-11-20.
 Substantive changes: <what Mike changed or asked for>
 Figures checked against: the one figure, 90 days, is FIRST_TOUCH_MS in assets/tracking.js; the list of what
 the note holds is tracking.js (landing, referrer, utm_*, gclid/gbraid/wbraid/fbclid, first_seen_at); "we send
@@ -17,8 +17,8 @@ Page: /privacy (update), PR <url>
 Overlap: update-existing, the page's own URL; no new URL, no sitemap or llms.txt change
 Gates: page_gate n/a (no money figure or claim row); slopcheck 0 HARD, 0 pieces over grade (grade 4.7; 2 WARN kept:
        a 26-word list sentence, and the closing line is the deletion instruction); read-aloud done;
-       critic <TODO: integrator runs the independent critic pass>
-Cadence: n/a (a legal-page update, no new page; effective date moved to November 16, 2026)
+       critic PASS (independent Sonnet agent, 2026-11-20; no AI tells, every fact matches the code; two optional notes kept as is)
+Cadence: n/a (a legal-page update, no new page; effective date set to November 20, 2026, the merge day)
 Repo checks: validate_site.py, check_local_pages.py and every node check_* in site-checks.yml pass
 ```
 
