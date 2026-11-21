@@ -4,6 +4,7 @@
 // stored it.
 
 const { crmConfigured, sendToCrm } = require("./_crm");
+const { humanCheckFailed } = require("./_human");
 
 async function submitLead(req, res, { crmForm }) {
   if (req.method !== "POST") {
@@ -32,8 +33,18 @@ async function submitLead(req, res, { crmForm }) {
     return res.status(400).json({ error: "Email is required" });
   }
 
+  // Bot check: a no-op until Turnstile is switched on (api/_human.js).
+  if (await humanCheckFailed(body, req.headers || {})) {
+    return res.status(400).json({ error: "Human check failed" });
+  }
+
   const crm = await sendToCrm(crmForm, body, req.headers || {});
   if (crm.ok) {
+    // When the CRM filed the lead but says this email or place asked too
+    // recently, tell the page how long to wait (it shows a countdown).
+    if (crm.report === "rate_limited") {
+      return res.status(200).json({ ok: true, report: "rate_limited", retryAfterSeconds: crm.retryAfterSeconds });
+    }
     return res.status(200).json({ ok: true });
   }
   return res.status(502).json({ error: "CRM submission failed" });

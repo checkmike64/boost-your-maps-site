@@ -68,7 +68,7 @@ assert.doesNotMatch(page, /\son[a-z]+\s*=/i);
 assert.doesNotMatch(page, /href="\s*javascript:/i);
 // The form posts through the script to this site only.
 assert.match(page, /data-endpoint="\/api\/partner-access"/);
-for (const file of ["assets/agency-partners.js", "assets/portal.js"]) {
+for (const file of ["assets/agency-partners.js", "assets/portal.js", "assets/place-search.js", "assets/retry-countdown.js"]) {
   const code = fs.readFileSync(path.join(ROOT, file), "utf8");
   for (const [, url] of code.matchAll(/fetch\(\s*"([^"]+)"/g)) assert.ok(url.startsWith("/api/"), `${file} calls ${url}`);
   assert.doesNotMatch(code, /https?:\/\/[a-z0-9.-]+\.[a-z]{2,}\/api|eval\(|new Function\(|document\.write|innerHTML\s*=/, file);

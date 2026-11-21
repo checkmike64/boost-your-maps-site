@@ -195,6 +195,21 @@ function attributionFrom(value, now = Date.now()) {
   return Buffer.byteLength(JSON.stringify(attribution), "utf8") <= ATTRIBUTION_BYTES_MAX ? attribution : null;
 }
 
+// What the visitor picked in the report form's business search. The CRM's
+// visibility-report route takes these two beside the answers (placeId up to
+// 1,024 characters, placeLabel up to 500, the label never stored) and asks for
+// the report with them. The Place ID is optional: a typed business name and
+// town still go through. A value that is not shaped like a Place ID is dropped
+// rather than sent (the same shape api/places.js hands out).
+const PLACE_ID_PATTERN = /^[A-Za-z0-9_-]{20,512}$/;
+
+function placeFrom(fields) {
+  const placeId = text(fields.place_id);
+  if (!PLACE_ID_PATTERN.test(placeId)) return {};
+  const label = cut(text(fields.place_label).replace(UNSAFE_TEXT_PATTERN, " "), 500);
+  return { placeId, ...(label ? { placeLabel: label } : {}) };
+}
+
 function answersFrom(fields) {
   const answers = {};
   for (const [key, max] of Object.entries(ANSWER_LIMITS)) {
@@ -232,12 +247,29 @@ function buildCrmPayload(body, headers) {
     email,
     phone: e164(fields.phone),
     answers: answersFrom(fields),
+    ...placeFrom(fields),
     sourceUrl: sourceUrlFrom(pageUrl),
     utm: utmFrom(pageUrl),
     visitorId: null, // no visit tracker on this site (the coaching site's visits.js)
     clientIp: clientIpFrom(headers || {}),
     userAgent: userAgentFrom(headers || {}),
   };
+}
+
+// The report step of the CRM's answer: { report: "queued" } or
+// { report: "rate_limited", retryAfterSeconds }, or nothing for any other form
+// or an answer that is not one of those two.
+const RETRY_MAX_SECONDS = 24 * 60 * 60;
+
+function reportFrom(data) {
+  if (data && data.report === "rate_limited") {
+    const seconds = data.retryAfterSeconds;
+    if (Number.isInteger(seconds) && seconds > 0 && seconds <= RETRY_MAX_SECONDS) {
+      return { report: "rate_limited", retryAfterSeconds: seconds };
+    }
+    return { report: "rate_limited", retryAfterSeconds: 20 * 60 };
+  }
+  return data && data.report === "queued" ? { report: "queued" } : {};
 }
 
 // Posts one submission. Resolves { ok: true } only when the CRM answered that
@@ -272,7 +304,7 @@ async function sendToCrm(form, body, headers) {
       return { ok: false };
     }
 
-    return { ok: true };
+    return { ok: true, ...reportFrom(data) };
   } catch (err) {
     console.error("BYM CRM submission error", slug, err);
     return { ok: false };
@@ -283,6 +315,7 @@ module.exports = {
   crmConfigured,
   sendToCrm,
   buildCrmPayload,
+  reportFrom,
   // Shared with the signup functions (api/_signup.js), unchanged.
   crmUrl,
   text,

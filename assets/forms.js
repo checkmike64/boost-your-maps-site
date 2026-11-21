@@ -10,14 +10,14 @@
 
   var forms = document.querySelectorAll("form[data-native-form]");
 
-  function showStatus(status, type, message, allowMarkup) {
+  function showStatus(status, type, message, allowMarkup, quiet) {
     status.className = "form-status full is-visible is-" + type;
     if (allowMarkup) {
       status.innerHTML = message;
     } else {
       status.textContent = message;
     }
-    status.focus();
+    if (!quiet) status.focus();
   }
 
   // The page URL the CRM stores, plus where the lead came from (2026-11-11): landing = first page of the
@@ -63,11 +63,45 @@
     };
   }
 
+  function withToken(payload, token) {
+    if (token) payload.human_token = token;
+    return payload;
+  }
+
+  // Bot-check hook. A no-op today: it resolves with no token, so nothing
+  // changes for the visitor. To turn on Cloudflare Turnstile, replace the body
+  // of this function so it resolves with the widget's token (README.md,
+  // "Turnstile"). Only forms marked data-human-check call it.
+  function humanCheck(form) {
+    return Promise.resolve("");
+  }
+
   forms.forEach(function (form) {
     var status = form.querySelector(".form-status");
     var submitButton = form.querySelector('[type="submit"]');
     if (!status || !submitButton) return;
     var originalButtonText = submitButton.textContent;
+
+    var countdown = null;
+    var shownOnce = false; // the first message takes focus, later ticks do not
+
+    function lockUntil(seconds) {
+      if (countdown) countdown.stop();
+      shownOnce = false;
+      submitButton.disabled = true;
+      countdown = window.BYMRetry.start(seconds, {
+        onTick: function (text) { showStatus(status, "error", text, false, shownOnce); shownOnce = true; },
+        onDone: function () {
+          countdown = null;
+          submitButton.disabled = false;
+          showStatus(status, "success", "You can send your request again now.", false);
+        }
+      }, {
+        now: function () { return Date.now(); },
+        setInterval: function (fn, ms) { return window.setInterval(fn, ms); },
+        clearInterval: function (id) { window.clearInterval(id); }
+      });
+    }
 
     form.addEventListener("invalid", function (event) {
       event.target.setAttribute("aria-invalid", "true");
@@ -81,6 +115,7 @@
 
     form.addEventListener("submit", async function (event) {
       event.preventDefault();
+      if (countdown) return;
 
       if (!form.reportValidity()) {
         var firstInvalid = form.querySelector(":invalid");
@@ -107,6 +142,11 @@
         return;
       }
 
+      var humanToken = "";
+      if (form.hasAttribute("data-human-check")) {
+        try { humanToken = (await humanCheck(form)) || ""; } catch (e) { humanToken = ""; }
+      }
+
       form.setAttribute("aria-busy", "true");
       submitButton.disabled = true;
       submitButton.textContent = "Sending…";
@@ -125,7 +165,7 @@
             "Accept": "application/json",
             "Content-Type": "application/json"
           },
-          body: JSON.stringify(formPayload(form)),
+          body: JSON.stringify(withToken(formPayload(form), humanToken)),
           credentials: "omit",
           signal: controller.signal
         });
@@ -136,7 +176,18 @@
           throw serverError;
         }
 
+        var answer = null;
+        try { answer = await response.json(); } catch (e) { answer = null; }
+
+        if (answer && answer.report === "rate_limited" && window.BYMRetry) {
+          // The lead is filed. The report was asked for too recently, so wait.
+          lockUntil(Number(answer.retryAfterSeconds) > 0 ? Number(answer.retryAfterSeconds) : 1200);
+          pushEvent({ event: "report_rate_limited", form_id: form.id });
+          return;
+        }
+
         form.reset();
+        if (form.resetPlace) form.resetPlace();
         showStatus(status, "success", form.dataset.successMessage, false);
         pushEvent({ event: "generate_lead", form_id: form.id });
       } catch (error) {
@@ -152,8 +203,9 @@
       } finally {
         window.clearTimeout(timeout);
         form.removeAttribute("aria-busy");
-        submitButton.disabled = false;
         submitButton.textContent = originalButtonText;
+        // Only the submit button waits out a countdown; the fields stay open.
+        submitButton.disabled = Boolean(countdown);
       }
     });
   });

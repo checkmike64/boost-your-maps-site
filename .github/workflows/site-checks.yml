@@ -36,3 +36,5 @@ jobs:
         run: node scripts/check_footer.js
       - name: Check the Content-Security-Policy
         run: node scripts/check_csp.js
+      - name: Check visibility form (place search, retry countdown, bot-check hook)
+        run: node scripts/check_visibility_form.js

@@ -28,9 +28,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gabarito:wght@500;600;700;800&amp;family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/styles.css?v=20261111-3">
+  <link rel="stylesheet" href="/assets/styles.css?v=20261121-1">
 <script src="/assets/tracking.js?v=4" defer></script>
-<script src="/assets/forms.js?v=20261111-1" defer></script>
+<script src="/assets/retry-countdown.js?v=20261121-1" defer></script>
+<script src="/assets/forms.js?v=20261121-1" defer></script>
+<script src="/assets/place-search.js?v=20261121-1" defer></script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "Organization", "@id": "https://www.boostyourmaps.com/#organization", "name": "Boost Your Maps", "legalName": "Impact Leads LLC", "url": "https://www.boostyourmaps.com/", "logo": "https://www.boostyourmaps.com/assets/icon-512.png", "email": "team@boostyourmaps.com", "contactPoint": {"@type": "ContactPoint", "contactType": "customer service", "email": "team@boostyourmaps.com", "availableLanguage": "English"}, "founder": {"@type": "Person", "name": "Michael Moll", "url": "https://www.boostyourmaps.com/about-us"}, "address": {"@type": "PostalAddress", "streetAddress": "1021 E Lincolnway, Suite #5789", "addressLocality": "Cheyenne", "addressRegion": "WY", "postalCode": "82001", "addressCountry": "US"}}, {"@type": "WebSite", "@id": "https://www.boostyourmaps.com/#website", "url": "https://www.boostyourmaps.com/", "name": "Boost Your Maps", "publisher": {"@id": "https://www.boostyourmaps.com/#organization"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.boostyourmaps.com/"}, {"@type": "ListItem", "position": 2, "name": "Visibility Report", "item": "https://www.boostyourmaps.com/visibility-report"}]}]}</script>
 </head>
 <body>
@@ -67,9 +69,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </section>
 <section class="section tight">
   <div class="wrap">
-    <form class="vform" id="vr-form" method="post" action="#" data-native-form data-form-type="visibility_report" data-endpoint="/api/visibility-report" data-success-message="Thanks. Your request is in. Check your inbox within 24 hours.">
+    <form class="vform" id="vr-form" method="post" action="#" data-native-form data-human-check data-form-type="visibility_report" data-endpoint="/api/visibility-report" data-success-message="Thanks. Your request is in. Check your inbox within 24 hours.">
       <div class="form-hp" aria-hidden="true"><label for="hp_field_2026">Leave this field empty</label><input id="hp_field_2026" name="hp_field_2026" type="text" tabindex="-1" autocomplete="new-password"></div>
-      <div class="full"><label for="business_name">Business name</label><input id="business_name" name="business_name" type="text" autocomplete="organization"></div>
+      <div class="full place-field"><label for="business_name">Business name</label><input id="business_name" name="business_name" type="text" autocomplete="organization" data-place-search><input type="hidden" name="place_id" value=""><input type="hidden" name="place_label" value=""><ul id="place-results" class="place-results" role="listbox" aria-label="Matching businesses" hidden></ul><p id="place-note" class="micro" role="status" aria-live="polite" hidden></p></div>
       <div><label for="service">Top service to grow</label><input id="service" name="service" type="text" placeholder="e.g. tattoo studio, plumbing, coaching"></div>
       <div><label for="location">Target location</label><input id="location" name="location" type="text" placeholder="City or postal code"></div>
       <div><label for="first_name">First name</label><input id="first_name" name="first_name" type="text" autocomplete="given-name"></div>
