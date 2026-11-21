@@ -45,6 +45,30 @@ form fields arrive as answers under their form names (`business_name`, `service`
 `location`, `website`, `message`, `service_interest`, `active_marketing`), and the CRM keeps
 only the ones its form defines.
 
+### Visibility report form: business search, wait time, bot check
+
+- **Business search.** `assets/place-search.js` (only on `/visibility-report`) calls this site's
+  `/api/places` (Google Places API (New) autocomplete, key `GOOGLE_PLACES_API_KEY`, server side only,
+  so the CSP is unchanged). Picking a result fills hidden `place_id` and `place_label`; the endpoint
+  sends them to the CRM as top-level `placeId` and `placeLabel`, the two fields the CRM's
+  `POST /api/forms/visibility-report` takes beside `answers` (the CRM never stores the label). The
+  Place ID is optional: with no JavaScript, search off or down, the typed business name and town go
+  through as before.
+- **Asked too recently.** When the CRM files the lead but answers `report: "rate_limited"` with
+  `retryAfterSeconds`, `api/_lead.js` passes both on and `assets/forms.js` shows "You asked for this
+  report a few minutes ago. You can ask again in N minutes." and disables only the submit button until
+  the time passes (`assets/retry-countdown.js`). The honeypot is unchanged.
+- **Turnstile (off today).** `assets/forms.js` calls `humanCheck(form)` for forms marked
+  `data-human-check` (a no-op that sends no token), and `api/_human.js` checks the token on the server
+  only when BOTH `TURNSTILE_SITE_KEY` and `TURNSTILE_SECRET_KEY` are set. To turn it on: (1) create a
+  Turnstile widget in Cloudflare for boostyourmaps.com; (2) in `vercel.json` add
+  `https://challenges.cloudflare.com` to `script-src`, `frame-src` and `connect-src`, and update the
+  asserts in `scripts/check_csp.js` (Mike decides, per that file); (3) load Cloudflare's
+  `api.js` on the page and make `humanCheck` resolve with the widget token (sent as `human_token`);
+  (4) set the two env vars in Vercel. Do step 4 last: with the secret set and no token sent, every
+  submission is refused. A Cloudflare outage lets visitors through. `node scripts/check_visibility_form.js`
+  covers all of this with fakes.
+
 The visitor sees the success message only when the CRM stored the lead. Failures are
 logged as `BYM CRM ...` in the Vercel function logs. `node scripts/check_crm_payload.js`
 checks what the CRM receives without touching the network; CI runs it. GoHighLevel was
