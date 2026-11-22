@@ -44,6 +44,32 @@ assert.equal(route.headers.find((h) => h.key === "X-Robots-Tag").value, "noindex
 assert.equal(route.headers.find((h) => h.key === "Cache-Control").value, "no-store");
 assert.ok(!route.headers.some((h) => h.key === "Content-Security-Policy"), "the page uses the site's policy, with no looser one of its own");
 
+// The visibility report page alone also allows Cloudflare Turnstile (Mike decided, 2026-11-21).
+// The widget needs its script, its frame and its check call, and no other host.
+const CF = "https://challenges.cloudflare.com";
+const vrRoute = config.headers.find((h) => h.source === "/visibility-report");
+assert.ok(vrRoute, "headers for /visibility-report");
+const vr = Object.fromEntries(
+  vrRoute.headers
+    .find((h) => h.key === "Content-Security-Policy")
+    .value.split(";")
+    .map((part) => part.trim().split(/\s+/))
+    .filter((p) => p[0])
+    .map(([name, ...values]) => [name, values])
+);
+assert.deepEqual(vr["script-src"], [...csp["script-src"], CF]);
+assert.deepEqual(vr["connect-src"], [...csp["connect-src"], CF]);
+assert.deepEqual(vr["frame-src"], [...csp["frame-src"], CF]);
+for (const name of Object.keys(csp)) {
+  if (!["script-src", "connect-src", "frame-src"].includes(name)) assert.deepEqual(vr[name], csp[name], `/visibility-report ${name} matches the site policy`);
+}
+assert.deepEqual(Object.keys(vr).sort(), Object.keys(csp).sort());
+// No other route may carry Cloudflare.
+for (const h of config.headers) {
+  const v = (h.headers.find((x) => x.key === "Content-Security-Policy") || {}).value || "";
+  if (h.source !== "/visibility-report") assert.ok(!v.includes("cloudflare"), `${h.source} must not allow Cloudflare`);
+}
+
 // ---- what the new page loads and runs ---------------------------------------------
 
 const page = fs.readFileSync(path.join(ROOT, "agency-partners.html"), "utf8");

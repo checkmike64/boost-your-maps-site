@@ -150,19 +150,38 @@ async function post(body) {
   assert.match(page, /id="business_name" name="business_name" type="text"/);
   assert.match(page, /<input type="hidden" name="place_id" value="">/);
 
-  // ---- The bot-check hook: off by default -----------------------------------
+  // ---- The bot check (Turnstile): on when the secret is set ------------------
   assert.equal(humanCheckOn({}), false);
-  assert.equal(humanCheckOn({ TURNSTILE_SITE_KEY: "s" }), false); // both keys or nothing
+  assert.equal(humanCheckOn({ TURNSTILE_SECRET_KEY: "  " }), false);
+  assert.equal(humanCheckOn({ TURNSTILE_SITE_KEY: "s" }), false); // the site key alone does nothing
+  assert.equal(humanCheckOn({ TURNSTILE_SECRET_KEY: "secret" }), true); // the site key lives in the HTML
   assert.equal(await humanCheckFailed({}, {}, {}, async () => { throw new Error("must not call"); }), false);
-  const on = { TURNSTILE_SITE_KEY: "site", TURNSTILE_SECRET_KEY: "secret" };
+  const on = { TURNSTILE_SECRET_KEY: "secret" };
   const verify = (data, ok = true) => async () => new Response(JSON.stringify(data), { status: ok ? 200 : 500 });
-  assert.equal(await humanCheckFailed({}, {}, on, verify({ success: true })), true); // no token
-  assert.equal(await humanCheckFailed({ human_token: "t" }, {}, on, verify({ success: true })), false);
+  assert.equal(await humanCheckFailed({}, {}, on, verify({ success: true })), true); // secret set, token missing: refused
+  assert.equal(await humanCheckFailed({ human_token: "t" }, {}, on, verify({ success: true })), false); // token ok
   assert.equal(await humanCheckFailed({ human_token: "t" }, {}, on, verify({ success: false })), true);
-  assert.equal(await humanCheckFailed({ human_token: "t" }, {}, on, async () => { throw new Error("down"); }), false);
+  assert.equal(await humanCheckFailed({ human_token: "t" }, {}, on, async () => { throw new Error("down"); }), false); // outage lets through
   assert.equal(await humanCheckFailed({ human_token: "t" }, {}, on, verify({}, false)), false);
-  // The client hook is a no-op today.
-  assert.match(forms, /function humanCheck\(form\) \{\s*return Promise\.resolve\(""\);/);
+
+  // The page carries the widget box with the public site key, and loads Cloudflare's script.
+  assert.match(page, /<form[^>]*data-human-check/);
+  assert.match(page, /<div class="full" id="vr-turnstile" data-turnstile data-sitekey="0x4AAAAAAGMZcHFSMZEKeATU"><\/div>/);
+  assert.match(page, /<script src="https:\/\/challenges\.cloudflare\.com\/turnstile\/v0\/api\.js\?render=explicit" async defer><\/script>/);
+  assert.doesNotMatch(page, /TURNSTILE_SECRET/);
+  // The browser side sends the token as human_token and has the plain blocked message.
+  assert.match(forms, /function humanCheck\(form\)/);
+  assert.match(forms, /window\.turnstile\.render/);
+  assert.match(forms, /payload\.human_token = token/);
+  assert.match(forms, /window\.turnstile\.reset/);
+  assert.match(forms, /Please turn on JavaScript or try another browser to send this form\./);
+
+  // CSP: this page alone allows Cloudflare, in three places and from one origin.
+  const config = JSON.parse(fs.readFileSync(path.join(ROOT, "vercel.json"), "utf8"));
+  const cspOf = (source) => config.headers.find((h) => h.source === source).headers.find((h) => h.key === "Content-Security-Policy").value;
+  const vrCsp = cspOf("/visibility-report");
+  assert.deepEqual(vrCsp.match(/https:\/\/[a-z.]*cloudflare\.com/g), ["https://challenges.cloudflare.com", "https://challenges.cloudflare.com", "https://challenges.cloudflare.com"]);
+  assert.ok(!cspOf("/(.*)").includes("cloudflare"));
 
   console.log("Visibility form checks passed.");
 })().catch((err) => {

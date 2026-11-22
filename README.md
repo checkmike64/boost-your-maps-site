@@ -58,16 +58,16 @@ only the ones its form defines.
   `retryAfterSeconds`, `api/_lead.js` passes both on and `assets/forms.js` shows "You asked for this
   report a few minutes ago. You can ask again in N minutes." and disables only the submit button until
   the time passes (`assets/retry-countdown.js`). The honeypot is unchanged.
-- **Turnstile (off today).** `assets/forms.js` calls `humanCheck(form)` for forms marked
-  `data-human-check` (a no-op that sends no token), and `api/_human.js` checks the token on the server
-  only when BOTH `TURNSTILE_SITE_KEY` and `TURNSTILE_SECRET_KEY` are set. To turn it on: (1) create a
-  Turnstile widget in Cloudflare for boostyourmaps.com; (2) in `vercel.json` add
-  `https://challenges.cloudflare.com` to `script-src`, `frame-src` and `connect-src`, and update the
-  asserts in `scripts/check_csp.js` (Mike decides, per that file); (3) load Cloudflare's
-  `api.js` on the page and make `humanCheck` resolve with the widget token (sent as `human_token`);
-  (4) set the two env vars in Vercel. Do step 4 last: with the secret set and no token sent, every
-  submission is refused. A Cloudflare outage lets visitors through. `node scripts/check_visibility_form.js`
-  covers all of this with fakes.
+- **Turnstile (on).** The widget is Cloudflare's Managed mode for www.boostyourmaps.com. Its public
+  site key is in `visibility-report.html` (`data-sitekey`, safe in HTML) with Cloudflare's `api.js`.
+  `assets/forms.js` draws the widget for forms marked `data-human-check`, waits for its token, sends it
+  as `human_token`, and resets the widget after every send. `api/_human.js` checks the token on the
+  server whenever `TURNSTILE_SECRET_KEY` is set in Vercel (never put it in the repo). With the secret
+  set, a missing token is refused; a visitor whose browser blocks Cloudflare sees "Please turn on
+  JavaScript or try another browser to send this form." A Cloudflare outage lets visitors through. Only
+  `/visibility-report` allows `https://challenges.cloudflare.com` (its own CSP in `vercel.json`, in
+  `script-src`, `frame-src` and `connect-src`); `scripts/check_csp.js` keeps every other page's policy
+  unchanged. `node scripts/check_visibility_form.js` covers all of this with fakes.
 
 The visitor sees the success message only when the CRM stored the lead. Failures are
 logged as `BYM CRM ...` in the Vercel function logs. `node scripts/check_crm_payload.js`

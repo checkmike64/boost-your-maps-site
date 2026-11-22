@@ -68,12 +68,78 @@
     return payload;
   }
 
-  // Bot-check hook. A no-op today: it resolves with no token, so nothing
-  // changes for the visitor. To turn on Cloudflare Turnstile, replace the body
-  // of this function so it resolves with the widget's token (README.md,
-  // "Turnstile"). Only forms marked data-human-check call it.
+  // Bot check (Cloudflare Turnstile). Only forms marked data-human-check call
+  // humanCheck. The widget box and the public site key are in the page's HTML
+  // (data-turnstile, data-sitekey). Cloudflare's api.js loads with the page;
+  // we wait for it, draw the widget, and keep its token. If the script never
+  // loads (blocked), there is no token: the form still sends, the server says
+  // no, and the visitor sees a plain message.
+  var BLOCKED_MESSAGE = "Please turn on JavaScript or try another browser to send this form.";
+
+  function setupTurnstile(form) {
+    var box = form.querySelector("[data-turnstile]");
+    var key = box ? (box.getAttribute("data-sitekey") || "").trim() : "";
+    if (!box || !key) return;
+    var state = { widgetId: null, token: "", failed: false, waiting: [] };
+    form._turnstile = state;
+
+    function flush() {
+      var list = state.waiting;
+      state.waiting = [];
+      list.forEach(function (done) { done(); });
+    }
+
+    function render() {
+      if (state.widgetId !== null) return true;
+      if (!window.turnstile || typeof window.turnstile.render !== "function") return false;
+      try {
+        state.widgetId = window.turnstile.render(box, {
+          sitekey: key,
+          callback: function (token) { state.token = token; flush(); },
+          "expired-callback": function () { state.token = ""; },
+          "error-callback": function () { state.token = ""; state.failed = true; flush(); }
+        });
+      } catch (e) {
+        state.failed = true;
+        return true;
+      }
+      return true;
+    }
+
+    var tries = 0;
+    var poll = window.setInterval(function () {
+      tries += 1;
+      if (render() || tries > 80) window.clearInterval(poll);
+    }, 250);
+    render();
+  }
+
+  // Resolves with the widget's token, or "" when there is none (script
+  // blocked, widget failed, or no answer in 20 seconds).
   function humanCheck(form) {
-    return Promise.resolve("");
+    var state = form._turnstile;
+    if (!state) return Promise.resolve("");
+    return new Promise(function (resolve) {
+      var timer = null;
+      function finish() {
+        if (timer) window.clearTimeout(timer);
+        resolve(state.token || "");
+      }
+      if (state.token || state.failed || !window.turnstile) return finish();
+      state.waiting.push(finish);
+      timer = window.setTimeout(finish, 20000);
+    });
+  }
+
+  // A token works once. After any send, get a fresh one.
+  function resetHumanCheck(form) {
+    var state = form._turnstile;
+    if (!state) return;
+    state.token = "";
+    state.failed = false;
+    try {
+      if (state.widgetId !== null && window.turnstile) window.turnstile.reset(state.widgetId);
+    } catch (e) {}
   }
 
   forms.forEach(function (form) {
@@ -81,6 +147,7 @@
     var submitButton = form.querySelector('[type="submit"]');
     if (!status || !submitButton) return;
     var originalButtonText = submitButton.textContent;
+    if (form.hasAttribute("data-human-check")) setupTurnstile(form);
 
     var countdown = null;
     var shownOnce = false; // the first message takes focus, later ticks do not
@@ -173,6 +240,7 @@
         if (!response.ok) {
           var serverError = new Error("Submission failed");
           serverError.name = "ServerError";
+          serverError.status = response.status;
           throw serverError;
         }
 
@@ -194,6 +262,10 @@
         var message = error.name === "AbortError"
           ? "That took too long. Please try again, or email team@boostyourmaps.com."
           : "We could not send that just now. Please try again, or email team@boostyourmaps.com.";
+        // No token and the server said no: the check could not run in this browser.
+        if (error.name === "ServerError" && error.status === 400 && !humanToken && form._turnstile) {
+          message = BLOCKED_MESSAGE;
+        }
         showStatus(status, "error", message, false);
         pushEvent({
           event: "lead_form_error",
@@ -202,6 +274,7 @@
         });
       } finally {
         window.clearTimeout(timeout);
+        resetHumanCheck(form);
         form.removeAttribute("aria-busy");
         submitButton.textContent = originalButtonText;
         // Only the submit button waits out a countdown; the fields stay open.
