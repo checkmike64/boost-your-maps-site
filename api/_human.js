@@ -1,16 +1,15 @@
-// Bot check hook for the lead forms. OFF today: with no keys set it does
-// nothing. To switch on Cloudflare Turnstile, set BOTH env vars in Vercel:
-//   TURNSTILE_SITE_KEY    (public; the page widget uses it, see README.md)
+// Bot check for the lead forms (Cloudflare Turnstile). ON when the env var
 //   TURNSTILE_SECRET_KEY  (private; this file checks the token with it)
-// and finish the browser side (README.md, "Turnstile"). The browser sends the
-// token as `human_token` in the form's JSON body. Only the visibility report
-// form asks for it (data-human-check on the form).
+// is set in Vercel. The public site key lives in visibility-report.html, so
+// no site key is needed here. With no secret the check does nothing. The
+// browser sends the token as `human_token` in the form's JSON body. Only the
+// visibility report form asks for it (data-human-check on the form).
 
 const VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 const TIMEOUT_MS = 5000;
 
 function humanCheckOn(env = process.env) {
-  return Boolean((env.TURNSTILE_SITE_KEY || "").trim() && (env.TURNSTILE_SECRET_KEY || "").trim());
+  return Boolean((env.TURNSTILE_SECRET_KEY || "").trim());
 }
 
 // Resolves true when the request must be refused. Never throws. With the
