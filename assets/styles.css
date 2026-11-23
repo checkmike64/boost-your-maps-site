@@ -374,6 +374,10 @@ p{font-size:1.05rem;}
 .su-links{display:flex;flex-wrap:wrap;align-items:center;gap:14px 26px;margin-top:28px;}
 .su-block{margin-top:56px;}
 .su-block > p{margin-top:10px;color:var(--muted);}
+/* Run a report: its own box, the report card's treatment (the one gray panel, a 1.5px red border). The "Run a report" link jumps here and the box lights up. */
+.su-run{background:var(--panel);border:1.5px solid var(--red);border-radius:16px;padding:28px 28px 30px;max-width:680px;scroll-margin-top:96px;transition:box-shadow .25s cubic-bezier(.32,.72,0,1);}
+.su-run .su-step-title{margin-top:0;}
+.su-run:target{box-shadow:0 0 0 5px rgba(197,34,31,.14);}
 .su-table{width:100%;border-collapse:collapse;margin-top:22px;}
 .su-table th{text-align:left;font-weight:600;font-size:.9rem;color:var(--muted);padding:0 14px 10px 0;}
 .su-table td{padding:16px 14px 16px 0;border-top:1px solid var(--hairline);vertical-align:top;font-size:1.05rem;}
@@ -386,6 +390,7 @@ p{font-size:1.05rem;}
 .su-muted{color:var(--muted);}
 main.su [hidden]{display:none!important;}
 @media(max-width:880px){
+  .su-run{padding:22px 18px 24px;}
   .su-grid{grid-template-columns:1fr;gap:36px;}
   .su-summary{position:static;}
   .su-table thead{position:absolute;left:-10000px;}
