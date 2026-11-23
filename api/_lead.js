@@ -3,7 +3,7 @@
 // the BYM CRM (api/_crm.js). The visitor sees success only when the CRM
 // stored it.
 
-const { crmConfigured, sendToCrm } = require("./_crm");
+const { crmConfigured, sendToCrm, placeFrom } = require("./_crm");
 const { humanCheckFailed } = require("./_human");
 
 async function submitLead(req, res, { crmForm }) {
@@ -31,6 +31,13 @@ async function submitLead(req, res, { crmForm }) {
   const email = typeof fields.email === "string" ? fields.email.trim() : "";
   if (!email) {
     return res.status(400).json({ error: "Email is required" });
+  }
+
+  // The free report is a scan of one place on Google Maps, so the visitor must
+  // have picked their business from the search list. A typed name is a guess,
+  // and the scan provider refuses a request without a real Place ID.
+  if (crmForm === "visibility-report" && !placeFrom(fields).placeId) {
+    return res.status(422).json({ error: "place_required" });
   }
 
   // Bot check: a no-op until Turnstile is switched on (api/_human.js).

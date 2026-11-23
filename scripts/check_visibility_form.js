@@ -92,13 +92,12 @@ async function post(body) {
   assert.equal(r.res.statusCode, 200);
   assert.deepEqual(r.res.body, { ok: true, report: "rate_limited", retryAfterSeconds: 840 });
 
-  // No place at all: the typed name and town still go through.
+  // No place at all: a typed name and town are refused, and nothing is sent.
   reply = { ok: true, result: {} };
   r = await post({ ...BODY, fields: { business_name: "Bay Pest Co", location: "Tampa", email: "dana@example.com" } });
-  assert.equal(r.res.statusCode, 200);
-  const sent = JSON.parse(r.calls[0].init.body);
-  assert.ok(!("placeId" in sent));
-  assert.equal(sent.answers.location, "Tampa");
+  assert.equal(r.res.statusCode, 422);
+  assert.deepEqual(r.res.body, { error: "place_required" });
+  assert.equal(r.calls.length, 0);
 
   // ---- The countdown, with a fake clock -------------------------------------
   assert.equal(retry.message(840), "You asked for this report a few minutes ago. You can ask again in 14 minutes.");

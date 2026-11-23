@@ -198,8 +198,8 @@ function attributionFrom(value, now = Date.now()) {
 // What the visitor picked in the report form's business search. The CRM's
 // visibility-report route takes these two beside the answers (placeId up to
 // 1,024 characters, placeLabel up to 500, the label never stored) and asks for
-// the report with them. The Place ID is optional: a typed business name and
-// town still go through. A value that is not shaped like a Place ID is dropped
+// the report with them. The report form needs it (api/_lead.js refuses a request
+// without one: the scan cannot run on a guessed name). A value that is not shaped like a Place ID is dropped
 // rather than sent (the same shape api/places.js hands out).
 const PLACE_ID_PATTERN = /^[A-Za-z0-9_-]{20,512}$/;
 
@@ -316,6 +316,7 @@ module.exports = {
   sendToCrm,
   buildCrmPayload,
   reportFrom,
+  placeFrom,
   // Shared with the signup functions (api/_signup.js), unchanged.
   crmUrl,
   text,

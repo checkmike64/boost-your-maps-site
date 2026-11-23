@@ -74,6 +74,7 @@
   // we wait for it, draw the widget, and keep its token. If the script never
   // loads (blocked), there is no token: the form still sends, the server says
   // no, and the visitor sees a plain message.
+  var PLACE_MESSAGE = "Pick your business from the list that appears as you type. We need it to find your profile on Google.";
   var BLOCKED_MESSAGE = "Please turn on JavaScript or try another browser to send this form.";
 
   function setupTurnstile(form) {
@@ -191,6 +192,16 @@
         return;
       }
 
+      // The report scans one place on Google Maps, so the business must be picked from the list, never typed.
+      var placeInput = form.querySelector("[data-place-search]");
+      if (placeInput && form.elements.place_id && !form.elements.place_id.value) {
+        showStatus(status, "error", PLACE_MESSAGE, false);
+        placeInput.setAttribute("aria-invalid", "true");
+        placeInput.focus();
+        pushEvent({ event: "form_validation_error", form_id: form.id, error_type: "place_not_picked" });
+        return;
+      }
+
       var honeypot = form.elements.hp_field_2026;
       if (honeypot && honeypot.value) {
         form.reset();
@@ -266,6 +277,7 @@
         if (error.name === "ServerError" && error.status === 400 && !humanToken && form._turnstile) {
           message = BLOCKED_MESSAGE;
         }
+        if (error.name === "ServerError" && error.status === 422) message = PLACE_MESSAGE;
         showStatus(status, "error", message, false);
         pushEvent({
           event: "lead_form_error",

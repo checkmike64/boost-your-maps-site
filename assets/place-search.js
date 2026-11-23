@@ -2,8 +2,9 @@
    Turns on only when /api/places says search is set up. The page calls only
    this site's /api/places (the Google key stays on the server). Picking a
    result fills two hidden fields, place_id and place_label, which assets/forms.js
-   sends with the lead. Everything here is optional: with no JavaScript, with
-   search off or down, the typed business name and town still go through. */
+   sends with the lead. The pick is required: the free report scans one place
+   on Google Maps, so assets/forms.js stops a submit without a place_id and
+   api/_lead.js refuses one too. A typed name is never enough. */
 (function () {
   "use strict";
 
@@ -42,6 +43,9 @@
     idField.value = place.placeId;
     labelField.value = place.address ? place.name + ", " + place.address : place.name;
     close();
+    input.removeAttribute("aria-invalid");
+    var status = form.querySelector(".form-status.is-error");
+    if (status) { status.className = "form-status full"; status.textContent = ""; }
     say("Picked: " + labelField.value + ". Not right? Keep typing to change it.");
     // The town field is filled from the address only when it is still empty.
     var location = form.elements.location;
