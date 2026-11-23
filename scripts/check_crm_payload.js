@@ -22,6 +22,8 @@ const VISIBILITY_REPORT = {
     "https://www.boostyourmaps.com/visibility-report?service=pest+control&utm_source=google&utm_medium=cpc&utm_campaign=tampa&gclid=Cj0KCQjw",
   fields: {
     business_name: " Bay Pest Co ",
+    place_id: "ChIJbaypestco_tampa_0001",
+    place_label: "Bay Pest Co, Tampa, FL",
     service: "pest control",
     location: "Tampa, FL",
     first_name: "Dana",
@@ -62,6 +64,8 @@ assert.deepEqual(buildCrmPayload(VISIBILITY_REPORT, HEADERS), {
     location: "Tampa, FL",
     website: "https://baypest.example.com",
   },
+  placeId: "ChIJbaypestco_tampa_0001",
+  placeLabel: "Bay Pest Co, Tampa, FL",
   sourceUrl: VISIBILITY_REPORT.page_url,
   utm: { utm_source: "google", utm_medium: "cpc", utm_campaign: "tampa" },
   visitorId: null,
@@ -251,10 +255,26 @@ const logged = (logs, start) => logs.some((line) => line.startsWith(start));
   assert.equal(r.sent, 0);
 
   // A typed email the CRM cannot take is skipped by api/_crm.js and logged.
-  r = await run({ env: CRM_ENV, crm: CRM_OK, body: { fields: { email: "not-an-email" } } });
+  r = await run({ env: CRM_ENV, crm: CRM_OK, body: { fields: { email: "not-an-email", place_id: "ChIJbaypestco_tampa_0001" } } });
   assert.equal(r.status, 502);
   assert.equal(r.sent, 0);
   assert.ok(logged(r.logs, "BYM CRM submission skipped: no valid email visibility-report"));
+
+  // The free report needs a business picked from Google's list: a typed name,
+  // an empty pick or a malformed Place ID is refused and nothing is sent.
+  for (const fields of [
+    { email: "a@example.com", business_name: "Bay Pest Co" },
+    { email: "a@example.com", business_name: "Bay Pest Co", place_id: "" },
+    { email: "a@example.com", business_name: "Bay Pest Co", place_id: "short id!" },
+  ]) {
+    r = await run({ env: CRM_ENV, crm: CRM_OK, body: { fields } });
+    assert.equal(r.status, 422);
+    assert.deepEqual(r.body, { error: "place_required" });
+    assert.equal(r.sent, 0);
+  }
+  // The inquiry form has no business search and needs no place.
+  r = await run({ env: CRM_ENV, crm: CRM_OK, body: INQUIRY, endpoint: inquiry });
+  assert.equal(r.status, 200);
 
   // The request checks send nothing.
   r = await run({ env: CRM_ENV, method: "GET" });
